@@ -1,0 +1,22 @@
+{
+  "name": "browserboiler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "browserify src/main.js -d -o dist/bundle.js -t [babelify]",
+    "start": "budo src/main.js:dist/bundle.js --pushstate --live -- -t babelify"
+  },
+  "devDependencies": {
+    "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
+    "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
+    "babel-plugin-transform-function-bind": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.3.0",
+    "budo": "^10.0.3"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    [
+      "transform-runtime",
+      {
+        "helpers": true,
+        "polyfill": true,
+        "regenerator": true,
+        "moduleName": "babel-runtime"
+      }
+    ],
+    "transform-es2015-modules-commonjs",
+    "transform-object-rest-spread",
+    "transform-async-to-generator",
+    "transform-async-generator-functions",
+    "syntax-trailing-function-commas",
+    "transform-function-bind"
+  ],
+  "presets": [],
+  "sourceMaps": true,
+  "retainLines": true
+}
