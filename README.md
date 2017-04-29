@@ -4,6 +4,7 @@ A minimal project with **Prettier formatting** (https://github.com/prettier/pret
 ## Quick Start
 - `npm start` starts a webserver and serves the directory.
 - `npm run build` creates a transpiled `dist.js`.
+- `npm run format` runs **Prettier** which formats the all Javascipt files in `/src`.
 
 ## TODO
 - [ ] Add PostCSS?
