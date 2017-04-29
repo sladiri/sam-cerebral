@@ -1,6 +1,6 @@
 const o = { a: 42 };
 const p = { b: 666 };
-const q = { ...a, ...b, c: 123 };
+const q = { ...o, ...p, c: 123 };
 
 async function* gfn(a, b, c) {
   const promises = [123, 42, 666];
