@@ -10,6 +10,4 @@ Example implementation of the **SAM pattern** (http://sam.js.org/) inside the **
 ## TODO
 - [ ] Add Routing control state example (log in <-> log out).
 - [ ] Prevent or at least warn about concurrent mutations while a step is in progress.
-- [ ] Add PostCSS?
 - [ ] Add tests.
-- [ ] Fix Budo path to node_modules?
