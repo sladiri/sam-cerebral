@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "build": "browserify src/main.js -d -o dist/bundle.js -t [babelify]",
     "start": "budo src/main.js:dist/bundle.js --pushstate --live -- -t babelify"
   },
