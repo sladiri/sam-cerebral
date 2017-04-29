@@ -2,6 +2,7 @@
   "name": "browserboiler",
   "version": "1.0.0",
   "main": "index.js",
+  "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
