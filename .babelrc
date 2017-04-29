@@ -16,7 +16,9 @@
     "syntax-trailing-function-commas",
     "transform-function-bind"
   ],
-  "presets": [],
+  "presets": [
+    "react"
+  ],
   "sourceMaps": true,
   "retainLines": true
 }

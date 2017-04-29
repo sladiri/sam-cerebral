@@ -20,5 +20,17 @@
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
     "budo": "^10.0.3"
+  },
+  "dependencies": {
+    "babel-preset-react": "^6.24.1",
+    "cerebral": "next",
+    "dynamics": "^1.0.0",
+    "pull-stream": "^3.5.0",
+    "ramda": "^0.23.0",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "rxjs": "^5.3.0",
+    "snabbt.js": "^0.6.4",
+    "trine": "^0.1.1"
   }
 }
