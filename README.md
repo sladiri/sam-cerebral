@@ -8,6 +8,7 @@ Example implementation of the **SAM pattern** (http://sam.js.org/) inside the **
 - `npm run format` runs **Prettier** (https://github.com/prettier/prettier) which formats the all Javascipt files in `/src`.
 
 ## TODO
-- [ ] Add Routing control state example (log in <-> log out).
 - [ ] Prevent or at least warn about concurrent mutations while a step is in progress.
+- [ ] Allow for next action to not block step until complete?
+- [ ] Add Routing control state example (log in <-> log out).
 - [ ] Add tests.
