@@ -1,20 +1,6 @@
 import { set, when, unset } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
 
-const ensureSamState = [
-  when(state`sam`),
-  {
-    true: [],
-    false: [set(state`sam`, {})],
-  },
-];
-
-const guardSamStep = when(
-  state`sam.stepInProgress`,
-  state`sam.napInProgress`,
-  (step, nap) => step && !nap,
-);
-
 export function samStepFactory({
   propose,
   computeControlState,
@@ -32,9 +18,9 @@ export function samStepFactory({
             getProposal(action),
             propose,
             getControlState,
-            when(props`controlState`, controlState => !!controlState),
+            ensureControlState,
             {
-              false: [() => throwError("Invalid control state.")],
+              false: [throwError("Invalid control state.")],
               true: [
                 set(state`sam.controlState`, props`controlState`),
                 getNextAction,
@@ -84,5 +70,26 @@ function logError({ props: { error } }) {
 }
 
 function throwError(msg) {
-  throw new Error(msg);
+  return () => {
+    throw new Error(msg);
+  };
 }
+
+const ensureSamState = [
+  when(state`sam`),
+  {
+    true: [],
+    false: [set(state`sam`, {})],
+  },
+];
+
+const guardSamStep = when(
+  state`sam.stepInProgress`,
+  state`sam.napInProgress`,
+  (step, nap) => step && !nap,
+);
+
+const ensureControlState = when(
+  props`controlState`,
+  controlState => !!controlState,
+);
