@@ -2,62 +2,67 @@ import Devtools from "cerebral/devtools";
 import { Controller } from "cerebral";
 import { samStepFactory } from "./sam";
 
-export const actions = {
-  async increase({ props: { value } }) {
-    const proposal = await wait(600, { value: value || 1 });
-    return proposal;
-  },
+//////////////////////////////////////////////////////////////////////////////
+/// Actions
+//////////////////////////////////////////////////////////////////
 
-  async decrease({ props: { value } }) {
-    const proposal = await wait(600, { value: (value || 1) * -1 });
-    return proposal;
-  },
+export async function increase({ value = 1 }) {
+  const proposal = await wait(600, { value });
+  return proposal;
+}
+
+export async function decrease({ value = 1 }) {
+  const proposal = await wait(600, { value: value * -1 });
+  return proposal;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// Model
+//////////////////////////////////////////////////////////////////
+
+export const defaultState = {
+  count: 0,
 };
 
 export async function propose({ state, props: { value } }) {
   if (value) state.set("count", state.get("count") + value);
 }
 
-export function computeControlState({ state }) {
-  let controlState = null;
-  if (Number.isInteger(state.get("count"))) {
-    controlState = "default";
+//////////////////////////////////////////////////////////////////////////////
+/// Control State
+//////////////////////////////////////////////////////////////////
 
-    if (state.get("count") <= -2) {
-      controlState = "small";
-    }
+export function computeControlState(state) {
+  if (Number.isInteger(state.count)) {
+    if (state.count <= -2) return "small";
 
-    if (state.get("count") >= 2) {
-      controlState = "big";
-    }
+    if (state.count >= 2) return "big";
+
+    return "default";
   }
-  state.set("control", controlState);
 }
 
-const nextActionMap = {
-  small: () => ["increaseClicked", { value: 3 }],
-  big: () => ["decreaseClicked", { value: 3 }],
-};
+export function nextActionPredicate(controlState) {
+  if (controlState === "small") return ["increaseClicked", { value: 6 }];
+
+  if (controlState === "big") return ["decreaseClicked", { value: 3 }];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// SAM Container
+//////////////////////////////////////////////////////////////////
 
 const samStep = samStepFactory({
-  actions,
   propose,
   computeControlState,
-  nextActionMap,
+  nextActionPredicate,
 });
 
 export default Controller({
-  state: {
-    count: 0,
-    control: "default",
-    block: {
-      stepInProgress: false,
-      napInProgress: false,
-    },
-  },
+  state: defaultState,
   signals: {
-    increaseClicked: samStep(actions.increase),
-    decreaseClicked: samStep(actions.decrease),
+    increaseClicked: samStep(increase),
+    decreaseClicked: samStep(decrease),
   },
   catch: new Map([[Error, logError]]),
   devtools: Devtools({ remoteDebugger: "localhost:8585", reconnect: true }),

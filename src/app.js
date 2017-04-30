@@ -5,7 +5,7 @@ import { state, signal } from "cerebral/tags";
 export default connect(
   {
     count: state`count`,
-    block: state`block.stepInProgress`,
+    disabled: state`sam.stepInProgress`,
     view: state`view`,
     increaseClicked: signal`increaseClicked`,
     decreaseClicked: signal`decreaseClicked`,
@@ -19,19 +19,21 @@ const views = {
   styles: {
     warn: { color: "red" },
   },
-  default({ count, block, increaseClicked, decreaseClicked, styles = {} }) {
+  default({ count, disabled, increaseClicked, decreaseClicked, styles = {} }) {
     if (styles.warn) console.log("sty", styles.warn);
     return (
       <div>
         <button
-          disabled={block}
-          onClick={() => increaseClicked({ value: 23 })}
+          disabled={disabled}
+          onClick={() => increaseClicked({ value: 7 })} // Note: Can propose value without action.
           style={styles.increase}
         >
           {" "}+{" "}
         </button>
         <div>{count}</div>
-        <button disabled={block} onClick={() => decreaseClicked()}> - </button>
+        <button disabled={disabled} onClick={() => decreaseClicked()}>
+          {" "}-{" "}
+        </button>
       </div>
     );
   },
