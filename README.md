@@ -1,4 +1,4 @@
-# SAM and Cerebral
+x# SAM and Cerebral
 Example implementation of the **SAM pattern** (http://sam.js.org/) inside the **Cerebral** framework (http://cerebraljs.com/).
 
 ## Quick Start
@@ -7,8 +7,12 @@ Example implementation of the **SAM pattern** (http://sam.js.org/) inside the **
 - `npm run build` creates a transpiled `dist.js`.
 - `npm run format` runs **Prettier** (https://github.com/prettier/prettier) which formats the all Javascipt files in `/src`.
 
+## SAM pattern
+Each signal is wrapped in a SAM-step signal. Only its `propose` function has write access to `state`.
+
 ## TODO
-- [ ] Prevent or at least warn about concurrent mutations while a step is in progress.
+- [x] Prevent or at least warn about concurrent mutations while a step is in progress?
+- [ ] Use control state for page change (routing).
+- [ ] Add session control state example (log in <-> log out on authenticated route).
 - [ ] Allow for next action to not block step until complete?
-- [ ] Add Routing control state example (log in <-> log out).
 - [ ] Add tests.

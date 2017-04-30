@@ -42,7 +42,7 @@ export function computeControlState(state) {
   }
 }
 
-export function nextActionPredicate(controlState) {
+export function computeNextAction(controlState) {
   if (controlState === "small") return ["increaseClicked", { value: 6 }];
 
   if (controlState === "big") return ["decreaseClicked", { value: 3 }];
@@ -55,7 +55,7 @@ export function nextActionPredicate(controlState) {
 const samStep = samStepFactory({
   propose,
   computeControlState,
-  nextActionPredicate,
+  computeNextAction,
 });
 
 export default Controller({

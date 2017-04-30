@@ -4,27 +4,31 @@ import { state, props } from "cerebral/tags";
 export function samStepFactory({
   propose,
   computeControlState,
-  nextActionPredicate,
+  computeNextAction,
 }) {
   return function samStep(action) {
     return {
       signal: [
         ...ensureSamState,
-        guardSamStep,
+        when(
+          state`sam.stepInProgress`,
+          state`sam.napInProgress`,
+          (step, nap) => step && !nap,
+        ),
         {
-          true: [warnBlockedAction],
+          true: [warnBlockedActionFactory(action)],
           false: [
             set(state`sam.stepInProgress`, true),
-            getProposal(action),
+            getProposalFactory(action),
             propose,
-            getControlState,
-            ensureControlState,
+            getControlStateFactory(computeControlState),
+            when(props`controlState`, controlState => !!controlState),
             {
-              false: [throwError("Invalid control state.")],
+              false: [throwErrorFactory("Invalid control state.")],
               true: [
                 set(state`sam.controlState`, props`controlState`),
-                getNextAction,
-                when(props`nextAction`),
+                getNextActionFactory(computeNextAction),
+                when(props`nextSignal`),
                 {
                   true: [set(state`sam.napInProgress`, true), runNextAction],
                   false: [
@@ -37,45 +41,45 @@ export function samStepFactory({
           ],
         },
       ],
-      catch: new Map([[Error, [logError]]]),
+      catch: new Map([[Error, [handleError]]]),
     };
-
-    function getControlState({ state }) {
-      return { controlState: computeControlState(state.get()) };
-    }
-
-    function getNextAction({ state }) {
-      return { nextAction: nextActionPredicate(state.get("sam.controlState")) };
-    }
   };
 }
 
-function getProposal(action) {
-  return ({ props, state }) => action(props, state);
+export const getProposalFactory = action =>
+  function getProposal({ props, state }) {
+    return action(props, state);
+  };
+
+export const getControlStateFactory = computeControlState =>
+  function({ state }) {
+    return { controlState: computeControlState(state.get()) };
+  };
+
+export const getNextActionFactory = computeNextAction =>
+  function({ state, controller }) {
+    const [signalPath, signalInput] = computeNextAction(
+      state.get("sam.controlState"),
+    ) || [];
+
+    return signalPath
+      ? {
+          nextSignal: controller.getSignal(signalPath),
+          signalInput,
+        }
+      : undefined;
+  };
+
+export function runNextAction({ props: { nextSignal, signalInput } }) {
+  return nextSignal(signalInput);
 }
 
-function runNextAction({ props: { nextAction }, controller }) {
-  const [signalPath, data] = nextAction;
-  return controller.getSignal(signalPath)(data);
-}
-
-function warnBlockedAction(action) {
-  return ({ props }) => {
+export const warnBlockedActionFactory = action =>
+  function warnBlockedAction({ props }) {
     console.warn("Action blocked, props:", action.name, props);
   };
-}
 
-function logError({ props: { error } }) {
-  console.error("sam catched error", error.stack);
-}
-
-function throwError(msg) {
-  return () => {
-    throw new Error(msg);
-  };
-}
-
-const ensureSamState = [
+export const ensureSamState = [
   when(state`sam`),
   {
     true: [],
@@ -83,13 +87,11 @@ const ensureSamState = [
   },
 ];
 
-const guardSamStep = when(
-  state`sam.stepInProgress`,
-  state`sam.napInProgress`,
-  (step, nap) => step && !nap,
-);
+export function handleError({ props: { error } }) {
+  console.error("sam catched error", error.stack);
+}
 
-const ensureControlState = when(
-  props`controlState`,
-  controlState => !!controlState,
-);
+export const throwErrorFactory = msg =>
+  function throwError() {
+    throw new Error(msg);
+  };

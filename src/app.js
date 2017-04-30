@@ -6,12 +6,12 @@ export default connect(
   {
     count: state`count`,
     disabled: state`sam.stepInProgress`,
-    view: state`view`,
+    controlState: state`sam.controlState`,
     increaseClicked: signal`increaseClicked`,
     decreaseClicked: signal`decreaseClicked`,
   },
-  function App({ view, ...props }) {
-    return getView(view)(props);
+  function App({ controlState, ...props }) {
+    return getView(controlState)(props);
   },
 );
 
@@ -42,6 +42,6 @@ const views = {
   },
 };
 
-function getView(view) {
-  return views[view] || views.default;
+function getView(controlState) {
+  return views.default;
 }
