@@ -8,14 +8,6 @@ export function samStepFactory({
   computeControlState,
   nextActionPredicate,
 }) {
-  const dummyMutation = (path, value) => {
-    console.warn(
-      "Mutation blocked, mutation must happen inside model (propose).",
-      { path, value },
-    );
-  };
-  let mutations;
-
   return function samStep(action) {
     const accept = [
       propose,
@@ -65,6 +57,14 @@ export function samStepFactory({
     return controller.getSignal(signalPath)(data);
   }
 
+  // const dummyMutation = (path, value) => {
+  //   console.warn(
+  //     "Mutation blocked, mutation must happen inside model (propose).",
+  //     { path, value },
+  //   );
+  // };
+  // let mutations;
+  
   // function disableMutations({ state }) {
   //   mutations = Object.keys(state).reduce((acc, key) => {
   //     acc[key] = state[key];
