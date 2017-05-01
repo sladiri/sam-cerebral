@@ -11,16 +11,24 @@ export default connect(
     decreaseClicked: signal`decreaseClicked`,
   },
   function App({ controlState, ...props }) {
-    return getView(controlState)(props);
+    return (views[controlState] || views.default)(props);
   },
 );
 
+const styles = {
+  warn: { backgroundColor: "brown" },
+  buttonHint: { marginLeft: "0.5rem" },
+};
+
 const views = {
-  styles: {
-    warn: { color: "red" },
-  },
-  default({ count, disabled, increaseClicked, decreaseClicked, styles = {} }) {
-    if (styles.warn) console.log("sty", styles.warn);
+  default({
+    count,
+    disabled,
+    increaseClicked,
+    decreaseClicked,
+    styles = {},
+    arrow = () => null,
+  }) {
     return (
       <div>
         <button
@@ -30,18 +38,36 @@ const views = {
         >
           {" "}+{" "}
         </button>
+        {arrow()}
         <div>{count}</div>
-        <button disabled={disabled} onClick={() => decreaseClicked()}>
+        <button
+          disabled={disabled}
+          onClick={() => decreaseClicked()}
+          style={styles.decrease}
+        >
           {" "}-{" "}
         </button>
       </div>
     );
   },
+
   big(props) {
-    return this.default(Object.assign(props, { increase: this.styles.warn }));
+    return views.default({
+      ...props,
+      styles: { increase: styles.warn },
+      arrow: () => arrow(false),
+    });
+  },
+
+  small(props) {
+    return views.default({
+      ...props,
+      styles: { decrease: styles.warn },
+      arrow: () => arrow(true),
+    });
   },
 };
 
-function getView(controlState) {
-  return views.default;
+function arrow(up) {
+  return <span style={styles.buttonHint}>{up ? "up" : "down"}</span>;
 }
