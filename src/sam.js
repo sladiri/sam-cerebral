@@ -79,11 +79,17 @@ export const warnBlockedActionFactory = action =>
     console.warn("Action blocked, props:", action.name, props);
   };
 
+export const samState = {
+  controlState: "",
+  stepInProgress: false,
+  napInProgress: false,
+};
+
 export const ensureSamState = [
   when(state`sam`),
   {
     true: [],
-    false: [set(state`sam`, {})],
+    false: [set(state`sam`, samState)],
   },
 ];
 
