@@ -47,8 +47,8 @@ export function samStepFactory({
 }
 
 export const getProposalFactory = action =>
-  function getProposal({ props, state }) {
-    return action(props, state.get());
+  function getProposal({ props }) {
+    return action(props);
   };
 
 export const getControlStateFactory = computeControlState =>
