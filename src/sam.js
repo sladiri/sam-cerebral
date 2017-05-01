@@ -10,11 +10,7 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureSamState,
-        when(
-          state`sam.stepInProgress`,
-          state`sam.napInProgress`,
-          (step, nap) => step && !nap,
-        ),
+        when(state`sam.stepInProgress`),
         {
           true: [warnBlockedActionFactory(action)],
           false: [
@@ -27,13 +23,14 @@ export function samStepFactory({
               false: [throwErrorFactory("Invalid control state.")],
               true: [
                 set(state`sam.controlState`, props`controlState`),
+                set(state`sam.stepInProgress`, false),
                 getNextActionFactory(computeNextAction),
                 when(props`nextSignal`),
                 {
-                  true: [set(state`sam.napInProgress`, true), runNextAction],
-                  false: [
-                    set(state`sam.napInProgress`, false),
-                    set(state`sam.stepInProgress`, false),
+                  false: [],
+                  true: [
+                    // The next action should be the last thing we do in a step ().
+                    runNextAction,
                   ],
                 },
               ],
