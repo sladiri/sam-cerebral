@@ -21,7 +21,9 @@
     "babel-preset-react": "^6.24.1",
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
-    "budo": "^10.0.3"
+    "budo": "^10.0.3",
+    "jsverify": "^0.8.2",
+    "tape": "^4.6.3"
   },
   "dependencies": {
     "cerebral": "next",
