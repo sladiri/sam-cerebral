@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
-    "build": "browserify src/main.js -d -o dist/bundle.js -t [babelify]",
+    "lint": "eslint \"src/**/*.js\"",
+    "build": "npm run format && npm run lint && browserify src/main.js -d -o dist/bundle.js -t [babelify]",
     "start": "budo src/main.js:dist/bundle.js --pushstate --live -- -t babelify"
   },
   "devDependencies": {
