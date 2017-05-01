@@ -4,8 +4,9 @@ A minimal project with **Prettier formatting** (https://github.com/prettier/pret
 ## Quick Start
 - The development-webserver wants to serve Babel polyfills from dist/node_modules, so you need to create a symbolic link to node_modules.
 - `npm start` starts a development-webserver and serves the directory.
-- `npm run build` creates a transpiled `dist.js`.
-- `npm run format` runs **Prettier** which formats the all Javascipt files in `/src`.
+- `npm run format` runs **Prettier** which formats the code.
+- `npm run lint` runs **ES-lint** checks a small number of rules to prevent common runtime errors.
+- `npm run build` formats the code, lints it, then creates a transpiled `dist.js`.
 
 ## TODO
 - [ ] Add PostCSS?
