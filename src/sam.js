@@ -29,7 +29,7 @@ export function samStepFactory({
                 {
                   false: [],
                   true: [
-                    // The next action should be the last thing we do in a step ().
+                    // The next action should be the last thing we do in a step.
                     runNextAction,
                   ],
                 },
