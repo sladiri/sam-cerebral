@@ -49,12 +49,12 @@ export const getProposalFactory = action =>
   };
 
 export const getControlStateFactory = computeControlState =>
-  function({ state }) {
+  function getControlState({ state }) {
     return { controlState: computeControlState(state.get()) };
   };
 
 export const getNextActionFactory = computeNextAction =>
-  function({ state, controller }) {
+  function getNextAction({ state, controller }) {
     const [signalPath, signalInput] = computeNextAction(
       state.get("sam.controlState"),
     ) || [];
