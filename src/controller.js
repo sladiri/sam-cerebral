@@ -26,6 +26,7 @@ export const defaultState = {
 
 export async function propose({ state, props: { value } }) {
   if (value) state.set("count", state.get("count") + value);
+  return await wait(600);
 }
 
 //////////////////////////////////////////////////////////////////////////////
