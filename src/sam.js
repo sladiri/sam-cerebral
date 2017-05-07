@@ -53,17 +53,13 @@ export const runNextActionFactory = computeNextAction =>
 
     if (signalPath) {
       setImmediate(() => {
-        const signalObj = controller.module.signals[signalPath];
+        const samStep = controller.module.signals[signalPath];
         try {
-          controller.runSignal(signalPath, signalObj.signal, signalInput);
+          controller.runSignal(signalPath, samStep.signal, signalInput);
         } catch (error) {
-          controller.runSignal(
-            signalPath,
-            Array.from(signalObj.catch.values()),
-            {
-              error,
-            },
-          );
+          controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
+            error,
+          });
         }
       });
     }
