@@ -6,7 +6,7 @@ export default connect(
   {
     count: state`count`,
     disabled: state`sam.stepInProgress`,
-    controlState: state`sam.controlState`,
+    controlState: state`sam.controlState.0`,
     increaseClicked: signal`increaseClicked`,
     decreaseClicked: signal`decreaseClicked`,
   },

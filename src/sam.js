@@ -59,7 +59,7 @@ export const getControlStateFactory = computeControlState =>
 export const getNextActionFactory = computeNextAction =>
   function getNextAction({ state }) {
     const [signalPath, signalInput] = computeNextAction(
-      state.get("sam.controlState"),
+      state.get("sam.controlState.0"),
     ) || [];
 
     return { signalPath, signalInput };
@@ -85,7 +85,7 @@ export const warnBlockedActionFactory = action =>
   };
 
 export const samState = {
-  controlState: "",
+  controlState: [],
   stepInProgress: false,
   napInProgress: false,
 };

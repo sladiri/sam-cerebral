@@ -35,11 +35,11 @@ export async function propose({ state, props: { value } }) {
 
 export function computeControlState(state) {
   if (Number.isInteger(state.count)) {
-    if (state.count <= -2) return "small";
+    if (state.count <= -2) return ["small", ["increaseClicked"]];
 
-    if (state.count >= 2) return "big";
+    if (state.count >= 2) return ["big", ["decreaseClicked"]];
 
-    return "default";
+    return ["default", ["increaseClicked", "decreaseClicked"]];
   }
 }
 
