@@ -10,7 +10,11 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureSamState,
-        when(state`sam.stepInProgress`),
+        when(
+          state`sam.stepInProgress`,
+          state`sam.napInProgress`,
+          (step, nap) => step && !nap,
+        ),
         {
           true: [warnBlockedActionFactory(action)],
           false: [
@@ -23,8 +27,15 @@ export function samStepFactory({
               false: [throwErrorFactory("Invalid control state.")],
               true: [
                 set(state`sam.controlState`, props`controlState`),
-                set(state`sam.stepInProgress`, false),
-                runNextActionFactory(computeNextAction),
+                getNextActionFactory(computeNextAction),
+                when(props`signalPath`),
+                {
+                  true: [set(state`sam.napInProgress`, true), runNextAction],
+                  false: [
+                    set(state`sam.stepInProgress`, false),
+                    set(state`sam.napInProgress`, false),
+                  ],
+                },
               ],
             },
           ],
@@ -45,25 +56,28 @@ export const getControlStateFactory = computeControlState =>
     return { controlState: computeControlState(state.get()) };
   };
 
-export const runNextActionFactory = computeNextAction =>
-  function runNextAction({ state, controller }) {
+export const getNextActionFactory = computeNextAction =>
+  function getNextAction({ state }) {
     const [signalPath, signalInput] = computeNextAction(
       state.get("sam.controlState"),
     ) || [];
 
-    if (signalPath) {
-      setImmediate(() => {
-        const samStep = controller.module.signals[signalPath];
-        try {
-          controller.runSignal(signalPath, samStep.signal, signalInput);
-        } catch (error) {
-          controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
-            error,
-          });
-        }
+    return { signalPath, signalInput };
+  };
+
+export function runNextAction({ props, controller }) {
+  setImmediate(() => {
+    const { signalPath, signalInput } = props;
+    const samStep = controller.module.signals[signalPath];
+    try {
+      controller.runSignal(signalPath, samStep.signal, signalInput);
+    } catch (error) {
+      controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
+        error,
       });
     }
-  };
+  });
+}
 
 export const warnBlockedActionFactory = action =>
   function warnBlockedAction({ props }) {
@@ -73,6 +87,7 @@ export const warnBlockedActionFactory = action =>
 export const samState = {
   controlState: "",
   stepInProgress: false,
+  napInProgress: false,
 };
 
 export const ensureSamState = [
