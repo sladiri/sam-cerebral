@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "cerebral/react";
 import { state, signal } from "cerebral/tags";
+import color from "color";
+import * as FreeStyle from "free-style";
 
 export default connect(
   {
@@ -15,10 +17,31 @@ export default connect(
   },
 );
 
-const styles = {
-  warn: { backgroundColor: "brown" },
-  buttonHint: { marginLeft: "0.5rem" },
+const Style = FreeStyle.create();
+
+const blinkAnimation = Style.registerKeyframes({
+  to: {
+    visibility: "hidden",
+  },
+});
+
+const classNames = {
+  warn: Style.registerStyle({
+    backgroundColor: "brown",
+    color: "white",
+  }),
+  buttonHint: Style.registerStyle({
+    marginLeft: "0.5rem",
+    animationName: blinkAnimation,
+    animationDuration: "0.1s",
+    animationTimingFunction: "steps(5, start)",
+    animationIterationCount: "infinite",
+  }),
 };
+
+const styleElement = document.createElement("style");
+styleElement.textContent = Style.getStyles();
+document.head.appendChild(styleElement);
 
 const views = {
   default({
@@ -26,7 +49,7 @@ const views = {
     disabled,
     increaseClicked,
     decreaseClicked,
-    styles = {},
+    classNames = {},
     arrow = () => null,
   }) {
     return (
@@ -34,16 +57,15 @@ const views = {
         <button
           disabled={disabled}
           onClick={() => increaseClicked({ value: 7 })} // Note: Can propose value without action.
-          style={styles.increase}
+          className={classNames.increase}
         >
           {" "}+{" "}
         </button>
-        {arrow()}
-        <div>{count}</div>
+        <div>{count}{arrow()}</div>
         <button
           disabled={disabled}
           onClick={() => decreaseClicked()}
-          style={styles.decrease}
+          className={classNames.decrease}
         >
           {" "}-{" "}
         </button>
@@ -54,7 +76,7 @@ const views = {
   big(props) {
     return views.default({
       ...props,
-      styles: { increase: styles.warn },
+      classNames: { increase: classNames.warn },
       arrow: () => arrow(false),
     });
   },
@@ -62,12 +84,12 @@ const views = {
   small(props) {
     return views.default({
       ...props,
-      styles: { decrease: styles.warn },
+      classNames: { decrease: classNames.warn },
       arrow: () => arrow(true),
     });
   },
 };
 
 function arrow(up) {
-  return <span style={styles.buttonHint}>{up ? "up" : "down"}</span>;
+  return <span className={classNames.buttonHint}>{up ? "up" : "down"}</span>;
 }
