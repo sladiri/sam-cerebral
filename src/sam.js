@@ -73,7 +73,6 @@ export const warnBlockedActionFactory = action =>
 export const samState = {
   controlState: "",
   stepInProgress: false,
-  napInProgress: false,
 };
 
 export const ensureSamState = [
