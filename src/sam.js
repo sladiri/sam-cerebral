@@ -18,8 +18,8 @@ export function samStepFactory({
         {
           true: [warnBlockedActionFactory(action)],
           false: [
-            set(state`sam.stepInProgress`, true),
             getProposalFactory(action),
+            set(state`sam.stepInProgress`, true),
             propose,
             getControlStateFactory(computeControlState),
             when(props`controlState`, controlState => !!controlState),
