@@ -24,15 +24,7 @@ export function samStepFactory({
               true: [
                 set(state`sam.controlState`, props`controlState`),
                 set(state`sam.stepInProgress`, false),
-                getNextActionFactory(computeNextAction),
-                when(props`nextSignal`),
-                {
-                  false: [],
-                  true: [
-                    // The next action should be the last thing we do in a step.
-                    runNextAction,
-                  ],
-                },
+                runNextActionFactory(computeNextAction),
               ],
             },
           ],
@@ -53,23 +45,29 @@ export const getControlStateFactory = computeControlState =>
     return { controlState: computeControlState(state.get()) };
   };
 
-export const getNextActionFactory = computeNextAction =>
-  function getNextAction({ state, controller }) {
+export const runNextActionFactory = computeNextAction =>
+  function runNextAction({ state, controller }) {
     const [signalPath, signalInput] = computeNextAction(
       state.get("sam.controlState"),
     ) || [];
 
-    return signalPath
-      ? {
-          nextSignal: controller.getSignal(signalPath),
-          signalInput,
+    if (signalPath) {
+      setImmediate(() => {
+        const signalObj = controller.module.signals[signalPath];
+        try {
+          controller.runSignal(signalPath, signalObj.signal, signalInput);
+        } catch (error) {
+          controller.runSignal(
+            signalPath,
+            Array.from(signalObj.catch.values()),
+            {
+              error,
+            },
+          );
         }
-      : undefined;
+      });
+    }
   };
-
-export function runNextAction({ props: { nextSignal, signalInput } }) {
-  return nextSignal(signalInput);
-}
 
 export const warnBlockedActionFactory = action =>
   function warnBlockedAction({ props }) {
