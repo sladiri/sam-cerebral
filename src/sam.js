@@ -91,7 +91,7 @@ export const ensureSamState = [
 ];
 
 export function handleError({ props: { error } }) {
-  console.error("sam catched error", error.stack);
+  console.error("sam catched error", error);
 }
 
 export const throwErrorFactory = msg =>

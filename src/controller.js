@@ -70,7 +70,7 @@ export default Controller({
 });
 
 function logError({ props: { error } }) {
-  console.error("app catched error", error.stack);
+  console.error("app catched error", error);
 }
 
 function wait(ms, value) {
