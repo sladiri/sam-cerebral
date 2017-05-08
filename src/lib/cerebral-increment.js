@@ -1,5 +1,3 @@
-import { isObject } from "../node_modules/cerebral/lib/utils";
-
 export default function(target, value = 1) {
   function increment({ state, props, resolve }) {
     if (!resolve.isTag(target, "state", "props")) {
