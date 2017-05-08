@@ -27,9 +27,9 @@ export const AppController = (function() {
     state: defaultState,
     signals: {
       init: samStep(R.always({})),
-      increaseClicked: samStep(increase),
-      decreaseClicked: samStep(decrease),
-      cancelClicked: samStep(cancel),
+      increase: samStep(increase),
+      decrease: samStep(decrease),
+      cancel: samStep(cancel),
     },
     catch: new Map([[Error, logError]]),
     devtools: Devtools({ remoteDebugger: "localhost:8585", reconnect: true }),
@@ -53,9 +53,9 @@ export const App = connect(
     count: state`count`,
     disabled: state`sam.stepInProgress`,
     controlState: state`sam.controlState.name`,
-    increaseClicked: signal`increaseClicked`,
-    decreaseClicked: signal`decreaseClicked`,
-    cancelClicked: signal`cancelClicked`,
+    increase: signal`increase`,
+    decrease: signal`decrease`,
+    cancel: signal`cancel`,
   },
   function App({ controlState, ...props }) {
     return getView(controlState, props);

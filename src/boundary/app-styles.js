@@ -13,7 +13,7 @@ export const colors = {
   warn: Color("brown").lighten(0.3).string(),
 };
 
-export const classNames = {
+export const rules = {
   warn: Style.registerStyle({
     backgroundColor: colors.warn,
     color: "white",
@@ -25,6 +25,9 @@ export const classNames = {
     animationDuration: "0.1s",
     animationTimingFunction: "steps(5, start)",
     animationIterationCount: "infinite",
+  }),
+  fog: Style.registerStyle({
+    opacity: 0.4,
   }),
 };
 

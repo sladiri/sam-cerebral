@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "cerebral": "next",
+    "classnames": "^2.2.5",
     "color": "^1.0.3",
     "dynamics": "^1.0.0",
     "free-style": "^2.3.1",
