@@ -1,4 +1,4 @@
-x# SAM and Cerebral
+# SAM and Cerebral
 - Example implementation of the **SAM pattern** ([home](http://sam.js.org/)).
 - Uses the **Cerebral** framework ([home](http://cerebraljs.com/)).
 - Folder structure according to **Boundary-Control-Entity** ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
