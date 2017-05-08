@@ -8,9 +8,10 @@ export default connect(
   {
     count: state`count`,
     disabled: state`sam.stepInProgress`,
-    controlState: state`sam.controlState.0`,
+    controlState: state`sam.controlState.name`,
     increaseClicked: signal`increaseClicked`,
     decreaseClicked: signal`decreaseClicked`,
+    cancelClicked: signal`cancelClicked`,
   },
   function App({ controlState, ...props }) {
     return (views[controlState] || views.default)(props);
@@ -49,6 +50,7 @@ const views = {
     disabled,
     increaseClicked,
     decreaseClicked,
+    cancelClicked,
     classNames = {},
     arrow = () => null,
   }) {
@@ -69,6 +71,9 @@ const views = {
         >
           {" "}-{" "}
         </button>
+        <br />
+        <br />
+        <button onClick={() => cancelClicked()}>cancel</button>
       </div>
     );
   },

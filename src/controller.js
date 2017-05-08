@@ -16,6 +16,10 @@ export async function decrease({ value = 1 }) {
   return proposal;
 }
 
+export async function cancel() {
+  return await wait(100, {});
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /// Model
 //////////////////////////////////////////////////////////////////
@@ -25,7 +29,7 @@ export const defaultState = {
 };
 
 export async function propose({ state, props: { value } }) {
-  await wait(600);
+  await wait(400);
   if (value) state.set("count", state.get("count") + value);
 }
 
@@ -35,11 +39,11 @@ export async function propose({ state, props: { value } }) {
 
 export function computeControlState(state) {
   if (Number.isInteger(state.count)) {
-    if (state.count <= -2) return ["small", ["increaseClicked"]];
+    if (state.count <= -2) return ["small", ["increaseClicked", "cancel"]];
 
-    if (state.count >= 2) return ["big", ["decreaseClicked"]];
+    if (state.count >= 2) return ["big", ["decreaseClicked", "cancel"]];
 
-    return ["default", ["increaseClicked", "decreaseClicked"]];
+    return ["default", ["increaseClicked", "decreaseClicked", "cancel"]];
   }
 }
 
@@ -62,8 +66,10 @@ const samStep = samStepFactory({
 export default Controller({
   state: defaultState,
   signals: {
+    init: samStep(() => {}),
     increaseClicked: samStep(increase),
     decreaseClicked: samStep(decrease),
+    cancelClicked: samStep(cancel),
   },
   catch: new Map([[Error, logError]]),
   devtools: Devtools({ remoteDebugger: "localhost:8585", reconnect: true }),

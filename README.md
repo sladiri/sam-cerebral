@@ -13,7 +13,8 @@ Each signal is wrapped in a SAM-step. Only its `propose` function has write acce
 
 ## TODO
 - [x] Prevent or at least warn about concurrent mutations while a step is in progress?
-- [ ] Use control state for page change (routing).
+- [ ] Use control state for page change (routing)?
 - [ ] Add session control state example (log in <-> log out on authenticated route).
 - [ ] Allow for next action to not block step until complete?
+- [ ] Queue action when received signal while in progress?
 - [ ] Add tests.

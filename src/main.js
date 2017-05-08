@@ -4,6 +4,7 @@ import { render } from "react-dom";
 import { Container } from "cerebral/react";
 import controller from "./controller";
 import App from "./app";
+import { samStepFactory } from "./sam";
 
 // When a function tree is executed
 controller.on("start", (execution, payload) => {
@@ -14,6 +15,8 @@ controller.on("start", (execution, payload) => {
 controller.on("end", (execution, payload) => {
   console.log("function tree end", { execution, payload });
 });
+
+controller.getSignal("init")({});
 
 render(
   <Container controller={controller}>
