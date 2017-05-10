@@ -9,11 +9,12 @@ export function samStepFactory({
   computeNextAction,
 }) {
   const GetId = getId();
+  const stepId = GetId.next().value;
 
   return function samStep(action) {
     return {
       signal: [
-        ...ensureSamStateFactory(GetId.next().value),
+        ...ensureSamStateFactory(stepId),
         guardStepInProgress,
         {
           true: [warnBlockedActionFactory(action)],
