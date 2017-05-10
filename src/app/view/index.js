@@ -43,7 +43,7 @@ function normal({
 }
 
 function big(props) {
-  return views.default({
+  return views.normal({
     ...props,
     styles: {
       ...props.styles,
@@ -54,7 +54,7 @@ function big(props) {
 }
 
 function small(props) {
-  return views.default({
+  return views.normal({
     ...props,
     styles: {
       ...props.styles,
