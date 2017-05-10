@@ -7,6 +7,7 @@
   "scripts": {
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "eslint \"src/**/*.js\"",
+    "prebuild": "mkdirp dist",
     "build": "npm run format && npm run lint && browserify src/main.js -d -o dist/bundle.js -t [babelify]",
     "start": "budo src/main.js:dist/bundle.js --pushstate --live -- -t babelify"
   },
@@ -20,6 +21,8 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
-    "budo": "^10.0.3"
-  }
+    "budo": "^10.0.3",
+    "mkdirp": "^0.5.1"
+  },
+  "dependencies": {}
 }
