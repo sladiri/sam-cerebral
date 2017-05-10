@@ -13,7 +13,7 @@ export const colors = {
   warn: Color("brown").lighten(0.3).string(),
 };
 
-export const rules = {
+export const styles = {
   warn: Style.registerStyle({
     backgroundColor: colors.warn,
     color: "white",

@@ -3,18 +3,15 @@ import { connect } from "cerebral/react";
 import { state, signal } from "cerebral/tags";
 import Devtools from "cerebral/devtools";
 import R from "ramda";
-import getView from "./app-view";
 import { samStepFactory } from "../lib/sam-step";
-import { defaultState, propose } from "../entity/app-model";
 import {
+  defaultState,
+  propose,
   computeControlState,
   computeNextAction,
-} from "../control/app-controller";
-import { increase, decrease, cancel } from "../boundary/actions";
-
-function logError({ props: { error } }) {
-  console.error("App catched an error", error);
-}
+} from "./entity";
+import { increase, decrease, cancel } from "./boundary";
+import { views } from "./view";
 
 const samStep = samStepFactory({
   propose,
@@ -22,7 +19,7 @@ const samStep = samStepFactory({
   computeNextAction,
 });
 
-export const AppController = (function() {
+export const controller = (function() {
   const result = Controller({
     state: defaultState,
     signals: {
@@ -48,16 +45,28 @@ export const AppController = (function() {
   return result;
 })();
 
-export const App = connect(
+export const component = connect(
   {
+    controlStateName: state`sam.controlState.name`,
     count: state`count`,
-    disabled: state`sam.stepInProgress`,
-    controlState: state`sam.controlState.name`,
+    actionsDisabled: state`sam.stepInProgress`,
     increase: signal`increase`,
     decrease: signal`decrease`,
     cancel: signal`cancel`,
   },
-  function App({ controlState, ...props }) {
-    return getView(controlState, props);
+  // Function can be omitted in simple cases.
+  // function computeAppViewModel(connectedProps, parentProps, resolve) {
+  //   return {
+  //     ...parentProps,
+  //     ...connectedProps,
+  //   };
+  // },
+  function App({ controlStateName, ...props }) {
+    const view = views[controlStateName];
+    return view ? view(props) : null;
   },
 );
+
+function logError({ props: { error } }) {
+  console.error("App catched an error", error);
+}
