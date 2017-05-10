@@ -24,7 +24,7 @@ The SAM pattern maps to the ECB pattern:
 
 ## TODO
 - [x] Prevent or at least warn about concurrent mutations while a step is in progress?
-- [ ] Defer updating the view until end of SAM step?S (State updates trigger rerending immediately currently.)
+- [ ] Defer updating the view until end of SAM step? (State updates trigger rerending immediately currently.)
 - [ ] Check allowed action in step.
 - [ ] Use control state for page change (routing)?
 - [ ] Add session control state example (log in <-> log out on authenticated route).
