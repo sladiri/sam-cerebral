@@ -18,9 +18,9 @@ Each Cerebral signal is wrapped in a SAM-step signal:
 
 ## Entity Control Boundary pattern
 The SAM pattern maps to the ECB pattern:
-- model + state function: entity 
-- services: control
-- actions: boundary
+- model: entity 
+- actions, compute state, compute next action: control
+- Cerebral module: boundary
 
 ## TODO
 - [x] Prevent or at least warn about concurrent mutations while a step is in progress?

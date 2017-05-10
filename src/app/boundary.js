@@ -1,15 +1,67 @@
-import { wait } from "../lib/util";
+import { Controller } from "cerebral";
+import { connect } from "cerebral/react";
+import { state, signal } from "cerebral/tags";
+import Devtools from "cerebral/devtools";
+import R from "ramda";
+import { samStepFactory } from "../lib/sam-step";
+import { defaultState, propose } from "./entity";
+import { actions, computeControlState, computeNextAction } from "./control";
+import { views } from "./view";
 
-export async function increase({ value = 1 }) {
-  const proposal = await wait(600, { value });
-  return proposal;
-}
+const samStep = samStepFactory({
+  propose,
+  computeControlState,
+  computeNextAction,
+});
 
-export async function decrease({ value = 1 }) {
-  const proposal = await wait(600, { value: value * -1 });
-  return proposal;
-}
+export const controller = (function() {
+  const result = Controller({
+    state: defaultState,
+    signals: {
+      init: samStep(R.always({})),
+      increase: samStep(actions.increase),
+      decrease: samStep(actions.decrease),
+      cancel: samStep(actions.cancel),
+    },
+    catch: new Map([[Error, logError]]),
+    devtools: Devtools({ remoteDebugger: "localhost:8585", reconnect: true }),
+  });
 
-export async function cancel() {
-  return await wait(100, {});
+  result.on("start", (execution, payload) => {
+    console.log("function tree start", { execution, payload });
+  });
+
+  result.on("end", (execution, payload) => {
+    console.log("function tree end", { execution, payload });
+  });
+
+  result.getSignal("init")({});
+
+  return result;
+})();
+
+export const component = connect(
+  {
+    controlStateName: state`sam.controlState.name`,
+    count: state`count`,
+    actionsDisabled: state`sam.stepInProgress`,
+    increase: signal`increase`,
+    decrease: signal`decrease`,
+    cancel: signal`cancel`,
+  },
+  // Documentation example: Function can be omitted in simple cases.
+  // function computeAppViewModel(connectedProps, parentProps, resolve) {
+  //   return {
+  //     ...parentProps,
+  //     ...connectedProps,
+  //   };
+  // },
+  function App({ controlStateName, ...props }) {
+    const view = views[controlStateName];
+    return view ? view(props) : null;
+  },
+);
+
+function logError({ props: { error } }) {
+  console.error("App catched an error", error);
 }
