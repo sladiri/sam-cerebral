@@ -49,17 +49,19 @@ export const component = connect(
     decrease: signal`decrease`,
     cancel: signal`cancel`,
   },
-  // Documentation example: Function can be omitted in simple cases.
-  // function computeAppViewModel(connectedProps, parentProps, resolve) {
-  //   return {
-  //     ...parentProps,
-  //     ...connectedProps,
-  //   };
-  // },
-  function App({ controlStateName, ...props }) {
-    const view = views[controlStateName];
-    return view ? view(props) : null;
+  function computeAppViewModel(
+    { increase, decrease, cancel, count, ...connectedProps },
+    parentProps,
+  ) {
+    return {
+      ...parentProps,
+      ...connectedProps,
+      actions: { increase, decrease, cancel },
+      model: { count },
+    };
   },
+  ({ controlStateName, ...props }) =>
+    controlStateName ? views[controlStateName](props) : null,
 );
 
 function logError({ props: { error } }) {
