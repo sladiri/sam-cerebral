@@ -20,6 +20,7 @@
         "no-redeclare": "error",
         "no-trailing-spaces": "error",
         "no-undef": "error",
+        "no-unused-vars": "error",
         "no-with": "error",
         "unicode-bom": "error",
         "valid-typeof": "error",
