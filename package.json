@@ -23,6 +23,7 @@
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
     "budo": "^10.0.3",
+    "eslint-plugin-react": "^7.0.0",
     "jsverify": "^0.8.2",
     "mkdirp": "^0.5.1",
     "tape": "^4.6.3"

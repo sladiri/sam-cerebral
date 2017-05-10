@@ -1,6 +1,5 @@
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
-import increment from "./cerebral-increment";
 import { getId } from "../lib/util";
 
 export function samStepFactory({
