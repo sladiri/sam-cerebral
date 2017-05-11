@@ -18,7 +18,7 @@ Each Cerebral signal is wrapped in a SAM-step signal:
 
 ## Entity Control Boundary pattern
 The SAM pattern maps to the ECB pattern:
-- model: entity 
+- model: entity
 - actions, compute state, compute next action: control
 - Cerebral module: boundary
 
