@@ -16,8 +16,8 @@ export function samStepFactory({
         ...ensureSamStateFactory(stepId),
         guardStepInProgress,
         {
-          true: [warnBlockedActionFactory(action)],
-          false: [
+          false: [warnBlockedActionFactory(action)],
+          true: [
             set(state`sam.init`, false),
             set(props`_stepId`, state`sam.stepId`),
             getProposalFactory(action),
@@ -37,13 +37,10 @@ export function samStepFactory({
                     getNextActionFactory(computeNextAction),
                     when(props`signalPath`),
                     {
+                      false: [set(state`sam.stepInProgress`, false)],
                       true: [
-                        set(state`sam.napInProgress`, true),
+                        set(state`sam.stepInProgress`, props`blockStep`),
                         runNextAction,
-                      ],
-                      false: [
-                        set(state`sam.stepInProgress`, false),
-                        set(state`sam.napInProgress`, false),
                       ],
                     },
                   ],
@@ -63,7 +60,6 @@ export const samStateFactory = stepId => ({
   stepId,
   controlState: {},
   stepInProgress: false,
-  napInProgress: false,
 });
 
 export const ensureSamStateFactory = stepId => [
@@ -81,9 +77,8 @@ export const setStepIdFactory = generator =>
 
 export const guardStepInProgress = when(
   state`sam.stepInProgress`,
-  state`sam.napInProgress`,
-  props`isNap`,
-  (step, nap, isNap) => (step && !nap) || (step && nap && !isNap),
+  props`_isNap`,
+  (step, isNap) => !step || isNap,
 );
 
 export const getProposalFactory = action =>
@@ -111,11 +106,15 @@ export const getControlStateFactory = computeControlState =>
 
 export const getNextActionFactory = computeNextAction =>
   function getNextAction({ state }) {
-    const [signalPath, signalInput] = computeNextAction(
+    const [signalPath, signalInput, blockStep = true] = computeNextAction(
       state.get("sam.controlState.name"),
     ) || [];
 
-    return { signalPath, signalInput };
+    return {
+      signalPath,
+      signalInput,
+      blockStep,
+    };
   };
 
 export function runNextAction({ props, controller }) {
@@ -125,7 +124,7 @@ export function runNextAction({ props, controller }) {
     try {
       controller.runSignal(signalPath, samStep.signal, {
         ...signalInput,
-        isNap: true,
+        _isNap: true,
       });
     } catch (error) {
       controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
