@@ -9,7 +9,7 @@ export const views = {
       <div>
         <button
           disabled={actionsDisabled}
-          onClick={() => actions.increase({ value: 7 })} // Note: Can propose value without action.
+          onClick={() => actions.increase({ value: 10 })} // Note: Can propose value without action.
           className={classNames(styles.increase, styles.buttonFog)}
         >
           {" "}+{" "}
@@ -17,7 +17,7 @@ export const views = {
         <div>{model.count}{arrow()}</div>
         <button
           disabled={actionsDisabled}
-          onClick={() => actions.decrease()}
+          onClick={() => actions.decrease({ value: 15 })}
           className={classNames(styles.decrease, styles.buttonFog)}
         >
           {" "}-{" "}
