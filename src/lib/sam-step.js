@@ -38,10 +38,7 @@ export function samStepFactory({
                     when(props`signalPath`),
                     {
                       false: [set(state`sam.stepInProgress`, false)],
-                      true: [
-                        set(state`sam.stepInProgress`, props`blockStep`),
-                        runNextAction,
-                      ],
+                      true: [runNextAction],
                     },
                   ],
                 },
@@ -106,14 +103,13 @@ export const getControlStateFactory = computeControlState =>
 
 export const getNextActionFactory = computeNextAction =>
   function getNextAction({ state }) {
-    const [signalPath, signalInput, blockStep = true] = computeNextAction(
+    const [signalPath, signalInput] = computeNextAction(
       state.get("sam.controlState.name"),
     ) || [];
 
     return {
       signalPath,
       signalInput,
-      blockStep,
     };
   };
 
