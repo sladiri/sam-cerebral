@@ -18,7 +18,6 @@ export function samStepFactory({
         {
           false: [warnBlockedActionFactory(action)],
           true: [
-            set(state`sam.init`, false),
             set(props`_stepId`, state`sam.stepId`),
             getProposalFactory(action),
             guardStaleAction,
@@ -53,7 +52,7 @@ export function samStepFactory({
 }
 
 export const samStateFactory = stepId => ({
-  init: true,
+  init: false,
   stepId,
   controlState: {},
   stepInProgress: false,
@@ -62,8 +61,13 @@ export const samStateFactory = stepId => ({
 export const ensureSamStateFactory = stepId => [
   when(state`sam`),
   {
-    true: [],
     false: [set(state`sam`, samStateFactory(stepId))],
+    true: [],
+  },
+  when(state`sam.init`),
+  {
+    false: [set(state`sam.init`, true)],
+    true: [],
   },
 ];
 
