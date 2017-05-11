@@ -1,0 +1,5 @@
+[*]
+trim_trailing_whitespace = true
+
+[{*,!*.js}]
+insert_final_newline = true
