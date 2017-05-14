@@ -18,28 +18,34 @@ export function samStepFactory({
         {
           false: [warnBlockedActionFactory(action)],
           true: [
-            set(props`_stepId`, state`sam.stepId`),
-            getProposalFactory(action),
-            guardStaleAction,
+            guardActionAllowed(action),
             {
-              false: [warnStaleActionFactory(action)],
+              false: [warnDisallowedActionFactory(action)],
               true: [
-                setStepIdFactory(GetId),
-                set(state`sam.stepInProgress`, true),
-                propose,
-                getControlStateFactory(computeControlState),
-                guardInvalidControlState,
+                set(props`_stepId`, state`sam.stepId`),
+                getProposalFactory(action),
+                guardStaleAction,
                 {
-                  false: [throwErrorFactory("Invalid control state.")],
+                  false: [warnStaleActionFactory(action)],
                   true: [
-                    set(state`sam.controlState`, props`controlState`),
-                    getNextActionFactory(computeNextAction),
-                    when(props`signalPath`),
+                    setStepIdFactory(GetId),
+                    set(state`sam.stepInProgress`, true),
+                    propose,
+                    getControlStateFactory(computeControlState),
+                    guardInvalidControlState,
                     {
-                      false: [set(state`sam.stepInProgress`, false)],
+                      false: [throwErrorFactory("Invalid control state.")],
                       true: [
-                        set(state`sam.stepInProgress`, props`blockStep`),
-                        runNextAction,
+                        set(state`sam.controlState`, props`controlState`),
+                        getNextActionFactory(computeNextAction),
+                        when(props`signalPath`),
+                        {
+                          false: [set(state`sam.stepInProgress`, false)],
+                          true: [
+                            set(state`sam.stepInProgress`, props`blockStep`),
+                            runNextAction,
+                          ],
+                        },
                       ],
                     },
                   ],
@@ -84,6 +90,13 @@ export const guardStepInProgress = when(
   props`_isNap`,
   (step, isNap) => !step || isNap,
 );
+
+export const guardActionAllowed = action =>
+  when(
+    state`sam.controlState`,
+    controlState =>
+      !controlState.name || controlState.allowedActions.includes(action.name),
+  );
 
 export const getProposalFactory = action =>
   function getProposal({ props }) {
@@ -153,6 +166,16 @@ export const warnBlockedActionFactory = action =>
     // TODO: Queue action?
     console.warn(
       "Action blocked, step in progress:",
+      action.name,
+      props,
+      state.get("sam"),
+    );
+  };
+
+export const warnDisallowedActionFactory = action =>
+  function warnDisallowedAction({ state, props }) {
+    console.warn(
+      "Action blocked, not allowed in step:",
       action.name,
       props,
       state.get("sam"),
