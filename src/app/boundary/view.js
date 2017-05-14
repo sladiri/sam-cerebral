@@ -2,11 +2,23 @@ import React from "react";
 import classNames from "classnames";
 import { styles } from "./styles";
 
+const clicker = fn => () => {
+  const time = Number.parseInt(document.getElementById("foo").value);
+  console.log({ time }, fn(time));
+};
+
 export const views = {
   normal({ model, actions, actionsDisabled, styles = {}, arrow = () => null }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
     return (
       <div>
+        <div>
+          <input id="foo" />
+          <br />
+          <button onClick={clicker(actions.findJobBrute)}>
+            Calculate Brute
+          </button>
+        </div>
         <button
           disabled={actionsDisabled}
           onClick={() => actions.increase({ value: 10 })} // Note: Can propose value without action.
