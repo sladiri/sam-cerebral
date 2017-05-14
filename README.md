@@ -23,11 +23,13 @@ The SAM pattern maps to the ECB pattern:
 - Cerebral module: boundary
 
 ## TODO
-- [x] Prevent or at least warn about concurrent mutations while a step is in progress?
+- [ ] Async Ticker is not a good next action example. Ticker should be a singleton.
 - [ ] Defer updating the view until end of SAM step? (State updates trigger rerending immediately currently.)
+- [ ] Create Proxy to hide state API?
 - [ ] Check allowed action in step.
 - [ ] Use control state for page change (routing)?
 - [ ] Add session control state example (log in <-> log out on authenticated route).
 - [ ] Allow for next action to not block step until complete?
 - [ ] Queue action when received signal while in progress?
 - [ ] Add tests.
+- [x] Prevent or at least warn about concurrent mutations while a step is in progress?
