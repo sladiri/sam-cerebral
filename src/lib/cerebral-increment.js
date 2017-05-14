@@ -16,7 +16,15 @@ export default function(target, value = 1) {
 
     if (target.type === "state") {
       const targetPath = resolve.path(target);
-      const incremented = state.get(targetPath) + resolvedValue;
+      const toIncrement = state.get(targetPath);
+
+      if (!Number.isInteger(toIncrement)) {
+        throw new Error(
+          "Cerebral operator.increment: You must increment integer values",
+        );
+      }
+
+      const incremented = toIncrement + resolvedValue;
       state.set(targetPath, incremented);
     } else {
       const result = Object.assign({}, props);
@@ -25,6 +33,13 @@ export default function(target, value = 1) {
       const targetObj = parts.reduce((target, key) => {
         return (target[key] = Object.assign({}, target[key] || {}));
       }, result);
+
+      if (!Number.isInteger(targetObj[key])) {
+        throw new Error(
+          "Cerebral operator.increment: You must increment integer values",
+        );
+      }
+
       targetObj[key] += resolvedValue;
 
       return result;
