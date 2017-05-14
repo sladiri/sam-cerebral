@@ -4,10 +4,12 @@ import R from "ramda";
 import { samStepFactory } from "../../lib/sam-step";
 import { defaultState, propose } from "../entity";
 import {
+  increase,
+  decrease,
+  cancel,
   computeControlState,
   computeNextAction,
-} from "../control/control-state.js";
-import * as actions from "../control/actions";
+} from "../control";
 // import { wait } from "../../lib/util";
 import findJobBrute from "../../napsack";
 
@@ -22,10 +24,10 @@ export const module = (function() {
     state: defaultState,
     signals: {
       init: samStep(R.always({})),
-      increase: samStep(actions.increase),
-      decrease: samStep(actions.decrease),
-      cancel: samStep(actions.cancel),
-      // tick: [() => wait(1000), ...samStep(actions.increase).signal],
+      increase: samStep(increase),
+      decrease: samStep(decrease),
+      cancel: samStep(cancel),
+      // tick: [() => wait(1000), ...samStep(increase).signal],
       napsack: samStep(findJobBrute),
     },
     catch: new Map([[Error, logError]]),
