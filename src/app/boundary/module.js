@@ -33,11 +33,11 @@ export const module = (function() {
   });
 
   result.on("start", (execution, payload) => {
-    console.log("function tree start", { execution, payload });
+    console.debug("function tree start", { execution, payload });
   });
 
   result.on("end", (execution, payload) => {
-    console.log("function tree end", { execution, payload });
+    console.debug("function tree end", { execution, payload });
   });
 
   result.getSignal("init")({});
