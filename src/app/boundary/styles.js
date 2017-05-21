@@ -3,7 +3,7 @@ import * as FreeStyle from "free-style";
 
 const Style = FreeStyle.create();
 
-export const blinkAnimation = Style.registerKeyframes({
+export const attentionKeyframes = Style.registerKeyframes({
   to: {
     visibility: "hidden",
   },
@@ -19,13 +19,16 @@ export const styles = {
     color: "white",
   }),
   buttonHint: Style.registerStyle({
-    color: colors.warn,
     marginLeft: "0.5rem",
-    animationName: blinkAnimation,
+  }),
+  attention: Style.registerStyle({
+    color: colors.warn,
+    animationName: attentionKeyframes,
     animationDuration: "0.1s",
     animationTimingFunction: "steps(5, start)",
     animationIterationCount: "infinite",
   }),
+
   fog: Style.registerStyle({
     opacity: 0.4,
   }),

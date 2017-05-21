@@ -87,7 +87,7 @@ export const views = {
 function arrow(up) {
   return h(
     "span",
-    { className: styles.buttonHint },
+    { className: classNames(styles.buttonHint, styles.attention) },
     up ? "too small" : "too big",
   );
 }
