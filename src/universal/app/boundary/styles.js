@@ -30,7 +30,3 @@ export const styles = {
     opacity: 0.4,
   }),
 };
-
-const styleElement = document.createElement("style");
-styleElement.textContent = Style.getStyles();
-document.head.appendChild(styleElement);

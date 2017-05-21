@@ -1,8 +1,7 @@
-/npm-debug.log*
 /yarn-debug.log*
 /yarn-error.log*
 
 /node_modules/
-/jspm_packages/
 
 /dist/
+/dist-server/

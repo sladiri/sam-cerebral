@@ -13,6 +13,7 @@
     "transform-object-rest-spread",
     "transform-async-to-generator",
     "transform-async-generator-functions",
+    "transform-do-expressions",
     "syntax-trailing-function-commas",
     "transform-function-bind"
   ],

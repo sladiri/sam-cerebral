@@ -1,8 +1,8 @@
 export const actions = {
   findJobBrute({ time = 1 }) {
-    console.log({ activities });
     const activityNames = [];
-    return activityNames;
+    console.log({ activities, activityNames });
+    return { activityNames };
   },
 };
 

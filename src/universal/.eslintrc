@@ -1,0 +1,7 @@
+{
+  "globals": {
+    "console": true,
+    "setTimeout": true,
+    "document": true
+  }
+}

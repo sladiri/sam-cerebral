@@ -5,16 +5,27 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
-    "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
+    "prelint-server": "prettier --write --trailing-comma all \"src/{server,universal}/**/*.js\"",
+    "lint-server": "eslint \"src/{server,universal}/**/*.js\"",
+    "prebuild-server": "mkdir -p dist-server && npm run lint-server",
+    "build-server": "babel \"src/{server,universal}/**/*.js\" --out-dir dist-server",
+    "start-server": "node dist-server/src/server/index.js",
+    "prelint-browser": "prettier --write --trailing-comma all \"src/{browser,universal}/**/*.js\"",
+    "lint-browser": "eslint \"src/{browser,universal}/**/*.js\"",
+    "prebuild-browser": "mkdir -p dist && npm run lint-browser",
+    "build-browser": "browserify src/browser/index.js -d -o dist/bundle.js -t [babelify]",
+    "prelint": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "eslint \"src/**/*.js\"",
-    "prebuild": "mkdirp dist",
-    "build": "npm run format && npm run lint && browserify src/main.js -d -o dist/bundle.js -t [babelify]",
-    "start": "budo src/main.js:dist/bundle.js --pushstate --live -- -t babelify"
+    "build": "npm run build-server && npm run build-browser",
+    "clean": "rm -rf dist && rm -rf dist-server",
+    "start": "budo src/browser/index.js:dist/bundle.js --pushstate --live -- -t babelify"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
     "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
     "babel-plugin-transform-async-generator-functions": "^6.24.1",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-do-expressions": "^6.22.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
     "babel-plugin-transform-function-bind": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
@@ -23,7 +34,6 @@
     "browserify": "^14.3.0",
     "budo": "^10.0.3",
     "jsverify": "^0.8.2",
-    "mkdirp": "^0.5.1",
     "tape": "^4.6.3"
   },
   "dependencies": {
@@ -31,6 +41,7 @@
     "classnames": "^2.2.5",
     "color": "^1.0.3",
     "dynamics": "^1.0.0",
+    "function-tree": "^0.4.7",
     "postcss-js": "^0.3.0",
     "pull-stream": "^3.5.0",
     "ramda": "^0.23.0",

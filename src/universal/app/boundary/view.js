@@ -1,31 +1,36 @@
 import h from "react-hyperscript";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
-import { Style, styles } from "./styles";
-
-const clicker = fn => () => {
-  const time = Number.parseInt(document.getElementById("foo").value);
-  console.log({ time }, fn(time));
-};
+import { Style, styles as Styles } from "./styles";
 
 export const views = {
   normal: wrap(function normal({
     model,
     actions,
     actionsDisabled,
-    styles = {},
+    cancelDisabled,
+    styles = Styles,
     arrow = () => null,
   }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
+    styles.cancelButtonFog = `${cancelDisabled ? ` ${styles.fog}` : ""}`;
     return h("div", [
       h("div", [
-        h("input", { id: "foo" }),
+        h("input", {
+          id: "foo",
+          onChange(e) {
+            console.log("eeee", e.nativeEvent.target.value);
+          },
+        }),
         h("br"),
         h(
           "button",
           {
             onClick() {
-              clicker(actions.findJobBrute);
+              console.log("eeee 2", document.getElementById("foo").value);
+              actions.findJobBrute({
+                time: document.getElementById("foo").value,
+              });
             },
           },
           "Calculate Brute",
@@ -42,7 +47,16 @@ export const views = {
         },
         " + ",
       ),
-      h("div", [model.count, arrow()]),
+      h("div", [
+        model.count,
+        actionsDisabled
+          ? h("span", { className: styles.buttonHint }, "Actions disabled!")
+          : undefined,
+        cancelDisabled
+          ? h("span", { className: styles.buttonHint }, "Cancel disabled!")
+          : undefined,
+        arrow(),
+      ]),
       h(
         "button",
         {
@@ -59,9 +73,11 @@ export const views = {
       h(
         "button",
         {
+          disabled: cancelDisabled,
           onClick() {
             actions.cancel();
           },
+          className: styles.cancelButtonFog,
         },
         "cancel",
       ),
@@ -72,8 +88,8 @@ export const views = {
     return views.normal({
       ...props,
       styles: {
-        ...props.styles,
-        increase: styles.warn,
+        ...Styles,
+        increase: Styles.warn,
       },
       arrow: () => arrow(false),
     });
@@ -83,8 +99,8 @@ export const views = {
     return views.normal({
       ...props,
       styles: {
-        ...props.styles,
-        decrease: styles.warn,
+        ...Styles,
+        decrease: Styles.warn,
       },
       arrow: () => arrow(true),
     });
@@ -94,7 +110,7 @@ export const views = {
 function arrow(up) {
   return h(
     "span",
-    { className: classNames(styles.buttonHint, styles.attention) },
+    { className: classNames(Styles.buttonHint, Styles.attention) },
     up ? "too small" : "too big",
   );
 }
