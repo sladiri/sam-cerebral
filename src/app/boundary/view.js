@@ -1,4 +1,4 @@
-import React from "react";
+import h from "react-hyperscript";
 import classNames from "classnames";
 import { styles } from "./styles";
 
@@ -10,35 +10,55 @@ const clicker = fn => () => {
 export const views = {
   normal({ model, actions, actionsDisabled, styles = {}, arrow = () => null }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
-    return (
-      <div>
-        <div>
-          <input id="foo" />
-          <br />
-          <button onClick={clicker(actions.findJobBrute)}>
-            Calculate Brute
-          </button>
-        </div>
-        <button
-          disabled={actionsDisabled}
-          onClick={() => actions.increase({ value: 10 })} // Note: Can propose value without action.
-          className={classNames(styles.increase, styles.buttonFog)}
-        >
-          {" "}+{" "}
-        </button>
-        <div>{model.count}{arrow()}</div>
-        <button
-          disabled={actionsDisabled}
-          onClick={() => actions.decrease({ value: 15 })}
-          className={classNames(styles.decrease, styles.buttonFog)}
-        >
-          {" "}-{" "}
-        </button>
-        <br />
-        <br />
-        <button onClick={() => actions.cancel()}>cancel</button>
-      </div>
-    );
+    return h("div", [
+      h("div", [
+        h("input", { id: "foo" }),
+        h("br"),
+        h(
+          "button",
+          {
+            onClick() {
+              clicker(actions.findJobBrute);
+            },
+          },
+          "Calculate Brute",
+        ),
+      ]),
+      h(
+        "button",
+        {
+          disabled: actionsDisabled,
+          onClick() {
+            actions.increase({ value: 10 });
+          },
+          className: classNames(styles.increase, styles.buttonFog),
+        },
+        " + ",
+      ),
+      h("div", [model.count, arrow()]),
+      h(
+        "button",
+        {
+          disabled: actionsDisabled,
+          onClick() {
+            actions.decrease({ value: 15 });
+          },
+          className: classNames(styles.decrease, styles.buttonFog),
+        },
+        " - ",
+      ),
+      h("br"),
+      h("br"),
+      h(
+        "button",
+        {
+          onClick() {
+            actions.cancel();
+          },
+        },
+        "cancel",
+      ),
+    ]);
   },
 
   big(props) {
@@ -65,7 +85,9 @@ export const views = {
 };
 
 function arrow(up) {
-  return (
-    <span className={styles.buttonHint}>{up ? "too small" : "too big"}</span>
+  return h(
+    "span",
+    { className: styles.buttonHint },
+    up ? "too small" : "too big",
   );
 }

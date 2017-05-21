@@ -1,12 +1,7 @@
 import "setimmediate";
-import React from "react";
+import h from "react-hyperscript";
 import { render } from "react-dom";
 import { Container } from "cerebral/react";
-import { module, App } from "./app/boundary";
+import { module as controller, App } from "./app/boundary";
 
-render(
-  <Container controller={module}>
-    <App />
-  </Container>,
-  document.querySelector("#app"),
-);
+render(h(Container, { controller }, h(App)), document.querySelector("#app"));
