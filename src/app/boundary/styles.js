@@ -23,10 +23,7 @@ export const styles = {
   }),
   attention: Style.registerStyle({
     color: colors.warn,
-    animationName: attentionKeyframes,
-    animationDuration: "0.1s",
-    animationTimingFunction: "steps(5, start)",
-    animationIterationCount: "infinite",
+    animation: `${attentionKeyframes} 0.1s steps(5, start) infinite`,
   }),
 
   fog: Style.registerStyle({
