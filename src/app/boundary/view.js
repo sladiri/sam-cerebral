@@ -1,6 +1,7 @@
 import h from "react-hyperscript";
 import classNames from "classnames";
-import { styles } from "./styles";
+import { wrap } from "react-free-style";
+import { Style, styles } from "./styles";
 
 const clicker = fn => () => {
   const time = Number.parseInt(document.getElementById("foo").value);
@@ -8,7 +9,13 @@ const clicker = fn => () => {
 };
 
 export const views = {
-  normal({ model, actions, actionsDisabled, styles = {}, arrow = () => null }) {
+  normal: wrap(function normal({
+    model,
+    actions,
+    actionsDisabled,
+    styles = {},
+    arrow = () => null,
+  }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
     return h("div", [
       h("div", [
@@ -59,7 +66,7 @@ export const views = {
         "cancel",
       ),
     ]);
-  },
+  }, Style),
 
   big(props) {
     return views.normal({

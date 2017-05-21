@@ -1,15 +1,15 @@
 import Color from "color";
-import * as FreeStyle from "free-style";
+import * as ReactFreeStyle from "react-free-style";
 
-const Style = FreeStyle.create();
+export const Style = ReactFreeStyle.create();
 
-export const attentionKeyframes = Style.registerKeyframes({
+const attentionKeyframes = Style.registerKeyframes({
   to: {
     visibility: "hidden",
   },
 });
 
-export const colors = {
+const colors = {
   warn: Color("brown").lighten(0.3).string(),
 };
 

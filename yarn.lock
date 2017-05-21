@@ -2223,6 +2223,12 @@ react-dom@^15.5.4:
     object-assign "^4.1.0"
     prop-types "~15.5.7"
 
+react-free-style@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-free-style/-/react-free-style-4.1.0.tgz#0328c3f79db4bb55b48cb65eb0c6d0ae1aa16940"
+  dependencies:
+    free-style "^2.3.1"
+
 react-hyperscript@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-hyperscript/-/react-hyperscript-3.0.0.tgz#3c16010b33175de6bc01fd1ebad0a16a9a6dc9ab"
