@@ -10,7 +10,6 @@ import {
   computeControlState,
   computeNextAction,
 } from "../control";
-// import { wait } from "../../lib/util";
 import findJobBrute from "../../napsack";
 
 const samStep = samStepFactory({
@@ -27,7 +26,6 @@ export const module = (function() {
       increase: samStep(increase),
       decrease: samStep(decrease),
       cancel: samStep(cancel),
-      // tick: [() => wait(1000), ...samStep(increase).signal],
       napsack: samStep(findJobBrute),
     },
     catch: new Map([[Error, logError]]),
