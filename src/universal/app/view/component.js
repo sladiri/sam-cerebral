@@ -36,7 +36,7 @@ export const App = connect(
     ...connectedProps,
     actions: { increase, decrease, cancel, findJobBrute },
     model: { count },
-    actionsDisabled: proposeInProgress, // Prevent accidental cancellation?
+    actionsDisabled: proposeInProgress, // TODO: Prevent accidental cancellation?
     cancelDisabled: napInProgress || acceptAndNapInProgress, // TODO: Add queuing?
     proposeInProgress,
     napInProgress,
