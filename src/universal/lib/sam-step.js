@@ -29,29 +29,68 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureSamStateFactory(stepId, controlState, allowedActions),
-        ...warnInterruptedActionFactory(action),
-        guardStepInProgress,
+        when(
+          state`sam.proposeInProgress`,
+          props`_isNap`,
+          state`sam.napInProgress`,
+          (proposeInProgress, isNap, napInProgress) =>
+            proposeInProgress && !isNap && !napInProgress,
+        ),
+        {
+          false: [],
+          true: [
+            ({ props }) => {
+              console.warn(
+                "Action interrupted pending action.",
+                action.name,
+                props,
+              );
+            },
+          ],
+        },
+        ,
+        when(
+          state`sam.napInProgress`,
+          state`sam.acceptAndNapInProgress`,
+          props`_isNap`,
+          (napInProgress, acceptAndNapInProgress, isNap) =>
+            (!napInProgress && !acceptAndNapInProgress) || isNap,
+        ),
         {
           false: [warnBlockedActionFactory(action)],
           true: [
-            set(state`sam.actionInProgress`, true),
-            guardActionAllowed(action),
+            set(state`sam.proposeInProgress`, true),
+            when(
+              state`sam.controlState`,
+              controlState =>
+                !controlState.name ||
+                controlState.allowedActions.includes(action.name),
+            ),
             {
               false: [warnDisallowedActionFactory(action)],
               true: [
                 set(props`_stepId`, state`sam.stepId`),
                 getProposalFactory(action),
-                guardStaleAction,
+                when(
+                  state`sam.init`,
+                  state`sam.stepId`,
+                  props`_stepId`,
+                  (init, stepId, actionStepId) =>
+                    init || stepId === actionStepId,
+                ),
                 {
                   false: [warnStaleActionFactory(action)],
                   true: [
                     incrementStepIdFactory(GetId),
-                    set(state`sam.stepInProgress`, true),
+                    set(state`sam.acceptAndNapInProgress`, true),
                     function proposeProposal(input) {
                       return propose(input);
                     },
                     getControlStateFactory(computeControlState),
-                    guardInvalidControlState,
+                    when(
+                      props`controlState.name`,
+                      controlStateName => !!controlStateName,
+                    ),
                     {
                       false: [throwErrorFactory("Invalid control state.")],
                       true: [
@@ -60,13 +99,16 @@ export function samStepFactory({
                         when(props`signalPath`),
                         {
                           false: [
-                            set(state`sam.stepInProgress`, false),
-                            set(state`sam.actionInProgress`, false),
+                            set(state`sam.acceptAndNapInProgress`, false),
+                            set(state`sam.proposeInProgress`, false),
                             set(state`sam.napInProgress`, false),
                           ],
                           true: [
                             // TODO: Check if blockStep is useful.
-                            set(state`sam.stepInProgress`, props`blockStep`),
+                            set(
+                              state`sam.acceptAndNapInProgress`,
+                              props`blockStep`,
+                            ),
                             set(state`sam.napInProgress`, true),
                             runNextAction,
                           ],
@@ -95,49 +137,19 @@ export const ensureSamStateFactory = (stepId, controlState, allowedActions) => [
   },
 ];
 
-export const warnInterruptedActionFactory = action => [
-  when(
-    state`sam.actionInProgress`,
-    props`_isNap`,
-    (actionInProgress, isNap) => actionInProgress && !isNap,
-  ),
-  {
-    false: [],
-    true: [
-      ({ props }) => {
-        console.warn("Action interrupted pending action.", action.name, props);
-      },
-    ],
-  },
-];
-
 export const samStateFactory = (stepId, controlState, allowedActions) => ({
   init: true,
   stepId,
   controlState: { name: controlState, allowedActions },
-  stepInProgress: false,
-  actionInProgress: false,
+  acceptAndNapInProgress: false,
+  proposeInProgress: false,
+  napInProgress: false,
 });
 
 export const incrementStepIdFactory = generator =>
   function setStepId({ state }) {
     state.set("sam.stepId", generator.next().value);
   };
-
-export const guardStepInProgress = when(
-  state`sam.napInProgress`,
-  state`sam.stepInProgress`,
-  props`_isNap`,
-  (napInProgress, stepInProgress, isNap) =>
-    (!napInProgress && !stepInProgress) || isNap,
-);
-
-export const guardActionAllowed = action =>
-  when(
-    state`sam.controlState`,
-    controlState =>
-      !controlState.name || controlState.allowedActions.includes(action.name),
-  );
 
 export const getProposalFactory = action =>
   function getProposal({ props }) {
@@ -149,18 +161,6 @@ export const getProposalFactory = action =>
         })
       : action({ input: props });
   };
-
-export const guardStaleAction = when(
-  state`sam.init`,
-  state`sam.stepId`,
-  props`_stepId`,
-  (init, stepId, actionStepId) => init || stepId === actionStepId,
-);
-
-export const guardInvalidControlState = when(
-  props`controlState.name`,
-  controlStateName => !!controlStateName,
-);
 
 export const getControlStateFactory = computeControlState =>
   function getControlState({ state }) {
@@ -188,7 +188,7 @@ export function runNextAction({ props, controller }) {
     try {
       controller.runSignal(signalPath, samStep.signal, {
         ...signalInput,
-        _isNap: true,
+        _isNap: true, // TODO: Secure this
       });
     } catch (error) {
       controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
@@ -212,7 +212,7 @@ export const warnBlockedActionFactory = action =>
   function warnBlockedAction({ state, props }) {
     // TODO: Queue action?
     console.warn(
-      "Action blocked, step in progress:",
+      `Action blocked, ${state.get("sam.napInProgress") ? "NAP" : "step"} in progress:`,
       action.name,
       props,
       state.get("sam"),

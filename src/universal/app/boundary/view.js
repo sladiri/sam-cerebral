@@ -11,10 +11,18 @@ export const views = {
     cancelDisabled,
     styles = Styles,
     arrow = () => null,
+    proposeInProgress,
+    acceptAndNapInProgress,
+    napInProgress,
   }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
     styles.cancelButtonFog = `${cancelDisabled ? ` ${styles.fog}` : ""}`;
     return h("div", [
+      h("div", [
+        h("p", `proposeInProgress: ${proposeInProgress}`),
+        h("p", `acceptAndNapInProgress: ${acceptAndNapInProgress}`),
+        h("p", `napInProgress: ${napInProgress}`),
+      ]),
       h("div", [
         h("input", {
           id: "foo",
