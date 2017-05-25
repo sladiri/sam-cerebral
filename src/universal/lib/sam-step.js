@@ -278,6 +278,4 @@ export const throwErrorFactory = msg =>
   };
 
 export const getModulePath = (prefix, path) =>
-  `${getModulePrefix(prefix)}${path}`;
-
-export const getModulePrefix = prefix => `${prefix ? `${prefix}.` : ""}`;
+  `${`${prefix ? `${prefix}.` : ""}`}${path}`;
