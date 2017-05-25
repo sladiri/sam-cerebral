@@ -67,7 +67,10 @@ export function samStepFactory({
                 controlState.allowedActions.includes(action.name),
             ),
             {
-              false: [warnDisallowedActionFactory(action)],
+              false: [
+                warnDisallowedActionFactory(action),
+                set(state`sam.proposeInProgress`, false),
+              ],
               true: [
                 set(props`_stepId`, state`sam.stepId`),
                 getProposalFactory(action),
