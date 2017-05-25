@@ -83,16 +83,7 @@ export const views = {
           },
           " + ",
         ),
-        h("div", [
-          model.count,
-          actionsDisabled
-            ? h("span", { className: styles.buttonHint }, "Actions disabled!")
-            : undefined,
-          cancelDisabled
-            ? h("span", { className: styles.buttonHint }, "Cancel disabled!")
-            : undefined,
-          arrow(),
-        ]),
+        h("div", [model.count, arrow()]),
         h(
           "button",
           {
