@@ -24,7 +24,7 @@ export const module = (function() {
   const result = Controller({
     state: defaultState,
     signals: {
-      // name: ...stuff outside of SAM, blocking SAM stuff,
+      // name: ...stuff outside of SAM, "blocking" SAM stuff,
       init: samStep(init),
       increase: samStep(["increase", [increase]]),
       decrease: samStep(decrease),
