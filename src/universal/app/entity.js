@@ -5,6 +5,6 @@ export const defaultState = {
 };
 
 export async function propose({ state, props: { value } }) {
-  await wait(400);
+  await wait(1200);
   if (value) state.set("count", state.get("count") + value);
 }

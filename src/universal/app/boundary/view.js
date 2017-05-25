@@ -18,12 +18,12 @@ export const views = {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
     styles.cancelButtonFog = `${cancelDisabled ? ` ${styles.fog}` : ""}`;
     return h("div", [
-      h("div", [
-        h("p", `proposeInProgress: ${proposeInProgress}`),
-        h("p", `acceptAndNapInProgress: ${acceptAndNapInProgress}`),
-        h("p", `napInProgress: ${napInProgress}`),
+      h("p", [
+        h("div", `propose: ${proposeInProgress}`),
+        h("div", `accept and NAP: ${acceptAndNapInProgress}`),
+        h("div", `NAP: ${napInProgress}`),
       ]),
-      h("div", [
+      h("p", [
         h("input", {
           id: "foo",
           onChange(e) {
@@ -76,7 +76,6 @@ export const views = {
         },
         " - ",
       ),
-      h("br"),
       h("br"),
       h(
         "button",
