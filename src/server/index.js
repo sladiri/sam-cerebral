@@ -5,7 +5,7 @@
 // import { UniversalController } from "cerebral";
 // import { Container } from "cerebral/react";
 // import { renderToString } from "react-dom/server";
-// import { module, App } from "../universal/app";
+// import { module, App } from "../universal/app/boundary";
 
 // const controller = UniversalController(module);
 
