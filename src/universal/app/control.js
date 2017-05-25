@@ -1,17 +1,13 @@
 import { wait } from "../lib/util";
 
-export function init() {
-  return {};
-}
+export function init() {}
 
 export async function increase({ input: { value = 1 } }) {
-  const proposal = await wait(800, { value });
-  return proposal;
+  return await wait(800, { value });
 }
 
 export async function decrease({ input: { value = 1 } }) {
-  const proposal = await wait(800, { value: value * -1 });
-  return proposal;
+  return await wait(800, { value: value * -1 });
 }
 
 export async function cancel() {

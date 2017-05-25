@@ -10,7 +10,7 @@ import {
   computeControlState,
   computeNextAction,
 } from "../control";
-import { actions as napsack } from "../../napsack";
+import { controller as napSack } from "../../nap-sack/boundary";
 
 const samStep = samStepFactory({
   propose,
@@ -20,18 +20,20 @@ const samStep = samStepFactory({
   allowedActions: ["init"],
 });
 
-export const module = (function() {
+export default (function() {
   const result = Controller({
     state: defaultState,
     signals: {
       // name: ...stuff outside of SAM, "blocking" SAM stuff,
       init: samStep(init),
-      increase: samStep(["increase", [increase]]),
+      increase: samStep(["increase", [increase]]), // Example of action-tree.
       decrease: samStep(decrease),
       cancel: samStep(cancel),
-      findJobBrute: samStep(napsack.findJobBrute),
     },
     catch: new Map([[Error, logError]]),
+    modules: { napSack },
+    // Add a global provider when module instantiates
+    // provider(context, functionDetails, payload) {},
     // TODO: Cerebral should support server-side?
     devtools: typeof window !== "undefined"
       ? Devtools({ remoteDebugger: "localhost:8585", reconnect: true })
@@ -52,6 +54,7 @@ export const module = (function() {
   });
 
   result.getSignal("init")({});
+  result.getSignal("napSack.init")({});
 
   return result;
 })();

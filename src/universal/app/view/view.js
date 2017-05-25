@@ -2,6 +2,9 @@ import h from "react-hyperscript";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { Style, styles as Styles } from "./styles";
+import StateIndicator from "./state-indicator";
+import Increment from "./increment";
+import { NapSack } from "../../nap-sack/boundary";
 
 export const views = {
   normal: wrap(function normal({
@@ -11,103 +14,17 @@ export const views = {
     cancelDisabled,
     styles = Styles,
     arrow = () => null,
-    proposeInProgress,
-    acceptAndNapInProgress,
-    napInProgress,
   }) {
-    styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
-    styles.cancelButtonFog = `${cancelDisabled ? ` ${styles.fog}` : ""}`;
+    styles = {
+      ...styles,
+      buttonFog: `${actionsDisabled ? ` ${styles.fog}` : ""}`,
+      cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
+    };
+
     return h("div", { className: styles.view }, [
-      h("section", [
-        h(
-          "div",
-          {
-            className: classNames(
-              styles.state,
-              proposeInProgress && styles.stateActive,
-            ),
-          },
-          "propose (actions)",
-        ),
-        h(
-          "div",
-          {
-            className: classNames(
-              styles.state,
-              acceptAndNapInProgress && styles.stateActive,
-            ),
-          },
-          "accept and NAP (cancel)",
-        ),
-        h(
-          "div",
-          {
-            className: classNames(
-              styles.state,
-              napInProgress && styles.stateActive,
-            ),
-          },
-          "NAP (cancel)",
-        ),
-      ]),
-      h("section", [
-        h("input", {
-          id: "foo",
-          onChange(e) {
-            console.log("eeee", e.nativeEvent.target.value);
-          },
-        }),
-        h("br"),
-        h(
-          "button",
-          {
-            onClick() {
-              console.log("eeee 2", document.getElementById("foo").value);
-              actions.findJobBrute({
-                time: document.getElementById("foo").value,
-              });
-            },
-          },
-          "Calculate Brute",
-        ),
-      ]),
-      h("section", [
-        h(
-          "button",
-          {
-            disabled: actionsDisabled,
-            onClick() {
-              actions.increase({ value: 10 });
-            },
-            className: classNames(styles.increase, styles.buttonFog),
-          },
-          " + ",
-        ),
-        h("div", [model.count, arrow()]),
-        h(
-          "button",
-          {
-            disabled: actionsDisabled,
-            onClick() {
-              actions.decrease({ value: 15 });
-            },
-            className: classNames(styles.decrease, styles.buttonFog),
-          },
-          " - ",
-        ),
-        h("br"),
-        h(
-          "button",
-          {
-            disabled: cancelDisabled,
-            onClick() {
-              actions.cancel();
-            },
-            className: styles.cancelButtonFog,
-          },
-          "cancel",
-        ),
-      ]),
+      h(StateIndicator, { model, styles }),
+      h(Increment, { model, actions, styles, arrow }),
+      h(NapSack, { styles }),
     ]);
   }, Style),
 

@@ -4,6 +4,7 @@ import FunctionTree from "function-tree";
 import { getId } from "../lib/util";
 
 export function samStepFactory({
+  prefix,
   propose,
   computeControlState,
   computeNextAction,
@@ -12,6 +13,7 @@ export function samStepFactory({
 }) {
   const GetId = getId();
   const stepId = GetId.next().value;
+  console.log(GetId, stepId);
 
   return function samStep(action) {
     if (Array.isArray(action)) {
@@ -28,11 +30,11 @@ export function samStepFactory({
 
     return {
       signal: [
-        ...ensureSamStateFactory(stepId, controlState, allowedActions),
+        ...ensureSamStateFactory(prefix, stepId, controlState, allowedActions),
         when(
-          state`sam.proposeInProgress`,
+          state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+          state`${getModulePath(prefix, "sam.napInProgress")}`,
           props`_isNap`,
-          state`sam.napInProgress`,
           (proposeInProgress, isNap, napInProgress) =>
             proposeInProgress && !isNap && !napInProgress,
         ),
@@ -48,10 +50,9 @@ export function samStepFactory({
             },
           ],
         },
-        ,
         when(
-          state`sam.napInProgress`,
-          state`sam.acceptAndNapInProgress`,
+          state`${getModulePath(prefix, "sam.napInProgress")}`,
+          state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
           props`_isNap`,
           (napInProgress, acceptAndNapInProgress, isNap) =>
             (!napInProgress && !acceptAndNapInProgress) || isNap,
@@ -59,9 +60,9 @@ export function samStepFactory({
         {
           false: [warnBlockedActionFactory(action)],
           true: [
-            set(state`sam.proposeInProgress`, true),
+            set(state`${getModulePath(prefix, "sam.proposeInProgress")}`, true),
             when(
-              state`sam.controlState`,
+              state`${getModulePath(prefix, "sam.controlState")}`,
               controlState =>
                 !controlState.name ||
                 controlState.allowedActions.includes(action.name),
@@ -69,14 +70,20 @@ export function samStepFactory({
             {
               false: [
                 warnDisallowedActionFactory(action),
-                set(state`sam.proposeInProgress`, false),
+                set(
+                  state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+                  false,
+                ),
               ],
               true: [
-                set(props`_stepId`, state`sam.stepId`),
+                set(
+                  props`_stepId`,
+                  state`${getModulePath(prefix, "sam.stepId")}`,
+                ),
                 getProposalFactory(action),
                 when(
-                  state`sam.init`,
-                  state`sam.stepId`,
+                  state`${getModulePath(prefix, "sam.init")}`,
+                  state`${getModulePath(prefix, "sam.stepId")}`,
                   props`_stepId`,
                   (init, stepId, actionStepId) =>
                     init || stepId === actionStepId,
@@ -84,8 +91,11 @@ export function samStepFactory({
                 {
                   false: [warnStaleActionFactory(action)],
                   true: [
-                    incrementStepIdFactory(GetId),
-                    set(state`sam.acceptAndNapInProgress`, true),
+                    incrementStepIdFactory(GetId, prefix),
+                    set(
+                      state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+                      true,
+                    ),
                     function proposeProposal(input) {
                       return propose(input);
                     },
@@ -97,22 +107,37 @@ export function samStepFactory({
                     {
                       false: [throwErrorFactory("Invalid control state.")],
                       true: [
-                        set(state`sam.controlState`, props`controlState`),
+                        set(
+                          state`${getModulePath(prefix, "sam.controlState")}`,
+                          props`controlState`,
+                        ),
                         getNextActionFactory(computeNextAction),
                         when(props`signalPath`),
                         {
                           false: [
-                            set(state`sam.acceptAndNapInProgress`, false),
-                            set(state`sam.proposeInProgress`, false),
-                            set(state`sam.napInProgress`, false),
+                            set(
+                              state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+                              false,
+                            ),
+                            set(
+                              state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+                              false,
+                            ),
+                            set(
+                              state`${getModulePath(prefix, "sam.napInProgress")}`,
+                              false,
+                            ),
                           ],
                           true: [
                             // TODO: Check if blockStep is useful.
                             set(
-                              state`sam.acceptAndNapInProgress`,
+                              state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
                               props`blockStep`,
                             ),
-                            set(state`sam.napInProgress`, true),
+                            set(
+                              state`${getModulePath(prefix, "sam.napInProgress")}`,
+                              true,
+                            ),
                             runNextAction,
                           ],
                         },
@@ -130,13 +155,21 @@ export function samStepFactory({
   };
 }
 
-export const ensureSamStateFactory = (stepId, controlState, allowedActions) => [
-  when(state`sam`),
+export const ensureSamStateFactory = (
+  prefix,
+  stepId,
+  controlState,
+  allowedActions,
+) => [
+  when(state`${getModulePath(prefix, "sam")}`),
   {
     false: [
-      set(state`sam`, samStateFactory(stepId, controlState, allowedActions)),
+      set(
+        state`${getModulePath(prefix, "sam")}`,
+        samStateFactory(stepId, controlState, allowedActions),
+      ),
     ],
-    true: [set(state`sam.init`, false)],
+    true: [set(state`${getModulePath(prefix, "sam.init")}`, false)],
   },
 ];
 
@@ -149,20 +182,24 @@ export const samStateFactory = (stepId, controlState, allowedActions) => ({
   napInProgress: false,
 });
 
-export const incrementStepIdFactory = generator =>
+export const incrementStepIdFactory = (generator, prefix) =>
   function setStepId({ state }) {
-    state.set("sam.stepId", generator.next().value);
+    state.set(getModulePath(prefix, "sam.stepId"), generator.next().value);
   };
 
 export const getProposalFactory = action =>
   function getProposal({ props }) {
     return action.tree
       ? new Promise(resolve => {
-          new FunctionTree()(action.tree, props, (self, execution, payload) => {
-            resolve(payload);
-          });
+          new FunctionTree()(
+            action.tree,
+            props,
+            (self, execution, payload = {}) => {
+              resolve(payload);
+            },
+          );
         })
-      : action({ input: props });
+      : action({ input: props }) || {};
   };
 
 export const getControlStateFactory = computeControlState =>
@@ -171,10 +208,10 @@ export const getControlStateFactory = computeControlState =>
     return { controlState: { name, allowedActions } };
   };
 
-export const getNextActionFactory = computeNextAction =>
+export const getNextActionFactory = (computeNextAction, prefix) =>
   function getNextAction({ state }) {
     const [signalPath, signalInput, blockStep = false] = computeNextAction(
-      state.get("sam.controlState.name"),
+      state.get(getModulePath(prefix, "sam.controlState.name")),
     ) || [];
 
     return {
@@ -201,20 +238,20 @@ export function runNextAction({ props, controller }) {
   });
 }
 
-export const warnStaleActionFactory = action =>
+export const warnStaleActionFactory = (action, prefix) =>
   function warnStaleAction({ state, props }) {
     console.warn(
-      `Stale action blocked at step-ID=${state.get("sam.stepId")}:`,
+      `Stale action blocked at step-ID=${state.get(getModulePath(prefix, "sam.stepId"))}:`,
       action.name,
       props,
       state.get("sam"),
     );
   };
 
-export const warnBlockedActionFactory = action =>
+export const warnBlockedActionFactory = (action, prefix) =>
   function warnBlockedAction({ state, props }) {
     console.warn(
-      `Action blocked, ${state.get("sam.napInProgress") ? "NAP" : "proposal"} in progress:`,
+      `Action blocked, ${state.get(getModulePath(prefix, "sam.napInProgress")) ? "NAP" : "proposal"} in progress:`,
       action.name,
       props,
       state.get("sam"),
@@ -239,3 +276,8 @@ export const throwErrorFactory = msg =>
   function throwError() {
     throw new Error(msg);
   };
+
+export const getModulePath = (prefix, path) =>
+  `${getModulePrefix(prefix)}${path}`;
+
+export const getModulePrefix = prefix => `${prefix ? `${prefix}.` : ""}`;

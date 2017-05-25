@@ -12,7 +12,7 @@ const attentionKeyframes = Style.registerKeyframes({
 const colors = {
   warn: Color("brown").lighten(0.3).string(),
   hilight: Color("magenta").darken(0.5).string(),
-  hilightIdle: Color("magenta").lighten(0.8).string(),
+  hilightIdle: Color("magenta").lighten(0.9).string(),
 };
 
 export const styles = {
