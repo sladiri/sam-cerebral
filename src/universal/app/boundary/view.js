@@ -17,13 +17,40 @@ export const views = {
   }) {
     styles.buttonFog = `${actionsDisabled ? ` ${styles.fog}` : ""}`;
     styles.cancelButtonFog = `${cancelDisabled ? ` ${styles.fog}` : ""}`;
-    return h("div", [
-      h("p", [
-        h("div", `propose: ${proposeInProgress}`),
-        h("div", `accept and NAP: ${acceptAndNapInProgress}`),
-        h("div", `NAP: ${napInProgress}`),
+    return h("div", { className: styles.view }, [
+      h("section", [
+        h(
+          "div",
+          {
+            className: classNames(
+              styles.state,
+              proposeInProgress && styles.stateActive,
+            ),
+          },
+          "propose (actions)",
+        ),
+        h(
+          "div",
+          {
+            className: classNames(
+              styles.state,
+              acceptAndNapInProgress && styles.stateActive,
+            ),
+          },
+          "accept and NAP (cancel)",
+        ),
+        h(
+          "div",
+          {
+            className: classNames(
+              styles.state,
+              napInProgress && styles.stateActive,
+            ),
+          },
+          "NAP (cancel)",
+        ),
       ]),
-      h("p", [
+      h("section", [
         h("input", {
           id: "foo",
           onChange(e) {
@@ -44,50 +71,52 @@ export const views = {
           "Calculate Brute",
         ),
       ]),
-      h(
-        "button",
-        {
-          disabled: actionsDisabled,
-          onClick() {
-            actions.increase({ value: 10 });
+      h("section", [
+        h(
+          "button",
+          {
+            disabled: actionsDisabled,
+            onClick() {
+              actions.increase({ value: 10 });
+            },
+            className: classNames(styles.increase, styles.buttonFog),
           },
-          className: classNames(styles.increase, styles.buttonFog),
-        },
-        " + ",
-      ),
-      h("div", [
-        model.count,
-        actionsDisabled
-          ? h("span", { className: styles.buttonHint }, "Actions disabled!")
-          : undefined,
-        cancelDisabled
-          ? h("span", { className: styles.buttonHint }, "Cancel disabled!")
-          : undefined,
-        arrow(),
+          " + ",
+        ),
+        h("div", [
+          model.count,
+          actionsDisabled
+            ? h("span", { className: styles.buttonHint }, "Actions disabled!")
+            : undefined,
+          cancelDisabled
+            ? h("span", { className: styles.buttonHint }, "Cancel disabled!")
+            : undefined,
+          arrow(),
+        ]),
+        h(
+          "button",
+          {
+            disabled: actionsDisabled,
+            onClick() {
+              actions.decrease({ value: 15 });
+            },
+            className: classNames(styles.decrease, styles.buttonFog),
+          },
+          " - ",
+        ),
+        h("br"),
+        h(
+          "button",
+          {
+            disabled: cancelDisabled,
+            onClick() {
+              actions.cancel();
+            },
+            className: styles.cancelButtonFog,
+          },
+          "cancel",
+        ),
       ]),
-      h(
-        "button",
-        {
-          disabled: actionsDisabled,
-          onClick() {
-            actions.decrease({ value: 15 });
-          },
-          className: classNames(styles.decrease, styles.buttonFog),
-        },
-        " - ",
-      ),
-      h("br"),
-      h(
-        "button",
-        {
-          disabled: cancelDisabled,
-          onClick() {
-            actions.cancel();
-          },
-          className: styles.cancelButtonFog,
-        },
-        "cancel",
-      ),
     ]);
   }, Style),
 

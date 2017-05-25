@@ -10,7 +10,6 @@ export const App = connect(
     cancelId: state`sam.stepId`,
     controlStateName: state`sam.controlState.name`,
     count: state`count`,
-    actionsDisabled: state`sam.proposeInProgress`,
     proposeInProgress: state`sam.proposeInProgress`,
     acceptAndNapInProgress: state`sam.acceptAndNapInProgress`,
     napInProgress: state`sam.napInProgress`,
@@ -26,6 +25,7 @@ export const App = connect(
       cancel,
       count,
       findJobBrute,
+      proposeInProgress,
       napInProgress,
       acceptAndNapInProgress,
       ...connectedProps
@@ -36,7 +36,9 @@ export const App = connect(
     ...connectedProps,
     actions: { increase, decrease, cancel, findJobBrute },
     model: { count },
-    cancelDisabled: napInProgress || acceptAndNapInProgress,
+    actionsDisabled: proposeInProgress, // Prevent accidental cancellation?
+    cancelDisabled: napInProgress || acceptAndNapInProgress, // TODO: Add queuing?
+    proposeInProgress,
     napInProgress,
     acceptAndNapInProgress,
   }),

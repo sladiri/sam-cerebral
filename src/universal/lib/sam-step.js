@@ -213,9 +213,8 @@ export const warnStaleActionFactory = action =>
 
 export const warnBlockedActionFactory = action =>
   function warnBlockedAction({ state, props }) {
-    // TODO: Queue action?
     console.warn(
-      `Action blocked, ${state.get("sam.napInProgress") ? "NAP" : "step"} in progress:`,
+      `Action blocked, ${state.get("sam.napInProgress") ? "NAP" : "proposal"} in progress:`,
       action.name,
       props,
       state.get("sam"),
