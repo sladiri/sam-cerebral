@@ -1,5 +1,6 @@
 // TODO: Not yet in Cerebral stable.
 
+// import "babel-polyfill";
 // import "setimmediate";
 // import h from "react-hyperscript";
 // import { UniversalController } from "cerebral";

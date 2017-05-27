@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import "setimmediate";
 import h from "react-hyperscript";
 import { render } from "react-dom";
