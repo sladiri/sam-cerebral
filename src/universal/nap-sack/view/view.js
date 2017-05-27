@@ -1,5 +1,6 @@
 import h from "react-hyperscript";
 import React from "react";
+import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { Style } from "../../app/view/styles";
 
@@ -12,6 +13,7 @@ export const NapSack = wrap(function NapSack({
 }) {
   styles = {
     ...styles,
+    buttonFog: `${actionsDisabled ? ` ${styles.fog}` : ""}`,
     cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
   };
 
@@ -38,6 +40,7 @@ export const NapSack = wrap(function NapSack({
             time: document.getElementById("foo").value,
           });
         }}
+        className={classNames(styles.increase, styles.buttonFog)}
       >
         Calculate Brute
       </button>
