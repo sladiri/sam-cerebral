@@ -177,8 +177,8 @@ export const samStateFactory = (stepId, controlState, allowedActions) => ({
   init: true,
   stepId,
   controlState: { name: controlState, allowedActions },
-  acceptAndNapInProgress: false,
   proposeInProgress: false,
+  acceptAndNapInProgress: false,
   napInProgress: false,
 });
 
