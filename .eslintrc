@@ -28,6 +28,8 @@
         "unicode-bom": "error",
         "valid-typeof": "error",
         "yoda": "error",
+        "react/jsx-no-undef": "error",
+        "react/jsx-no-comment-textnodes": "error",
         "react/jsx-uses-react": "error",
         "react/jsx-uses-vars": "error"
     }
