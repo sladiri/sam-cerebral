@@ -40,7 +40,7 @@ export const NapSack = wrap(function NapSack({
             time: document.getElementById("foo").value,
           });
         }}
-        className={classNames(styles.increase, styles.buttonFog)}
+        className={styles.buttonFog}
       >
         Calculate Brute
       </button>
