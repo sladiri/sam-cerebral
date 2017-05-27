@@ -1,6 +1,5 @@
 import h from "react-hyperscript";
 import React from "react";
-import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { Style } from "../../app/view/styles";
 
