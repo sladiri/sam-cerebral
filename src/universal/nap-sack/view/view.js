@@ -16,8 +16,8 @@ export const NapSack = wrap(function NapSack({
     cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
   };
 
-  const activities = model.activityNames.map(activity =>
-    h("li", { key: activity.name }, activity.name),
+  const activities = model.activities.map(({ name }) =>
+    h("li", { key: name }, name),
   );
 
   return (

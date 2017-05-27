@@ -11,12 +11,9 @@ const activities = [
   { name: "making CSS codepens", time: 3, xp: 4 },
 ];
 
-export async function findJobBrute({ time = 1, props, state }) {
+export async function findJobBrute({ time = 1 }) {
   await wait(500);
-  const activityNames = [];
-  await wait(500);
-  console.log(time, activities, activityNames);
-  return { activityNames: activities };
+  return { activities };
 }
 
 export async function cancel() {}

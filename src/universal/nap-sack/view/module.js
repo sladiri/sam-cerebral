@@ -1,6 +1,6 @@
 import Devtools from "cerebral/devtools";
 import { samStepFactory } from "../../lib/sam-step";
-import { defaultState, proposeFactory } from "../entity";
+import { defaultState, propose } from "../entity";
 import {
   init,
   findJobBrute,
@@ -11,7 +11,7 @@ import {
 
 const samStep = samStepFactory({
   prefix: "napSack",
-  propose: proposeFactory("napSack"),
+  propose,
   computeControlState,
   computeNextAction,
   controlState: "normal",

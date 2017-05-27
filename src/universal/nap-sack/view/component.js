@@ -4,7 +4,7 @@ import { NapSack } from "./view";
 
 export default connect(
   {
-    activityNames: state`napSack.activityNames`,
+    activities: state`napSack.activities`,
     proposeInProgress: state`napSack.sam.proposeInProgress`,
     acceptAndNapInProgress: state`napSack.sam.acceptAndNapInProgress`,
     napInProgress: state`napSack.sam.napInProgress`,
@@ -13,7 +13,7 @@ export default connect(
   },
   (
     {
-      activityNames,
+      activities,
       proposeInProgress,
       acceptAndNapInProgress,
       napInProgress,
@@ -25,7 +25,7 @@ export default connect(
   ) => ({
     ...parentProps,
     ...connectedProps,
-    model: { activityNames },
+    model: { activities },
     actionsDisabled: proposeInProgress, // Prevent accidental cancellation.
     cancelDisabled: napInProgress || acceptAndNapInProgress, // TODO: Add queuing?
     actions: { findJobBrute, cancel },
