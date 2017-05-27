@@ -1,4 +1,4 @@
-import h from "react-hyperscript";
+import React from "react";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { Style, styles as Styles } from "./styles";
@@ -21,11 +21,22 @@ export const views = {
       cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
     };
 
-    return h("div", { className: styles.view }, [
-      h(StateIndicator, { model, styles }),
-      h(Increment, { model, actions, styles, arrow }),
-      h(NapSack, { styles }),
-    ]);
+    return (
+      <div className={styles.view}>
+
+        <StateIndicator model={model} styles={styles} />
+
+        <Increment
+          model={model}
+          actions={actions}
+          styles={styles}
+          arrow={arrow}
+        />
+
+        <NapSack styles={styles} />
+
+      </div>
+    );
   }, Style),
 
   big(props) {
@@ -52,9 +63,9 @@ export const views = {
 };
 
 function arrow(up) {
-  return h(
-    "span",
-    { className: classNames(Styles.buttonHint, Styles.attention) },
-    up ? "too small" : "too big",
+  return (
+    <span className={classNames(Styles.buttonHint, Styles.attention)}>
+      {up ? "too small" : "too big"}
+    </span>
   );
 }

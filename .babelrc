@@ -15,7 +15,8 @@
     "transform-async-generator-functions",
     "transform-do-expressions",
     "syntax-trailing-function-commas",
-    "transform-function-bind"
+    "transform-function-bind",
+    "transform-react-jsx"
   ],
   "sourceMaps": true,
   "retainLines": true

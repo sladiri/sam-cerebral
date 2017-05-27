@@ -3,6 +3,9 @@
     "env": {
         "es6": true
     },
+    "plugins": [
+        "react"
+    ],
     "rules": {
         "eol-last": [
             "error",
@@ -24,6 +27,8 @@
         "no-with": "error",
         "unicode-bom": "error",
         "valid-typeof": "error",
-        "yoda": "error"
+        "yoda": "error",
+        "react/jsx-uses-react": "error",
+        "react/jsx-uses-vars": "error"
     }
 }

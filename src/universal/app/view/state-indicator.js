@@ -11,43 +11,28 @@ export default connect(
     acceptAndNapInProgress: state`sam.acceptAndNapInProgress`,
     napInProgress: state`sam.napInProgress`,
   },
-  wrap(function stateIndicator({
+  wrap(function StateIndicator({
     proposeInProgress,
     acceptAndNapInProgress,
     napInProgress,
     styles,
   }) {
-    return h("section", [
-      h(
-        "div",
-        {
-          className: classNames(
-            styles.state,
-            proposeInProgress && styles.stateActive,
-          ),
-        },
-        "propose (actions)",
+    return h(
+      "section",
+      [
+        [proposeInProgress, "propose (actions)"],
+        [acceptAndNapInProgress, "accept and NAP (cancel)"],
+        [napInProgress, "NAP (cancel)"],
+      ].map(([trigger, text], key) =>
+        h(
+          "div",
+          {
+            key,
+            className: classNames(styles.state, trigger && styles.stateActive),
+          },
+          text,
+        ),
       ),
-      h(
-        "div",
-        {
-          className: classNames(
-            styles.state,
-            acceptAndNapInProgress && styles.stateActive,
-          ),
-        },
-        "accept and NAP (cancel)",
-      ),
-      h(
-        "div",
-        {
-          className: classNames(
-            styles.state,
-            napInProgress && styles.stateActive,
-          ),
-        },
-        "NAP (cancel)",
-      ),
-    ]);
+    );
   }, Style),
 );

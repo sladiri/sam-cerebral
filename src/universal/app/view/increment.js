@@ -1,9 +1,9 @@
-import h from "react-hyperscript";
+import React from "react";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { Style } from "./styles";
 
-export default wrap(function increment({
+export default wrap(function Increment({
   model,
   actionsDisabled,
   cancelDisabled,
@@ -11,41 +11,42 @@ export default wrap(function increment({
   styles,
   arrow,
 }) {
-  return h("section", [
-    h(
-      "button",
-      {
-        disabled: actionsDisabled,
-        onClick() {
+  return (
+    <section>
+
+      <button
+        disabled={actionsDisabled}
+        onClick={() => {
           actions.increase({ value: 10 });
-        },
-        className: classNames(styles.increase, styles.buttonFog),
-      },
-      " + ",
-    ),
-    h("div", [model.count, arrow()]),
-    h(
-      "button",
-      {
-        disabled: actionsDisabled,
-        onClick() {
+        }}
+        className={classNames(styles.increase, styles.buttonFog)}
+      >
+        {" "}+{" "}
+      </button>
+
+      <div>{model.count}{arrow()}</div>
+
+      <button
+        disabled={actionsDisabled}
+        onClick={() => {
           actions.decrease({ value: 15 });
-        },
-        className: classNames(styles.decrease, styles.buttonFog),
-      },
-      " - ",
-    ),
-    h("br"),
-    h(
-      "button",
-      {
-        disabled: cancelDisabled,
-        onClick() {
+        }}
+        className={classNames(styles.decrease, styles.buttonFog)}
+      >
+        {" "}-{" "}
+      </button>
+
+      <br />
+      <button
+        disabled={cancelDisabled}
+        onClick={() => {
           actions.cancel();
-        },
-        className: styles.cancelButtonFog,
-      },
-      "cancel",
-    ),
-  ]);
+        }}
+        className={styles.cancelButtonFog}
+      >
+        cancel
+      </button>
+
+    </section>
+  );
 }, Style);

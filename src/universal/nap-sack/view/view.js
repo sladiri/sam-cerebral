@@ -1,4 +1,5 @@
 import h from "react-hyperscript";
+import React from "react";
 import { wrap } from "react-free-style";
 import { Style } from "../../app/view/styles";
 
@@ -9,43 +10,46 @@ export const NapSack = wrap(function NapSack({
   cancelDisabled,
   styles,
 }) {
-  const activities = model.activityNames.map((activity, i) =>
-    h("li", { key: `${i}-${activity.name}` }, activity.name),
+  const activities = model.activityNames.map((activity, key) =>
+    h("li", { key }, activity.name),
   );
 
-  return h("section", [
-    h("input", {
-      id: "foo",
-      onChange(e) {
-        // TODO: Write to state?
-        console.log("on change event", e.nativeEvent.target.value);
-      },
-    }),
-    h("br"),
-    h(
-      "button",
-      {
-        disabled: actionsDisabled,
-        onClick() {
+  return (
+    <section>
+
+      <input
+        id="foo"
+        onChange={e => {
+          // TODO: Write to state?
+          console.log("on change event", e.nativeEvent.target.value);
+        }}
+      />
+
+      <br />
+      <button
+        disabled={actionsDisabled}
+        onClick={() => {
           actions.findJobBrute({
             time: document.getElementById("foo").value,
           });
-        },
-      },
-      "Calculate Brute",
-    ),
-    h("br"),
-    h(
-      "button",
-      {
-        disabled: cancelDisabled,
-        onClick() {
+        }}
+      >
+        Calculate Brute
+      </button>
+
+      <br />
+      <button
+        disabled={cancelDisabled}
+        onClick={() => {
           actions.cancel();
-        },
-        className: styles.cancelButtonFog,
-      },
-      "cancel",
-    ),
-    h("ul", activities),
-  ]);
+        }}
+        className={styles.cancelButtonFog}
+      >
+        cancel
+      </button>
+
+      <ul>{activities}</ul>
+
+    </section>
+  );
 }, Style);
