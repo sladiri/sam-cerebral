@@ -21,7 +21,7 @@ export default wrap(function Increment({
         }}
         className={classNames(styles.increase, styles.buttonFog)}
       >
-        {" "}+{" "}
+        {" + "}
       </button>
 
       <div>{model.count}{arrow()}</div>
@@ -33,7 +33,7 @@ export default wrap(function Increment({
         }}
         className={classNames(styles.decrease, styles.buttonFog)}
       >
-        {" "}-{" "}
+        {" - "}
       </button>
 
       <br />
