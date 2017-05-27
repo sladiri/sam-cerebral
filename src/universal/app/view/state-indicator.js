@@ -23,11 +23,11 @@ export default connect(
         [proposeInProgress, "propose (actions)"],
         [acceptAndNapInProgress, "accept and NAP (cancel)"],
         [napInProgress, "NAP (cancel)"],
-      ].map(([trigger, text], key) =>
+      ].map(([trigger, text]) =>
         h(
           "div",
           {
-            key,
+            key: text,
             className: classNames(styles.state, trigger && styles.stateActive),
           },
           text,
