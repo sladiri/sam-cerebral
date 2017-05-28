@@ -12,18 +12,12 @@ export default connect(
     activities: state`napSack.activities`,
     findJobBrute: signal`napSack.findJobBrute`,
     cancel: signal`napSack.cancel`,
-    actionsDisabled: actionsDisabled(state`napSack.sam.proposeInProgress`),
-    cancelDisabled: cancelDisabled(
-      state`napSack.sam.acceptAndNapInProgress`,
-      state`napSack.sam.napInProgress`,
-    ),
+    actionsDisabled: actionsDisabled("napSack"),
+    cancelDisabled: cancelDisabled("napSack"),
     styles: addButtonStyles(
       props`styles`,
-      actionsDisabled(state`napSack.sam.proposeInProgress`),
-      cancelDisabled(
-        state`napSack.sam.acceptAndNapInProgress`,
-        state`napSack.sam.napInProgress`,
-      ),
+      actionsDisabled("napSack"),
+      cancelDisabled("napSack"),
     ),
   },
   ({ activities, findJobBrute, cancel, ...connectedProps }, parentProps) => ({

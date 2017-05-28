@@ -5,7 +5,7 @@ import { connect } from "cerebral/react";
 import { state, props, signal } from "cerebral/tags";
 import { Style } from "./styles";
 import {
-  appModel,
+  appViewModel,
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
@@ -13,20 +13,10 @@ import {
 
 export default connect(
   {
-    model: appModel,
-    actionsDisabled: actionsDisabled(state`sam.proposeInProgress`),
-    cancelDisabled: cancelDisabled(
-      state`sam.acceptAndNapInProgress`,
-      state`sam.napInProgress`,
-    ),
-    styles: addButtonStyles(
-      props`styles`,
-      actionsDisabled(state`sam.proposeInProgress`),
-      cancelDisabled(
-        state`sam.acceptAndNapInProgress`,
-        state`sam.napInProgress`,
-      ),
-    ),
+    model: appViewModel,
+    actionsDisabled: actionsDisabled(),
+    cancelDisabled: cancelDisabled(),
+    styles: addButtonStyles(props`styles`, actionsDisabled(), cancelDisabled()),
   },
   wrap(function Increment({
     model,

@@ -1,7 +1,7 @@
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
 import FunctionTree from "function-tree";
-import { getId } from "../lib/util";
+import { getId, getModulePath } from "../lib/util";
 
 export function samStepFactory({
   prefix,
@@ -276,6 +276,3 @@ export const throwErrorFactory = msg =>
   function throwError() {
     throw new Error(msg);
   };
-
-export const getModulePath = (prefix, path) =>
-  `${`${prefix ? `${prefix}.` : ""}`}${path}`;

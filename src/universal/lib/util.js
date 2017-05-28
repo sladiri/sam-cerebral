@@ -17,3 +17,6 @@ export function* getId() {
     value = parseInt(temp, 2);
   }
 }
+
+export const getModulePath = (prefix, path) =>
+  `${`${prefix ? `${prefix}.` : ""}`}${path}`;
