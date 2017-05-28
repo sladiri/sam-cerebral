@@ -1,52 +1,78 @@
 import React from "react";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
+import { connect } from "cerebral/react";
+import { state, props, signal } from "cerebral/tags";
 import { Style } from "./styles";
-
-export default wrap(function Increment({
-  model,
+import {
+  appModel,
   actionsDisabled,
   cancelDisabled,
-  actions,
-  styles,
-  arrow,
-}) {
-  return (
-    <section>
+  addButtonStyles,
+} from "../../lib/computed";
 
-      <button
-        disabled={actionsDisabled}
-        onClick={() => {
-          actions.increase({ value: 10 });
-        }}
-        className={classNames(styles.increase, styles.buttonFog)}
-      >
-        {" + "}
-      </button>
+export default connect(
+  {
+    model: appModel,
+    actionsDisabled: actionsDisabled(state`sam.proposeInProgress`),
+    cancelDisabled: cancelDisabled(
+      state`sam.acceptAndNapInProgress`,
+      state`sam.napInProgress`,
+    ),
+    styles: addButtonStyles(
+      props`styles`,
+      actionsDisabled(state`sam.proposeInProgress`),
+      cancelDisabled(
+        state`sam.acceptAndNapInProgress`,
+        state`sam.napInProgress`,
+      ),
+    ),
+  },
+  wrap(function Increment({
+    model,
+    actions,
+    actionsDisabled,
+    cancelDisabled,
+    styles,
+    arrow,
+  }) {
+    return (
+      <section>
 
-      <div>{model.count}{arrow()}</div>
+        <button
+          disabled={actionsDisabled}
+          onClick={() => {
+            actions.increase({ value: 10 });
+          }}
+          className={classNames(styles.increase, styles.buttonFog)}
+        >
+          {" + "}
+        </button>
 
-      <button
-        disabled={actionsDisabled}
-        onClick={() => {
-          actions.decrease({ value: 15 });
-        }}
-        className={classNames(styles.decrease, styles.buttonFog)}
-      >
-        {" - "}
-      </button>
+        <div>{model.count}{arrow()}</div>
 
-      <br />
-      <button
-        disabled={cancelDisabled}
-        onClick={() => {
-          actions.cancel();
-        }}
-        className={styles.cancelButtonFog}
-      >
-        cancel
-      </button>
+        <button
+          disabled={actionsDisabled}
+          onClick={() => {
+            actions.decrease({ value: 15 });
+          }}
+          className={classNames(styles.decrease, styles.buttonFog)}
+        >
+          {" - "}
+        </button>
 
-    </section>
-  );
-}, Style);
+        <br />
+        <button
+          disabled={cancelDisabled}
+          onClick={() => {
+            actions.cancel();
+          }}
+          className={styles.cancelButtonFog}
+        >
+          cancel
+        </button>
+
+      </section>
+    );
+  }, Style),
+);

@@ -1,33 +1,35 @@
 import { connect } from "cerebral/react";
-import { state, signal } from "cerebral/tags";
+import { state, signal, props } from "cerebral/tags";
 import { NapSack } from "./view";
+import {
+  actionsDisabled,
+  cancelDisabled,
+  addButtonStyles,
+} from "../../lib/computed";
 
 export default connect(
   {
     activities: state`napSack.activities`,
-    proposeInProgress: state`napSack.sam.proposeInProgress`,
-    acceptAndNapInProgress: state`napSack.sam.acceptAndNapInProgress`,
-    napInProgress: state`napSack.sam.napInProgress`,
     findJobBrute: signal`napSack.findJobBrute`,
     cancel: signal`napSack.cancel`,
+    actionsDisabled: actionsDisabled(state`napSack.sam.proposeInProgress`),
+    cancelDisabled: cancelDisabled(
+      state`napSack.sam.acceptAndNapInProgress`,
+      state`napSack.sam.napInProgress`,
+    ),
+    styles: addButtonStyles(
+      props`styles`,
+      actionsDisabled(state`napSack.sam.proposeInProgress`),
+      cancelDisabled(
+        state`napSack.sam.acceptAndNapInProgress`,
+        state`napSack.sam.napInProgress`,
+      ),
+    ),
   },
-  (
-    {
-      activities,
-      proposeInProgress,
-      acceptAndNapInProgress,
-      napInProgress,
-      findJobBrute,
-      cancel,
-      ...connectedProps
-    },
-    parentProps,
-  ) => ({
+  ({ activities, findJobBrute, cancel, ...connectedProps }, parentProps) => ({
     ...parentProps,
     ...connectedProps,
     model: { activities },
-    actionsDisabled: proposeInProgress, // Prevent accidental cancellation.
-    cancelDisabled: napInProgress || acceptAndNapInProgress, // TODO: Add queuing?
     actions: { findJobBrute, cancel },
   }),
   NapSack,

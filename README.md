@@ -23,6 +23,7 @@ The SAM pattern maps to the ECB pattern:
 - Cerebral module: boundary
 
 ## TODO
+- [ ] Move NapSack to own Cerebral instance?
 - [ ] Async Ticker is not a good next action example. Ticker should be a singleton.
 - [ ] Defer updating the view until end of SAM step? (State updates trigger rerending immediately currently.)
 - [ ] Create Proxy to hide state API?

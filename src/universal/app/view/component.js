@@ -8,33 +8,14 @@ export const App = ({ controlStateName, ...props }) =>
 export default connect(
   {
     controlStateName: state`sam.controlState.name`,
-    count: state`count`,
-    proposeInProgress: state`sam.proposeInProgress`,
-    acceptAndNapInProgress: state`sam.acceptAndNapInProgress`,
-    napInProgress: state`sam.napInProgress`,
     increase: signal`increase`,
     decrease: signal`decrease`,
     cancel: signal`cancel`,
   },
-  (
-    {
-      count,
-      proposeInProgress,
-      napInProgress,
-      acceptAndNapInProgress,
-      increase,
-      decrease,
-      cancel,
-      ...connectedProps
-    },
-    parentProps,
-  ) => ({
+  ({ increase, decrease, cancel, ...connectedProps }, parentProps) => ({
     ...parentProps,
     ...connectedProps,
-    model: { count },
-    actionsDisabled: proposeInProgress, // Prevent accidental cancellation.
-    cancelDisabled: napInProgress || acceptAndNapInProgress, // TODO: Add queuing?
-    actions: { increase, decrease, cancel },
+    actions: { increase, decrease, cancel }, // TODO: Why can we not use Computeds for signals?
   }),
   App,
 );

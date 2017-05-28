@@ -8,30 +8,16 @@ import { NapSack } from "../../nap-sack/boundary";
 
 export const views = {
   normal: wrap(function normal({
-    model,
     actions,
-    actionsDisabled,
-    cancelDisabled,
     styles = Styles,
     arrow = () => null,
   }) {
-    styles = {
-      ...styles,
-      buttonFog: `${actionsDisabled ? ` ${styles.fog}` : ""}`,
-      cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
-    };
-
     return (
       <div className={styles.view}>
 
-        <StateIndicator model={model} styles={styles} />
+        <StateIndicator styles={styles} />
 
-        <Increment
-          model={model}
-          actions={actions}
-          styles={styles}
-          arrow={arrow}
-        />
+        <Increment actions={actions} styles={styles} arrow={arrow} />
 
         <NapSack styles={styles} />
 

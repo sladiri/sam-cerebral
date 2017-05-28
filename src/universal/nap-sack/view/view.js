@@ -10,12 +10,6 @@ export const NapSack = wrap(function NapSack({
   cancelDisabled,
   styles,
 }) {
-  styles = {
-    ...styles,
-    buttonFog: `${actionsDisabled ? ` ${styles.fog}` : ""}`,
-    cancelButtonFog: `${cancelDisabled ? ` ${styles.fog}` : ""}`,
-  };
-
   const activities = model.activities.map(({ name }) =>
     h("li", { key: name }, name),
   );
