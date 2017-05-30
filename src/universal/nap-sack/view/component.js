@@ -6,19 +6,16 @@ import {
   cancelDisabled,
   addButtonStyles,
 } from "../../lib/computed";
+import { styles } from "../../app/view/styles";
 
 export default connect(
   {
-    activities: state`napSack.activities`,
-    findJobBrute: signal`napSack.findJobBrute`,
-    cancel: signal`napSack.cancel`,
-    actionsDisabled: actionsDisabled("napSack"),
-    cancelDisabled: cancelDisabled("napSack"),
-    styles: addButtonStyles(
-      props`styles`,
-      actionsDisabled("napSack"),
-      cancelDisabled("napSack"),
-    ),
+    activities: state`activities`,
+    findJobBrute: signal`findJobBrute`,
+    cancel: signal`cancel`,
+    actionsDisabled: actionsDisabled(),
+    cancelDisabled: cancelDisabled(),
+    styles: addButtonStyles(styles, actionsDisabled(), cancelDisabled()),
   },
   ({ activities, findJobBrute, cancel, ...connectedProps }, parentProps) => ({
     ...parentProps,

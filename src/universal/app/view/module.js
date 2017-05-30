@@ -10,7 +10,6 @@ import {
   computeControlState,
   computeNextAction,
 } from "../control";
-import { controller as napSack } from "../../nap-sack/boundary";
 
 const samStep = samStepFactory({
   propose,
@@ -20,7 +19,7 @@ const samStep = samStepFactory({
   allowedActions: ["init"],
 });
 
-export default (function() {
+export default do {
   const result = Controller({
     state: defaultState,
     signals: {
@@ -31,7 +30,6 @@ export default (function() {
       cancel: samStep(cancel),
     },
     catch: new Map([[Error, logError]]),
-    modules: { napSack },
     // Add a global provider when module instantiates
     // provider(context, functionDetails, payload) {},
     // TODO: Cerebral should support server-side?
@@ -54,10 +52,9 @@ export default (function() {
   });
 
   result.getSignal("init")({});
-  result.getSignal("napSack.init")({});
 
-  return result;
-})();
+  result;
+};
 
 function logError({ props: { error } }) {
   console.error("App catched an error", error);
