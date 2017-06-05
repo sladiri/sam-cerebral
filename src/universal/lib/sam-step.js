@@ -30,45 +30,19 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureSamStateFactory(prefix, stepId, controlState, allowedActions),
-        when(
-          state`${getModulePath(prefix, "sam.proposeInProgress")}`,
-          state`${getModulePath(prefix, "sam.napInProgress")}`,
-          props`_isNap`,
-          (proposeInProgress, isNap, napInProgress) =>
-            proposeInProgress && !isNap && !napInProgress,
-        ),
+        ...logPossibleInterruptFactory(action.name, prefix),
+        guardSignalInterruptFactory(prefix),
         {
-          false: [],
+          false: logInterruptFailedFactory(action.name, prefix),
           true: [
-            ({ props }) => {
-              console.warn(
-                "Action interrupted pending action.",
-                action.name,
-                props,
-              );
-            },
-          ],
-        },
-        when(
-          state`${getModulePath(prefix, "sam.napInProgress")}`,
-          state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
-          props`_isNap`,
-          (napInProgress, acceptAndNapInProgress, isNap) =>
-            (!napInProgress && !acceptAndNapInProgress) || isNap,
-        ),
-        {
-          false: [warnBlockedActionFactory(action)],
-          true: [
-            set(state`${getModulePath(prefix, "sam.proposeInProgress")}`, true),
-            when(
-              state`${getModulePath(prefix, "sam.controlState")}`,
-              controlState =>
-                !controlState.name ||
-                controlState.allowedActions.includes(action.name),
+            set(
+              state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+              action.name,
             ),
+            guardDisallowedActionFactory(action.name, prefix),
             {
               false: [
-                warnDisallowedActionFactory(action),
+                logDisallowedActionFactory(action.name, prefix),
                 set(
                   state`${getModulePath(prefix, "sam.proposeInProgress")}`,
                   false,
@@ -80,15 +54,9 @@ export function samStepFactory({
                   state`${getModulePath(prefix, "sam.stepId")}`,
                 ),
                 getProposalFactory(action),
-                when(
-                  state`${getModulePath(prefix, "sam.init")}`,
-                  state`${getModulePath(prefix, "sam.stepId")}`,
-                  props`_stepId`,
-                  (init, stepId, actionStepId) =>
-                    init || stepId === actionStepId,
-                ),
+                guardStaleActionFactory(prefix),
                 {
-                  false: [warnStaleActionFactory(action)],
+                  false: [logStaleActionFactory(action.name, prefix)],
                   true: [
                     incrementStepIdFactory(GetId, prefix),
                     set(
@@ -107,7 +75,11 @@ export function samStepFactory({
                       controlStateName => !!controlStateName,
                     ),
                     {
-                      false: [throwErrorFactory("Invalid control state.")],
+                      false: [
+                        () => {
+                          throw new Error("Invalid control state.");
+                        },
+                      ],
                       true: [
                         set(
                           state`${getModulePath(prefix, "sam.controlState")}`,
@@ -153,7 +125,7 @@ export function samStepFactory({
                                 prefix,
                                 "sam.napInProgress",
                               )}`,
-                              true,
+                              action.name,
                             ),
                             runNextAction,
                           ],
@@ -167,7 +139,16 @@ export function samStepFactory({
           ],
         },
       ],
-      catch: new Map([[Error, [handleError]]]),
+      catch: new Map([
+        [
+          Error,
+          [
+            ({ props: { error } }) => {
+              console.error("SAM step catched an error", error);
+            },
+          ],
+        ],
+      ]),
     };
   };
 }
@@ -198,6 +179,90 @@ export const samStateFactory = (stepId, controlState, allowedActions) => ({
   acceptAndNapInProgress: false,
   napInProgress: false,
 });
+
+export const logPossibleInterruptFactory = (actionName, prefix) => [
+  when(
+    state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+    state`${getModulePath(prefix, "sam.napInProgress")}`,
+    props`_isNap`,
+    (proposeInProgress, isNap, napInProgress) =>
+      proposeInProgress && !isNap && !napInProgress,
+  ),
+  {
+    false: [],
+    true: [
+      ({ state, props }) => {
+        const sam = state.get(getModulePath(prefix, "sam"));
+        console.warn(
+          `Possible interrupt by action [${actionName}] for pending action [${sam.proposeInProgress}] in step-ID [${sam.stepId}]. Props:`,
+          props,
+        );
+      },
+    ],
+  },
+];
+
+export const guardSignalInterruptFactory = prefix =>
+  when(
+    state`${getModulePath(prefix, "sam.napInProgress")}`,
+    state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+    props`_isNap`,
+    (napInProgress, acceptAndNapInProgress, isNap) =>
+      (!napInProgress && !acceptAndNapInProgress) || isNap,
+  );
+
+export const logInterruptFailedFactory = (actionName, prefix) => [
+  ({ state, props }) => {
+    // If GUI allows clicks while model's propose or NAP is in progress, log a warning.
+    const sam = state.get(getModulePath(prefix, "sam"));
+    const progressMsg = sam.napInProgress
+      ? `automatic (NAP) action [${sam.napInProgress}]`
+      : `proposal for action [${sam.proposeInProgress}]`;
+    console.warn(
+      `Blocked intterupt by action [${actionName}], ${progressMsg} in progress in step-ID [${sam.stepId}]. Props:`,
+      props,
+    );
+  },
+];
+
+export const guardDisallowedActionFactory = (actionName, prefix) =>
+  when(
+    state`${getModulePath(prefix, "sam.controlState")}`,
+    controlState =>
+      !controlState.name || controlState.allowedActions.includes(actionName),
+  );
+
+export const logDisallowedActionFactory = (actionName, prefix) => ({
+  state,
+  props,
+}) => {
+  const sam = state.get(getModulePath(prefix, "sam"));
+  console.warn(
+    `Disallowed action [${actionName}] blocked in control-state [${sam
+      .controlState.name}] in step-ID [${sam.stepId}]. Props:`,
+    props,
+  );
+};
+
+export const guardStaleActionFactory = prefix =>
+  when(
+    state`${getModulePath(prefix, "sam.init")}`,
+    state`${getModulePath(prefix, "sam.stepId")}`,
+    props`_stepId`,
+    (init, stepId, actionStepId) => init || stepId === actionStepId,
+  );
+
+export const logStaleActionFactory = (actionName, prefix) => ({
+  state,
+  props,
+}) => {
+  console.warn(
+    `Cancelled action [${actionName}] in step-ID [${state.get(
+      getModulePath(prefix, "sam.stepId"),
+    )}]. Props:`,
+    props,
+  );
+};
 
 export const incrementStepIdFactory = (generator, prefix) =>
   function setStepId({ state }) {
@@ -255,46 +320,3 @@ export function runNextAction({ props, controller }) {
     }
   });
 }
-
-export const warnStaleActionFactory = (action, prefix) =>
-  function warnStaleAction({ state, props }) {
-    console.warn(
-      `Stale action blocked at step-ID=${state.get(
-        getModulePath(prefix, "sam.stepId"),
-      )}:`,
-      action.name,
-      props,
-      state.get("sam"),
-    );
-  };
-
-export const warnBlockedActionFactory = (action, prefix) =>
-  function warnBlockedAction({ state, props }) {
-    console.warn(
-      `Action blocked, ${state.get(getModulePath(prefix, "sam.napInProgress"))
-        ? "NAP"
-        : "proposal"} in progress:`,
-      action.name,
-      props,
-      state.get("sam"),
-    );
-  };
-
-export const warnDisallowedActionFactory = action =>
-  function warnDisallowedAction({ state, props }) {
-    console.warn(
-      "Action blocked, not allowed in step:",
-      action.name,
-      props,
-      state.get("sam"),
-    );
-  };
-
-export function handleError({ props: { error } }) {
-  console.error("SAM step catched an error", error);
-}
-
-export const throwErrorFactory = msg =>
-  function throwError() {
-    throw new Error(msg);
-  };
