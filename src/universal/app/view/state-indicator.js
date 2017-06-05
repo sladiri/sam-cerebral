@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { connect } from "cerebral/react";
 import { state } from "cerebral/tags";
-import { Style } from "./styles";
 
 export default connect(
   {
@@ -34,5 +33,5 @@ export default connect(
         ),
       ),
     );
-  }, Style),
+  }),
 );

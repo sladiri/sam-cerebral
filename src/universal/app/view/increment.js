@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { connect } from "cerebral/react";
 import { props } from "cerebral/tags";
-import { Style } from "./styles";
 import {
   appViewModel,
   actionsDisabled,
@@ -64,5 +63,5 @@ export default connect(
 
       </section>
     );
-  }, Style),
+  }),
 );

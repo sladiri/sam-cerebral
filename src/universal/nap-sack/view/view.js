@@ -1,7 +1,6 @@
 import h from "react-hyperscript";
 import React from "react";
 import { wrap } from "react-free-style";
-import { Style } from "../../app/view/styles";
 
 export default wrap(function NapSack({
   model,
@@ -53,4 +52,4 @@ export default wrap(function NapSack({
 
     </section>
   );
-}, Style);
+});
