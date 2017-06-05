@@ -173,10 +173,10 @@ export const logPossibleInterruptFactory = (actionName, prefix) => [
       ({ state, props }) => {
         const sam = state.get(getModulePath(prefix, "sam"));
         console.warn(
-          `Possible cancelation by action [${getPrefixedPath(
+          `Possible cancelation by action [${getModulePath(
             prefix,
             actionName,
-          )}] for pending action [${getPrefixedPath(
+          )}] for pending action [${getModulePath(
             prefix,
             sam.proposeInProgress,
           )}] in step-ID [${sam.stepId}]. Props:`,
@@ -201,16 +201,16 @@ export const logInterruptFailedFactory = (actionName, prefix) => [
     // If GUI allows clicks while model's propose or NAP is in progress, log a warning.
     const sam = state.get(getModulePath(prefix, "sam"));
     const progressMsg = sam.napInProgress
-      ? `automatic (NAP) action [${getPrefixedPath(
+      ? `automatic (NAP) action [${getModulePath(
           prefix,
           sam.napInProgress,
         )}] for control-state [${sam.controlState.name}]`
-      : `accept and NAP for action [${getPrefixedPath(
+      : `accept and NAP for action [${getModulePath(
           prefix,
           sam.proposeInProgress,
         )}]`;
     console.warn(
-      `Blocked action [${getPrefixedPath(
+      `Blocked action [${getModulePath(
         prefix,
         actionName,
       )}], ${progressMsg} in progress in step-ID [${sam.stepId}]. Props:`,
@@ -232,7 +232,7 @@ export const logDisallowedActionFactory = (actionName, prefix) => ({
 }) => {
   const sam = state.get(getModulePath(prefix, "sam"));
   console.warn(
-    `Disallowed action [${getPrefixedPath(
+    `Disallowed action [${getModulePath(
       prefix,
       actionName,
     )}] blocked in control-state [${sam.controlState
@@ -254,7 +254,7 @@ export const logStaleActionFactory = (actionName, prefix) => ({
   props,
 }) => {
   console.warn(
-    `Canceled action [${getPrefixedPath(
+    `Canceled action [${getModulePath(
       prefix,
       actionName,
     )}] in step-ID [${state.get(getModulePath(prefix, "sam.stepId"))}]. Props:`,
@@ -318,6 +318,3 @@ export function runNextAction({ props, controller }) {
     }
   });
 }
-
-export const getPrefixedPath = (prefix, path) =>
-  prefix ? `${prefix}.${path}` : path;
