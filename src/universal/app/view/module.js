@@ -42,13 +42,13 @@ export default do {
       : undefined,
   });
 
-  result.on("start", (execution, payload) => {
-    console.log("function tree start", { execution, payload });
-  });
+  // result.on("start", (execution, payload) => {
+  //   console.log("function tree start", { execution, payload });
+  // });
 
-  result.on("end", (execution, payload) => {
-    console.log("function tree end", { execution, payload });
-  });
+  // result.on("end", (execution, payload) => {
+  //   console.log("function tree end", { execution, payload });
+  // });
 
   result.on("functionStart", (execution, functionDetails, payload) => {
     if (functionDetails.name === "proposeProposal")
