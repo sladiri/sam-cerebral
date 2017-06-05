@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
-import { styles as Styles } from "./styles";
+import { Style, styles as Styles } from "./styles";
 import StateIndicator from "./state-indicator";
 import Increment from "./increment";
 import { view as NapSack } from "../../nap-sack/boundary";
@@ -19,7 +19,7 @@ export const views = {
         <NapSack styles={styles} />
       </div>
     );
-  }),
+  }, Style),
 
   big(props) {
     return views.normal({
