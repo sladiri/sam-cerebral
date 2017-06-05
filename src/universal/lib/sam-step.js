@@ -163,9 +163,7 @@ export const logPossibleInterruptFactory = (actionName, prefix) => [
   when(
     state`${getModulePath(prefix, "sam.proposeInProgress")}`,
     state`${getModulePath(prefix, "sam.napInProgress")}`,
-    props`_isNap`,
-    (proposeInProgress, napInProgress, isNap) =>
-      proposeInProgress && !isNap && !napInProgress,
+    (proposeInProgress, napInProgress) => proposeInProgress && !napInProgress,
   ),
   {
     false: [],
