@@ -23,14 +23,13 @@ The SAM pattern maps to the ECB pattern:
 - Cerebral module: boundary
 
 ## TODO
-- [ ] Move NapSack to own Cerebral instance?
 - [ ] Async Ticker is not a good next action example. Ticker should be a singleton.
-- [ ] Defer updating the view until end of SAM step? (State updates trigger rerending immediately currently.)
+- [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
 - [ ] Create Proxy to hide state API?
-- [ ] Use control state for page change (routing)?
+- [ ] Use control state for page change (routing) example?
 - [ ] Add session control state example (log in <-> log out on authenticated route).
-- [ ] Allow for next action to not block step until complete?
-- [ ] Queue action when received signal while in progress?
+- [ ] Allow for next action to not block step until complete (blockStep = true)?
+- [ ] Queue action when received signal while in (NAP?) progress? (see previous)
 - [ ] Add tests.
 - [x] Prevent or at least warn about concurrent mutations while a step is in progress?
 - [x] Check allowed action in step.
