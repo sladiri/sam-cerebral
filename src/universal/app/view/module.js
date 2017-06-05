@@ -10,6 +10,7 @@ import {
   computeControlState,
   computeNextAction,
 } from "../control";
+import { module as napSack } from "../../nap-sack/boundary";
 
 const samStep = samStepFactory({
   propose,
@@ -21,6 +22,9 @@ const samStep = samStepFactory({
 
 export default do {
   const result = Controller({
+    modules: {
+      napSack,
+    },
     state: defaultState,
     signals: {
       // name: ...stuff outside of SAM, "blocking" SAM stuff,
@@ -52,6 +56,8 @@ export default do {
   });
 
   result.getSignal("init")({});
+
+  result.getSignal("napSack.init")({});
 
   result;
 };

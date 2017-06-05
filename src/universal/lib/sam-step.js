@@ -13,7 +13,6 @@ export function samStepFactory({
 }) {
   const GetId = getId();
   const stepId = GetId.next().value;
-  console.log(GetId, stepId);
 
   return function samStep(action) {
     if (Array.isArray(action)) {
@@ -93,7 +92,10 @@ export function samStepFactory({
                   true: [
                     incrementStepIdFactory(GetId, prefix),
                     set(
-                      state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+                      state`${getModulePath(
+                        prefix,
+                        "sam.acceptAndNapInProgress",
+                      )}`,
                       true,
                     ),
                     function proposeProposal(input) {
@@ -116,26 +118,41 @@ export function samStepFactory({
                         {
                           false: [
                             set(
-                              state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+                              state`${getModulePath(
+                                prefix,
+                                "sam.acceptAndNapInProgress",
+                              )}`,
                               false,
                             ),
                             set(
-                              state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+                              state`${getModulePath(
+                                prefix,
+                                "sam.proposeInProgress",
+                              )}`,
                               false,
                             ),
                             set(
-                              state`${getModulePath(prefix, "sam.napInProgress")}`,
+                              state`${getModulePath(
+                                prefix,
+                                "sam.napInProgress",
+                              )}`,
                               false,
                             ),
                           ],
                           true: [
                             // TODO: Check if blockStep is useful.
                             set(
-                              state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+                              state`${getModulePath(
+                                prefix,
+                                "sam.acceptAndNapInProgress",
+                              )}`,
                               props`blockStep`,
                             ),
                             set(
-                              state`${getModulePath(prefix, "sam.napInProgress")}`,
+                              state`${getModulePath(
+                                prefix,
+                                "sam.napInProgress",
+                              )}`,
                               true,
                             ),
                             runNextAction,
@@ -210,9 +227,10 @@ export const getControlStateFactory = computeControlState =>
 
 export const getNextActionFactory = (computeNextAction, prefix) =>
   function getNextAction({ state }) {
-    const [signalPath, signalInput, blockStep = false] = computeNextAction(
-      state.get(getModulePath(prefix, "sam.controlState.name")),
-    ) || [];
+    const [signalPath, signalInput, blockStep = false] =
+      computeNextAction(
+        state.get(getModulePath(prefix, "sam.controlState.name")),
+      ) || [];
 
     return {
       signalPath,
@@ -241,7 +259,9 @@ export function runNextAction({ props, controller }) {
 export const warnStaleActionFactory = (action, prefix) =>
   function warnStaleAction({ state, props }) {
     console.warn(
-      `Stale action blocked at step-ID=${state.get(getModulePath(prefix, "sam.stepId"))}:`,
+      `Stale action blocked at step-ID=${state.get(
+        getModulePath(prefix, "sam.stepId"),
+      )}:`,
       action.name,
       props,
       state.get("sam"),
@@ -251,7 +271,9 @@ export const warnStaleActionFactory = (action, prefix) =>
 export const warnBlockedActionFactory = (action, prefix) =>
   function warnBlockedAction({ state, props }) {
     console.warn(
-      `Action blocked, ${state.get(getModulePath(prefix, "sam.napInProgress")) ? "NAP" : "proposal"} in progress:`,
+      `Action blocked, ${state.get(getModulePath(prefix, "sam.napInProgress"))
+        ? "NAP"
+        : "proposal"} in progress:`,
       action.name,
       props,
       state.get("sam"),

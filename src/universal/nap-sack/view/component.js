@@ -1,26 +1,29 @@
 import { connect } from "cerebral/react";
-import { state, signal, props } from "cerebral/tags";
-import { NapSack } from "./view";
+import { props, signal } from "cerebral/tags";
 import {
+  napSackViewModel,
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
-} from "../../lib/computed";
-import { styles } from "../../app/view/styles";
+} from "../../lib/computed.js";
+import NapSack from "./view";
 
 export default connect(
   {
-    activities: state`activities`,
-    findJobBrute: signal`findJobBrute`,
-    cancel: signal`cancel`,
-    actionsDisabled: actionsDisabled(),
-    cancelDisabled: cancelDisabled(),
-    styles: addButtonStyles(styles, actionsDisabled(), cancelDisabled()),
+    model: napSackViewModel,
+    findJobBrute: signal`napSack.findJobBrute`,
+    cancel: signal`napSack.cancel`,
+    actionsDisabled: actionsDisabled("napSack"),
+    cancelDisabled: cancelDisabled("napSack"),
+    styles: addButtonStyles(
+      props`styles`,
+      actionsDisabled("napSack"),
+      cancelDisabled("napSack"),
+    ),
   },
-  ({ activities, findJobBrute, cancel, ...connectedProps }, parentProps) => ({
+  ({ findJobBrute, cancel, ...connectedProps }, parentProps) => ({
     ...parentProps,
     ...connectedProps,
-    model: { activities },
     actions: { findJobBrute, cancel },
   }),
   NapSack,

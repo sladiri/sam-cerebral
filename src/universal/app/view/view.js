@@ -4,6 +4,7 @@ import { wrap } from "react-free-style";
 import { Style, styles as Styles } from "./styles";
 import StateIndicator from "./state-indicator";
 import Increment from "./increment";
+import { view as NapSack } from "../../nap-sack/boundary";
 
 export const views = {
   normal: wrap(function normal({
@@ -15,6 +16,7 @@ export const views = {
       <div className={styles.view}>
         <StateIndicator styles={styles} />
         <Increment actions={actions} styles={styles} arrow={arrow} />
+        <NapSack styles={styles} />
       </div>
     );
   }, Style),

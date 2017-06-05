@@ -7,15 +7,8 @@ import {
   controller as appController,
   view as App,
 } from "../universal/app/boundary";
-import {
-  controller as napSackController,
-  view as NapSack,
-} from "../universal/nap-sack/boundary";
 
 render(
-  h("div", [
-    h(Container, { controller: appController }, h(App)),
-    h(Container, { controller: napSackController }, h(NapSack)),
-  ]),
+  h("div", [h(Container, { controller: appController }, h(App))]),
   document.querySelector("#app"),
 );

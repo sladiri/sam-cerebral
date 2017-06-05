@@ -6,5 +6,5 @@ export const defaultState = {
 
 export async function propose({ state, props: { activities } }) {
   await wait(1000);
-  if (activities) state.set("activities", activities);
+  if (activities) state.set("napSack.activities", activities);
 }

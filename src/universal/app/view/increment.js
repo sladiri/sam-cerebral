@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { wrap } from "react-free-style";
 import { connect } from "cerebral/react";
-import { state, props, signal } from "cerebral/tags";
+import { props } from "cerebral/tags";
 import { Style } from "./styles";
 import {
   appViewModel,

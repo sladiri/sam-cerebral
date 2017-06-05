@@ -1,5 +1,3 @@
-import { Controller } from "cerebral";
-import Devtools from "cerebral/devtools";
 import { samStepFactory } from "../../lib/sam-step";
 import { defaultState, propose } from "../entity";
 import {
@@ -11,32 +9,24 @@ import {
 } from "../control";
 
 const samStep = samStepFactory({
+  prefix: "napSack",
   propose,
   computeControlState,
   computeNextAction,
   controlState: "normal",
-  allowedActions: ["init", "findJobBrute"],
+  allowedActions: ["init"],
 });
 
-export default do {
-  const result = Controller({
-    state: defaultState,
-    signals: {
-      init: samStep(init),
-      findJobBrute: samStep(findJobBrute),
-      cancel: samStep(cancel),
-    },
-    catch: new Map([[Error, logError]]),
-    devtools: typeof window !== "undefined"
-      ? Devtools({ remoteDebugger: "localhost:8586", reconnect: true })
-      : undefined,
-  });
-
-  result.getSignal("init")({});
-
-  result;
+export default {
+  state: defaultState,
+  signals: {
+    init: samStep(init),
+    findJobBrute: samStep(findJobBrute),
+    cancel: samStep(cancel),
+  },
+  catch: new Map([[Error, logError]]),
 };
 
 function logError({ props: { error } }) {
-  console.error("Nap-sack catched an error", error);
+  console.error("NapSack catched an error", error);
 }

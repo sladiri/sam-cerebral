@@ -3,7 +3,7 @@ import React from "react";
 import { wrap } from "react-free-style";
 import { Style } from "../../app/view/styles";
 
-export const NapSack = wrap(function NapSack({
+export default wrap(function NapSack({
   model,
   actions,
   actionsDisabled,

@@ -8,6 +8,12 @@ export const appViewModel = compute(function appViewModel(get) {
   };
 });
 
+export const napSackViewModel = compute(function appViewModel(get) {
+  return {
+    activities: get(state`napSack.activities`),
+  };
+});
+
 export const actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {
     return get(state`${getModulePath(prefix, "sam.proposeInProgress")}`);
