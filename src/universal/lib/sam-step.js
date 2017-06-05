@@ -15,13 +15,9 @@ export function samStepFactory({
   const stepId = GetId.next().value;
 
   return function samStep(action) {
-    if (Array.isArray(action)) {
-      const [name, tree] = action;
-      action = { name, tree };
-    } else if (
-      Object.prototype.toString.call(action) !== "[object Function]" ||
-      !action.name.length
-    ) {
+    action = handleActionTree(action);
+
+    if (!action) {
       throw new Error(
         "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
       );
@@ -152,6 +148,19 @@ export function samStepFactory({
     };
   };
 }
+
+export const handleActionTree = action => {
+  if (Array.isArray(action)) {
+    const [name, tree] = action;
+    action = { name, tree };
+  } else if (
+    Object.prototype.toString.call(action) !== "[object Function]" ||
+    !action.name.length
+  ) {
+    action = null;
+  }
+  return action;
+};
 
 export const ensureSamStateFactory = (
   prefix,
