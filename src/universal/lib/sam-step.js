@@ -26,25 +26,19 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureSamStateFactory(prefix, stepId, controlState, allowedActions),
-        ...logPossibleInterruptFactory(action.name, prefix),
-        guardSignalInterruptFactory(prefix),
+        guardDisallowedActionFactory(action.name, prefix),
         {
-          false: logInterruptFailedFactory(action.name, prefix),
+          false: [logDisallowedActionFactory(action.name, prefix)],
           true: [
-            set(
-              state`${getModulePath(prefix, "sam.proposeInProgress")}`,
-              action.name,
-            ),
-            guardDisallowedActionFactory(action.name, prefix),
+            ...logPossibleInterruptFactory(action.name, prefix),
+            guardSignalInterruptFactory(prefix),
             {
-              false: [
-                logDisallowedActionFactory(action.name, prefix),
+              false: logInterruptFailedFactory(action.name, prefix),
+              true: [
                 set(
                   state`${getModulePath(prefix, "sam.proposeInProgress")}`,
-                  false,
+                  action.name,
                 ),
-              ],
-              true: [
                 set(
                   props`_stepId`,
                   state`${getModulePath(prefix, "sam.stepId")}`,
@@ -82,49 +76,25 @@ export function samStepFactory({
                           props`controlState`,
                         ),
                         getNextActionFactory(computeNextAction),
+                        ({ state, props }) => {
+                          state.set(
+                            getModulePath(prefix, "sam.proposeInProgress"),
+                            false,
+                          );
+                          state.set(
+                            getModulePath(prefix, "sam.napInProgress"),
+                            props.signalPath,
+                          );
+                          // TODO: Check if blockStep is useful.
+                          state.set(
+                            getModulePath(prefix, "sam.acceptAndNapInProgress"),
+                            props.blockStep,
+                          );
+                        },
                         when(props`signalPath`),
                         {
-                          false: [
-                            set(
-                              state`${getModulePath(
-                                prefix,
-                                "sam.acceptAndNapInProgress",
-                              )}`,
-                              false,
-                            ),
-                            set(
-                              state`${getModulePath(
-                                prefix,
-                                "sam.proposeInProgress",
-                              )}`,
-                              false,
-                            ),
-                            set(
-                              state`${getModulePath(
-                                prefix,
-                                "sam.napInProgress",
-                              )}`,
-                              false,
-                            ),
-                          ],
-                          true: [
-                            // TODO: Check if blockStep is useful.
-                            set(
-                              state`${getModulePath(
-                                prefix,
-                                "sam.acceptAndNapInProgress",
-                              )}`,
-                              props`blockStep`,
-                            ),
-                            set(
-                              state`${getModulePath(
-                                prefix,
-                                "sam.napInProgress",
-                              )}`,
-                              action.name,
-                            ),
-                            runNextAction,
-                          ],
+                          false: [],
+                          true: [runNextAction],
                         },
                       ],
                     },
@@ -203,7 +173,13 @@ export const logPossibleInterruptFactory = (actionName, prefix) => [
       ({ state, props }) => {
         const sam = state.get(getModulePath(prefix, "sam"));
         console.warn(
-          `Possible interrupt by action [${actionName}] for pending action [${sam.proposeInProgress}] in step-ID [${sam.stepId}]. Props:`,
+          `Possible cancelation by action [${getPrefixedPath(
+            prefix,
+            actionName,
+          )}] for pending action [${getPrefixedPath(
+            prefix,
+            sam.proposeInProgress,
+          )}] in step-ID [${sam.stepId}]. Props:`,
           props,
         );
       },
@@ -225,10 +201,19 @@ export const logInterruptFailedFactory = (actionName, prefix) => [
     // If GUI allows clicks while model's propose or NAP is in progress, log a warning.
     const sam = state.get(getModulePath(prefix, "sam"));
     const progressMsg = sam.napInProgress
-      ? `automatic (NAP) action [${sam.napInProgress}]`
-      : `proposal for action [${sam.proposeInProgress}]`;
+      ? `automatic (NAP) action [${getPrefixedPath(
+          prefix,
+          sam.napInProgress,
+        )}] for control-state [${sam.controlState.name}]`
+      : `accept and NAP for action [${getPrefixedPath(
+          prefix,
+          sam.proposeInProgress,
+        )}]`;
     console.warn(
-      `Blocked intterupt by action [${actionName}], ${progressMsg} in progress in step-ID [${sam.stepId}]. Props:`,
+      `Blocked action [${getPrefixedPath(
+        prefix,
+        actionName,
+      )}], ${progressMsg} in progress in step-ID [${sam.stepId}]. Props:`,
       props,
     );
   },
@@ -247,8 +232,11 @@ export const logDisallowedActionFactory = (actionName, prefix) => ({
 }) => {
   const sam = state.get(getModulePath(prefix, "sam"));
   console.warn(
-    `Disallowed action [${actionName}] blocked in control-state [${sam
-      .controlState.name}] in step-ID [${sam.stepId}]. Props:`,
+    `Disallowed action [${getPrefixedPath(
+      prefix,
+      actionName,
+    )}] blocked in control-state [${sam.controlState
+      .name}] in step-ID [${sam.stepId}]. Props:`,
     props,
   );
 };
@@ -266,9 +254,10 @@ export const logStaleActionFactory = (actionName, prefix) => ({
   props,
 }) => {
   console.warn(
-    `Cancelled action [${actionName}] in step-ID [${state.get(
-      getModulePath(prefix, "sam.stepId"),
-    )}]. Props:`,
+    `Canceled action [${getPrefixedPath(
+      prefix,
+      actionName,
+    )}] in step-ID [${state.get(getModulePath(prefix, "sam.stepId"))}]. Props:`,
     props,
   );
 };
@@ -301,7 +290,7 @@ export const getControlStateFactory = computeControlState =>
 
 export const getNextActionFactory = (computeNextAction, prefix) =>
   function getNextAction({ state }) {
-    const [signalPath, signalInput, blockStep = false] =
+    const [signalPath = false, signalInput, blockStep = false] =
       computeNextAction(
         state.get(getModulePath(prefix, "sam.controlState.name")),
       ) || [];
@@ -329,3 +318,6 @@ export function runNextAction({ props, controller }) {
     }
   });
 }
+
+export const getPrefixedPath = (prefix, path) =>
+  prefix ? `${prefix}.${path}` : path;
