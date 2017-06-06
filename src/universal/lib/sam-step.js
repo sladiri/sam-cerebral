@@ -91,7 +91,6 @@ export function samStepFactory({
     );
 
     const logInterruptFailed = ({ state, props }) => {
-      // If GUI allows clicks while model's accept or NAP is in progress, log a warning.
       const {
         napInProgress,
         acceptInProgress,
@@ -168,7 +167,7 @@ export function samStepFactory({
         {
           false: [logDisallowedAction],
           true: [
-            ...logPossibleInterrupt,
+            ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP is in progress, log a warning.
             guardSignalInterrupt,
             {
               false: [logInterruptFailed],
