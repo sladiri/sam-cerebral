@@ -1,3 +1,5 @@
+import { curry } from "ramda";
+
 export function wait(ms, value) {
   return new Promise(resolve => {
     setTimeout(() => {
@@ -18,5 +20,6 @@ export function* getId() {
   }
 }
 
-export const getModulePath = (prefix, path) =>
-  `${`${prefix ? `${prefix}.` : ""}`}${path}`;
+export const getModulePath = curry(
+  (prefix, path) => `${`${prefix ? `${prefix}.` : ""}`}${path}`,
+);

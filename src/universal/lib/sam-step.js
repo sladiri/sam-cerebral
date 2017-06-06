@@ -11,6 +11,7 @@ export function samStepFactory({
   controlState,
   allowedActions,
 }) {
+  const prefixedPath = getModulePath(prefix);
   const GetId = getId();
   const stepId = GetId.next().value;
 
@@ -25,35 +26,34 @@ export function samStepFactory({
 
     return {
       signal: [
-        ...ensureSamStateFactory(prefix, stepId, controlState, allowedActions),
-        guardDisallowedActionFactory(action.name, prefix),
+        ...ensureSamStateFactory(
+          prefixedPath,
+          stepId,
+          controlState,
+          allowedActions,
+        ),
+        guardDisallowedActionFactory(action.name, prefixedPath),
         {
-          false: [logDisallowedActionFactory(action.name, prefix)],
+          false: [logDisallowedActionFactory(action.name, prefixedPath)],
           true: [
-            ...logPossibleInterruptFactory(action.name, prefix),
-            guardSignalInterruptFactory(prefix),
+            ...logPossibleInterruptFactory(action.name, prefixedPath),
+            guardSignalInterruptFactory(prefixedPath),
             {
-              false: logInterruptFailedFactory(action.name, prefix),
+              false: logInterruptFailedFactory(action.name, prefixedPath),
               true: [
                 set(
-                  state`${getModulePath(prefix, "sam.proposeInProgress")}`,
+                  state`${prefixedPath("sam.proposeInProgress")}`,
                   action.name,
                 ),
-                set(
-                  props`_stepId`,
-                  state`${getModulePath(prefix, "sam.stepId")}`,
-                ),
+                set(props`_stepId`, state`${prefixedPath("sam.stepId")}`),
                 getProposalFactory(action),
-                guardStaleActionFactory(prefix),
+                guardStaleActionFactory(prefixedPath),
                 {
-                  false: [logStaleActionFactory(action.name, prefix)],
+                  false: [logStaleActionFactory(action.name, prefixedPath)],
                   true: [
-                    incrementStepIdFactory(GetId, prefix),
+                    incrementStepIdFactory(GetId, prefixedPath),
                     set(
-                      state`${getModulePath(
-                        prefix,
-                        "sam.acceptAndNapInProgress",
-                      )}`,
+                      state`${prefixedPath("sam.acceptAndNapInProgress")}`,
                       true,
                     ),
                     function proposeProposal(input) {
@@ -72,22 +72,22 @@ export function samStepFactory({
                       ],
                       true: [
                         set(
-                          state`${getModulePath(prefix, "sam.controlState")}`,
+                          state`${prefixedPath("sam.controlState")}`,
                           props`controlState`,
                         ),
-                        getNextActionFactory(computeNextAction),
+                        getNextActionFactory(computeNextAction, prefixedPath),
                         ({ state, props }) => {
                           state.set(
-                            getModulePath(prefix, "sam.proposeInProgress"),
+                            prefixedPath("sam.proposeInProgress"),
                             false,
                           );
                           state.set(
-                            getModulePath(prefix, "sam.napInProgress"),
+                            prefixedPath("sam.napInProgress"),
                             props.signalPath,
                           );
                           // TODO: Check if blockStep is useful.
                           state.set(
-                            getModulePath(prefix, "sam.acceptAndNapInProgress"),
+                            prefixedPath("sam.acceptAndNapInProgress"),
                             props.blockStep,
                           );
                         },
@@ -133,20 +133,20 @@ export const handleActionTree = action => {
 };
 
 export const ensureSamStateFactory = (
-  prefix,
+  prefixedPath,
   stepId,
   controlState,
   allowedActions,
 ) => [
-  when(state`${getModulePath(prefix, "sam")}`),
+  when(state`${prefixedPath("sam")}`),
   {
     false: [
       set(
-        state`${getModulePath(prefix, "sam")}`,
+        state`${prefixedPath("sam")}`,
         samStateFactory(stepId, controlState, allowedActions),
       ),
     ],
-    true: [set(state`${getModulePath(prefix, "sam.init")}`, false)],
+    true: [set(state`${prefixedPath("sam.init")}`, false)],
   },
 ];
 
@@ -159,23 +159,42 @@ export const samStateFactory = (stepId, controlState, allowedActions) => ({
   napInProgress: false,
 });
 
-export const logPossibleInterruptFactory = (actionName, prefix) => [
+export const guardDisallowedActionFactory = (actionName, prefixedPath) =>
   when(
-    state`${getModulePath(prefix, "sam.proposeInProgress")}`,
-    state`${getModulePath(prefix, "sam.napInProgress")}`,
+    state`${prefixedPath("sam.controlState")}`,
+    controlState =>
+      !controlState.name || controlState.allowedActions.includes(actionName),
+  );
+
+export const logDisallowedActionFactory = (actionName, prefixedPath) => ({
+  state,
+  props,
+}) => {
+  const sam = state.get(prefixedPath("sam"));
+  console.warn(
+    `Disallowed action [${prefixedPath(
+      actionName,
+    )}] blocked in control-state [${sam.controlState
+      .name}] in step-ID [${sam.stepId}]. Props:`,
+    props,
+  );
+};
+
+export const logPossibleInterruptFactory = (actionName, prefixedPath) => [
+  when(
+    state`${prefixedPath("sam.proposeInProgress")}`,
+    state`${prefixedPath("sam.napInProgress")}`,
     (proposeInProgress, napInProgress) => proposeInProgress && !napInProgress,
   ),
   {
     false: [],
     true: [
       ({ state, props }) => {
-        const sam = state.get(getModulePath(prefix, "sam"));
+        const sam = state.get(prefixedPath("sam"));
         console.warn(
-          `Possible cancelation by action [${getModulePath(
-            prefix,
+          `Possible cancelation by action [${prefixedPath(
             actionName,
-          )}] for pending action [${getModulePath(
-            prefix,
+          )}] for pending action [${prefixedPath(
             sam.proposeInProgress,
           )}] in step-ID [${sam.stepId}]. Props:`,
           props,
@@ -185,31 +204,26 @@ export const logPossibleInterruptFactory = (actionName, prefix) => [
   },
 ];
 
-export const guardSignalInterruptFactory = prefix =>
+export const guardSignalInterruptFactory = prefixedPath =>
   when(
-    state`${getModulePath(prefix, "sam.napInProgress")}`,
-    state`${getModulePath(prefix, "sam.acceptAndNapInProgress")}`,
+    state`${prefixedPath("sam.napInProgress")}`,
+    state`${prefixedPath("sam.acceptAndNapInProgress")}`,
     props`_isNap`,
     (napInProgress, acceptAndNapInProgress, isNap) =>
       (!napInProgress && !acceptAndNapInProgress) || isNap,
   );
 
-export const logInterruptFailedFactory = (actionName, prefix) => [
+export const logInterruptFailedFactory = (actionName, prefixedPath) => [
   ({ state, props }) => {
     // If GUI allows clicks while model's propose or NAP is in progress, log a warning.
-    const sam = state.get(getModulePath(prefix, "sam"));
+    const sam = state.get(prefixedPath("sam"));
     const progressMsg = sam.napInProgress
-      ? `automatic (NAP) action [${getModulePath(
-          prefix,
+      ? `automatic (NAP) action [${prefixedPath(
           sam.napInProgress,
         )}] for control-state [${sam.controlState.name}]`
-      : `accept and NAP for action [${getModulePath(
-          prefix,
-          sam.proposeInProgress,
-        )}]`;
+      : `accept and NAP for action [${prefixedPath(sam.proposeInProgress)}]`;
     console.warn(
-      `Blocked action [${getModulePath(
-        prefix,
+      `Blocked action [${prefixedPath(
         actionName,
       )}], ${progressMsg} in progress in step-ID [${sam.stepId}]. Props:`,
       props,
@@ -217,52 +231,29 @@ export const logInterruptFailedFactory = (actionName, prefix) => [
   },
 ];
 
-export const guardDisallowedActionFactory = (actionName, prefix) =>
+export const guardStaleActionFactory = prefixedPath =>
   when(
-    state`${getModulePath(prefix, "sam.controlState")}`,
-    controlState =>
-      !controlState.name || controlState.allowedActions.includes(actionName),
-  );
-
-export const logDisallowedActionFactory = (actionName, prefix) => ({
-  state,
-  props,
-}) => {
-  const sam = state.get(getModulePath(prefix, "sam"));
-  console.warn(
-    `Disallowed action [${getModulePath(
-      prefix,
-      actionName,
-    )}] blocked in control-state [${sam.controlState
-      .name}] in step-ID [${sam.stepId}]. Props:`,
-    props,
-  );
-};
-
-export const guardStaleActionFactory = prefix =>
-  when(
-    state`${getModulePath(prefix, "sam.init")}`,
-    state`${getModulePath(prefix, "sam.stepId")}`,
+    state`${prefixedPath("sam.init")}`,
+    state`${prefixedPath("sam.stepId")}`,
     props`_stepId`,
     (init, stepId, actionStepId) => init || stepId === actionStepId,
   );
 
-export const logStaleActionFactory = (actionName, prefix) => ({
+export const logStaleActionFactory = (actionName, prefixedPath) => ({
   state,
   props,
 }) => {
   console.warn(
-    `Canceled action [${getModulePath(
-      prefix,
-      actionName,
-    )}] in step-ID [${state.get(getModulePath(prefix, "sam.stepId"))}]. Props:`,
+    `Canceled action [${prefixedPath(actionName)}] in step-ID [${state.get(
+      prefixedPath("sam.stepId"),
+    )}]. Props:`,
     props,
   );
 };
 
-export const incrementStepIdFactory = (generator, prefix) =>
+export const incrementStepIdFactory = (generator, prefixedPath) =>
   function setStepId({ state }) {
-    state.set(getModulePath(prefix, "sam.stepId"), generator.next().value);
+    state.set(prefixedPath("sam.stepId"), generator.next().value);
   };
 
 export const getProposalFactory = action =>
@@ -286,12 +277,10 @@ export const getControlStateFactory = computeControlState =>
     return { controlState: { name, allowedActions } };
   };
 
-export const getNextActionFactory = (computeNextAction, prefix) =>
+export const getNextActionFactory = (computeNextAction, prefixedPath) =>
   function getNextAction({ state }) {
     const [signalPath = false, signalInput, blockStep = false] =
-      computeNextAction(
-        state.get(getModulePath(prefix, "sam.controlState.name")),
-      ) || [];
+      computeNextAction(state.get(prefixedPath("sam.controlState.name"))) || [];
 
     return {
       signalPath,
