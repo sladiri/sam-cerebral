@@ -94,15 +94,15 @@ export function samStepFactory({
       // If GUI allows clicks while model's accept or NAP is in progress, log a warning.
       const {
         napInProgress,
+        acceptInProgress,
         controlState,
-        proposeInProgress,
         stepId,
       } = state.get(prefixedPath("sam"));
       const progressMsg = napInProgress
         ? `automatic (NAP) action [${prefixedPath(
             napInProgress,
           )}] for control-state [${controlState.name}]`
-        : `accept for action [${prefixedPath(proposeInProgress)}]`;
+        : `accept for action [${acceptInProgress}]`;
       console.warn(
         `Blocked action [${prefixedPath(
           action.name,
@@ -153,15 +153,12 @@ export function samStepFactory({
     };
 
     const getNextAction = ({ state }) => {
-      const [signalPath = false, signalInput, blockStep = false] =
-        computeNextAction(state.get(prefixedPath("sam.controlState.name"))) ||
-        [];
+      const nextAction = computeNextAction(
+        state.get(prefixedPath("sam.controlState.name")),
+      );
+      const [signalPath, signalInput] = nextAction || [];
 
-      return {
-        signalPath,
-        signalInput,
-        blockStep,
-      };
+      return { signalPath, signalInput };
     };
 
     return {
@@ -187,24 +184,27 @@ export function samStepFactory({
                   false: [logStaleProposal],
                   true: [
                     set(state`${prefixedPath("sam.proposeInProgress")}`, false),
-                    incrementStepId,
-                    set(state`${prefixedPath("sam.acceptInProgress")}`, true),
-                    accept,
-                    setControlState,
-                    getNextAction,
-                    set(
-                      state`${prefixedPath("sam.napInProgress")}`,
-                      props`signalPath`,
-                    ),
-                    // TODO: Check if blockStep is useful.
                     set(
                       state`${prefixedPath("sam.acceptInProgress")}`,
-                      props`blockStep`,
+                      action.name,
                     ),
+                    incrementStepId,
+                    accept,
+                    set(state`${prefixedPath("sam.acceptInProgress")}`, false),
+                    setControlState,
+                    getNextAction,
                     when(props`signalPath`),
                     {
-                      false: [],
-                      true: [runNextAction],
+                      false: [
+                        set(state`${prefixedPath("sam.napInProgress")}`, false),
+                      ],
+                      true: [
+                        set(
+                          state`${prefixedPath("sam.napInProgress")}`,
+                          props`signalPath`,
+                        ),
+                        runNextAction,
+                      ],
                     },
                   ],
                 },

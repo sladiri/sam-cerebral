@@ -26,7 +26,6 @@ export function computeControlState(model) {
 }
 
 export function computeNextAction(controlState) {
-  // if (controlState === "small") return ["increase", { value: 5 }];
+  if (controlState === "small") return ["increase", { value: 3 }];
   if (controlState === "big") return ["decrease", {}];
-  // return ["tick", {}];
 }
