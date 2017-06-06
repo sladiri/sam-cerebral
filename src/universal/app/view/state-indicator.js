@@ -7,21 +7,21 @@ import { state } from "cerebral/tags";
 export default connect(
   {
     proposeInProgress: state`sam.proposeInProgress`,
-    acceptAndNapInProgress: state`sam.acceptAndNapInProgress`,
+    acceptInProgress: state`sam.acceptInProgress`,
     napInProgress: state`sam.napInProgress`,
   },
   wrap(function StateIndicator({
     proposeInProgress,
-    acceptAndNapInProgress,
+    acceptInProgress,
     napInProgress,
     styles,
   }) {
     return h(
       "section",
       [
-        [proposeInProgress, "propose (actions)"],
-        [acceptAndNapInProgress, "accept and NAP (cancel)"],
-        [napInProgress, "NAP (cancel)"],
+        [proposeInProgress, "propose (no actions)"],
+        [acceptInProgress, "accept (no cancel)"],
+        [napInProgress, "NAP (no cancel)"],
       ].map(([trigger, text]) =>
         h(
           "div",
