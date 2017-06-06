@@ -16,7 +16,10 @@ export const napSackViewModel = compute(function appViewModel(get) {
 
 export const actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {
-    return get(state`${getModulePath(prefix, "sam.proposeInProgress")}`);
+    return (
+      get(state`${getModulePath(prefix, "sam.proposeInProgress")}`) ||
+      get(state`${getModulePath(prefix, "sam.acceptInProgress")}`)
+    );
   });
 
 export const cancelDisabled = prefix =>

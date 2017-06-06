@@ -19,7 +19,7 @@ export default connect(
     return h(
       "section",
       [
-        [proposeInProgress, "propose (no actions)"],
+        [proposeInProgress, "propose (cancelable action)"],
         [acceptInProgress, "accept (no cancel)"],
         [napInProgress, "NAP (no cancel)"],
       ].map(([trigger, text]) =>

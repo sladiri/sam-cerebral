@@ -124,16 +124,16 @@ export function samStepFactory({
           })
         : action({ input: props }) || {};
 
-    const guardStaleAction = when(
+    const guardStaleProposal = when(
       state`${prefixedPath("sam.init")}`,
       state`${prefixedPath("sam.stepId")}`,
       props`_stepId`,
       (init, stepId, actionStepId) => init || stepId === actionStepId,
     );
 
-    const logStaleAction = ({ state, props }) => {
+    const logStaleProposal = ({ state, props }) => {
       console.warn(
-        `Canceled (stale) action [${prefixedPath(
+        `Canceled (stale) proposal from action [${prefixedPath(
           action.name,
         )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}]. Props:`,
         props,
@@ -182,16 +182,16 @@ export function samStepFactory({
                 ),
                 set(props`_stepId`, state`${prefixedPath("sam.stepId")}`),
                 getProposal,
-                guardStaleAction,
+                guardStaleProposal,
                 {
-                  false: [logStaleAction],
+                  false: [logStaleProposal],
                   true: [
+                    set(state`${prefixedPath("sam.proposeInProgress")}`, false),
                     incrementStepId,
                     set(state`${prefixedPath("sam.acceptInProgress")}`, true),
                     propose,
                     setControlState,
                     getNextAction,
-                    set(state`${prefixedPath("sam.proposeInProgress")}`, false),
                     set(
                       state`${prefixedPath("sam.napInProgress")}`,
                       props`signalPath`,
