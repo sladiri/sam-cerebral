@@ -1,7 +1,7 @@
 import { Controller } from "cerebral";
 import Devtools from "cerebral/devtools";
 import { samStepFactory } from "../../lib/sam-step";
-import { defaultState, propose } from "../entity";
+import { defaultState, accept } from "../entity";
 import {
   init,
   increase,
@@ -13,7 +13,7 @@ import {
 import { module as napSack } from "../../nap-sack/boundary";
 
 const samStep = samStepFactory({
-  propose,
+  accept,
   computeControlState,
   computeNextAction,
   controlState: "normal",

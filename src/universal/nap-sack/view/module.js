@@ -1,5 +1,5 @@
 import { samStepFactory } from "../../lib/sam-step";
-import { defaultState, propose } from "../entity";
+import { defaultState, accept } from "../entity";
 import {
   init,
   findJobBrute,
@@ -10,7 +10,7 @@ import {
 
 const samStep = samStepFactory({
   prefix: "napSack",
-  propose,
+  accept,
   computeControlState,
   computeNextAction,
   controlState: "normal",

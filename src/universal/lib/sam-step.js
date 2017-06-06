@@ -5,7 +5,7 @@ import { getId, getModulePath } from "../lib/util";
 
 export function samStepFactory({
   prefix,
-  propose,
+  accept,
   computeControlState,
   computeNextAction,
   controlState,
@@ -91,7 +91,7 @@ export function samStepFactory({
     );
 
     const logInterruptFailed = ({ state, props }) => {
-      // If GUI allows clicks while model's propose or NAP is in progress, log a warning.
+      // If GUI allows clicks while model's accept or NAP is in progress, log a warning.
       const {
         napInProgress,
         controlState,
@@ -189,7 +189,7 @@ export function samStepFactory({
                     set(state`${prefixedPath("sam.proposeInProgress")}`, false),
                     incrementStepId,
                     set(state`${prefixedPath("sam.acceptInProgress")}`, true),
-                    propose,
+                    accept,
                     setControlState,
                     getNextAction,
                     set(
