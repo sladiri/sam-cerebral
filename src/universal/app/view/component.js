@@ -15,7 +15,7 @@ export default connect(
   ({ increase, decrease, cancel, ...connectedProps }, parentProps) => ({
     ...parentProps,
     ...connectedProps,
-    actions: { increase, decrease, cancel }, // TODO: Why can we not use Computeds for signals?
+    actions: { increase, decrease, cancel },
   }),
   App,
 );
