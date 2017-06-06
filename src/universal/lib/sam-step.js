@@ -13,7 +13,7 @@ export function samStepFactory({
 }) {
   const prefixedPath = getModulePath(prefix);
   const GetId = getId();
-  const ensureSamState = [
+  const ensureInitialSamState = [
     when(state`${prefixedPath("sam")}`),
     {
       false: [
@@ -133,9 +133,9 @@ export function samStepFactory({
 
     const logStaleAction = ({ state, props }) => {
       console.warn(
-        `Canceled action [${prefixedPath(action.name)}] in step-ID [${state.get(
-          prefixedPath("sam.stepId"),
-        )}]. Props:`,
+        `Canceled (stale) action [${prefixedPath(
+          action.name,
+        )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}]. Props:`,
         props,
       );
     };
@@ -144,9 +144,12 @@ export function samStepFactory({
       state.set(prefixedPath("sam.stepId"), GetId.next().value);
     };
 
-    const getControlState = ({ state }) => {
-      const [name, allowedActions] = computeControlState(state.get());
-      return { controlState: { name, allowedActions } };
+    const setControlState = ({ state }) => {
+      const [name, allowedActions] = computeControlState(state.get()) || [];
+      if (!name) {
+        throw new Error("Invalid control state name.");
+      }
+      state.set(prefixedPath("sam.controlState"), { name, allowedActions });
     };
 
     const getNextAction = ({ state }) => {
@@ -161,44 +164,9 @@ export function samStepFactory({
       };
     };
 
-    const throwOnInvalidControlState = [
-      when(props`controlState.name`, controlStateName => !!controlStateName),
-      {
-        false: [
-          () => {
-            throw new Error("Invalid control state.");
-          },
-        ],
-        true: [],
-      },
-    ];
-
-    const runStep = [
-      incrementStepId,
-      set(state`${prefixedPath("sam.acceptInProgress")}`, true),
-      function proposeProposal(input) {
-        return propose(input);
-      },
-      getControlState,
-      ...throwOnInvalidControlState,
-      set(state`${prefixedPath("sam.controlState")}`, props`controlState`),
-      getNextAction,
-      ({ state, props }) => {
-        state.set(prefixedPath("sam.proposeInProgress"), false);
-        state.set(prefixedPath("sam.napInProgress"), props.signalPath);
-        // TODO: Check if blockStep is useful.
-        state.set(prefixedPath("sam.acceptInProgress"), props.blockStep);
-      },
-      when(props`signalPath`),
-      {
-        false: [],
-        true: [runNextAction],
-      },
-    ];
-
     return {
       signal: [
-        ...ensureSamState,
+        ...ensureInitialSamState,
         guardDisallowedAction,
         {
           false: [logDisallowedAction],
@@ -217,7 +185,28 @@ export function samStepFactory({
                 guardStaleAction,
                 {
                   false: [logStaleAction],
-                  true: runStep,
+                  true: [
+                    incrementStepId,
+                    set(state`${prefixedPath("sam.acceptInProgress")}`, true),
+                    propose,
+                    setControlState,
+                    getNextAction,
+                    set(state`${prefixedPath("sam.proposeInProgress")}`, false),
+                    set(
+                      state`${prefixedPath("sam.napInProgress")}`,
+                      props`signalPath`,
+                    ),
+                    // TODO: Check if blockStep is useful.
+                    set(
+                      state`${prefixedPath("sam.acceptInProgress")}`,
+                      props`blockStep`,
+                    ),
+                    when(props`signalPath`),
+                    {
+                      false: [],
+                      true: [runNextAction],
+                    },
+                  ],
                 },
               ],
             },

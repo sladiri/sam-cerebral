@@ -50,13 +50,12 @@ export default do {
   //   console.log("function tree end", { execution, payload });
   // });
 
-  result.on("functionStart", (execution, functionDetails, payload) => {
-    if (functionDetails.name === "proposeProposal")
-      console.log("function tree functionStart", functionDetails.name, payload);
-  });
+  // result.on("functionStart", (execution, functionDetails, payload) => {
+  //   if (functionDetails.name === "proposeProposal")
+  //     console.log("function tree functionStart", functionDetails.name, payload);
+  // });
 
   result.getSignal("init")({});
-
   result.getSignal("napSack.init")({});
 
   result;
