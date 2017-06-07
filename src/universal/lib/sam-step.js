@@ -110,18 +110,10 @@ export function samStepFactory({
       );
     };
 
-    const getProposal = ({ props }) =>
+    const getProposal = input =>
       action.tree
-        ? new Promise(resolve => {
-            new FunctionTree()(
-              action.tree,
-              props,
-              (self, execution, payload = {}) => {
-                resolve(payload);
-              },
-            );
-          })
-        : action({ input: props }) || {};
+        ? new FunctionTree().run(action.name, action.tree, input.props)
+        : action(input) || {};
 
     const guardStaleProposal = when(
       state`${prefixedPath("sam.init")}`,

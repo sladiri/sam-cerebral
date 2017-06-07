@@ -2,11 +2,11 @@ import { wait } from "../lib/util";
 
 export function init() {}
 
-export async function increase({ input: { value = 1 } }) {
+export async function increase({ props: { value = 1 } }) {
   return await wait(800, { value });
 }
 
-export async function decrease({ input: { value = 1 } }) {
+export async function decrease({ props: { value = 1 } }) {
   return await wait(800, { value: value * -1 });
 }
 

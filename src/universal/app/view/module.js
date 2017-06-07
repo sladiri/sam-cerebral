@@ -38,7 +38,7 @@ export default do {
     // provider(context, functionDetails, payload) {},
     // TODO: Cerebral should support server-side?
     devtools: typeof window !== "undefined"
-      ? Devtools({ remoteDebugger: "localhost:8585", reconnect: true })
+      ? Devtools({ host: "localhost:8585", reconnect: true })
       : undefined,
   });
 
