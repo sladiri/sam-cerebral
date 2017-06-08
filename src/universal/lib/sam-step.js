@@ -1,3 +1,4 @@
+import asap from "asap";
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
 import FunctionTree from "function-tree";
@@ -232,7 +233,7 @@ function parseAction(action) {
 }
 
 function runNextAction({ props, controller }) {
-  setImmediate(() => {
+  asap(() => {
     const { signalPath, signalInput } = props;
     const samStep = controller.module.signals[signalPath];
     try {
