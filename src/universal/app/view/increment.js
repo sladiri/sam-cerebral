@@ -1,6 +1,5 @@
 import React from "react";
 import classNames from "classnames";
-import { wrap } from "react-free-style";
 import { connect } from "cerebral/react";
 import { props } from "cerebral/tags";
 import {
@@ -17,7 +16,7 @@ export default connect(
     cancelDisabled: cancelDisabled(),
     styles: addButtonStyles(props`styles`, actionsDisabled(), cancelDisabled()),
   },
-  wrap(function Increment({
+  function Increment({
     model,
     actions,
     actionsDisabled,
@@ -63,5 +62,5 @@ export default connect(
 
       </section>
     );
-  }),
+  },
 );

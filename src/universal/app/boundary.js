@@ -1,2 +1,3 @@
-export { default as controller } from "./view/module";
-export { default as view } from "./view/component";
+export { default as module } from "./view/module";
+export { default as component } from "./view/component";
+export { App } from "./view/component";

@@ -6,7 +6,9 @@ import {
   cancelDisabled,
   addButtonStyles,
 } from "../../lib/computed.js";
-import NapSack from "./view";
+import view from "./view";
+
+export { default as NapSack } from "./view";
 
 export default connect(
   {
@@ -21,10 +23,12 @@ export default connect(
       cancelDisabled("napSack"),
     ),
   },
-  ({ findJobBrute, cancel, ...connectedProps }, parentProps) => ({
-    ...parentProps,
-    ...connectedProps,
-    actions: { findJobBrute, cancel },
-  }),
-  NapSack,
+  ({ findJobBrute, cancel, ...connectedProps }, parentProps) => {
+    return {
+      ...parentProps,
+      ...connectedProps,
+      actions: { findJobBrute, cancel },
+    };
+  },
+  view,
 );

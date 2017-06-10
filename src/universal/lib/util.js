@@ -23,3 +23,6 @@ export function* getId() {
 export const getModulePath = curry(
   (prefix, path) => `${`${prefix ? `${prefix}.` : ""}`}${path}`,
 );
+
+export const setFunctionName = (name, fn) =>
+  Object.defineProperty(fn, "name", { value: name });

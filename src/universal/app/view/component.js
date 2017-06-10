@@ -1,9 +1,18 @@
 import { connect } from "cerebral/react";
 import { state, signal } from "cerebral/tags";
+import { wrap } from "react-free-style";
+import { Style } from "./styles";
+import { setFunctionName } from "../../lib/util";
 import { views } from "./view";
 
-export const App = ({ controlStateName, ...props }) =>
-  controlStateName ? views[controlStateName](props) : null;
+export const App = setFunctionName(
+  "App",
+  wrap(
+    ({ controlStateName, ...props }) =>
+      controlStateName ? views[controlStateName](props) : null,
+    Style,
+  ),
+);
 
 export default connect(
   {

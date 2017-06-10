@@ -1,17 +1,12 @@
 import React from "react";
 import classNames from "classnames";
-import { wrap } from "react-free-style";
-import { Style, styles as Styles } from "./styles";
+import { styles as Styles } from "./styles";
 import StateIndicator from "./state-indicator";
 import Increment from "./increment";
-import { view as NapSack } from "../../nap-sack/boundary";
+import { component as NapSack } from "../../nap-sack/boundary";
 
 export const views = {
-  normal: wrap(function normal({
-    actions,
-    styles = Styles,
-    arrow = () => null,
-  }) {
+  normal: ({ actions, styles = Styles, arrow = () => null }) => {
     return (
       <div className={styles.view}>
         <StateIndicator styles={styles} />
@@ -19,7 +14,7 @@ export const views = {
         <NapSack styles={styles} />
       </div>
     );
-  }, Style),
+  },
 
   big(props) {
     return views.normal({

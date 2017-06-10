@@ -1,8 +1,7 @@
 import h from "react-hyperscript";
 import React from "react";
-import { wrap } from "react-free-style";
 
-export default wrap(function NapSack({
+export default function NapSack({
   model,
   actions,
   actionsDisabled,
@@ -52,4 +51,4 @@ export default wrap(function NapSack({
 
     </section>
   );
-});
+}
