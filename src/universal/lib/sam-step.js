@@ -48,7 +48,7 @@ export function samStepFactory({
 
     const logDisallowedAction = ({ state, props }) => {
       const { controlState, stepId } = state.get(prefixedPath("sam"));
-      console.warn(
+      console.info(
         `Disallowed action [${prefixedPath(
           action.name,
         )}] blocked in control-state [${controlState.name}] in step-ID [${stepId}]. Props:`,
@@ -70,7 +70,7 @@ export function samStepFactory({
             const { proposeInProgress, stepId } = state.get(
               prefixedPath("sam"),
             );
-            console.warn(
+            console.info(
               `Possible cancelation by action [${prefixedPath(
                 action.name,
               )}] for pending action [${prefixedPath(
@@ -103,7 +103,7 @@ export function samStepFactory({
             napInProgress,
           )}] for control-state [${controlState.name}]`
         : `accept for action [${acceptInProgress}]`;
-      console.warn(
+      console.info(
         `Blocked action [${prefixedPath(
           action.name,
         )}], ${progressMsg} in progress in step-ID [${stepId}]. Props:`,
@@ -124,7 +124,7 @@ export function samStepFactory({
     );
 
     const logStaleProposal = ({ state, props }) => {
-      console.warn(
+      console.info(
         `Canceled (stale) proposal from action [${prefixedPath(
           action.name,
         )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}]. Props:`,
