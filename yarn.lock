@@ -2691,9 +2691,9 @@ react-dom@^15.5.4:
     object-assign "^4.1.0"
     prop-types "~15.5.7"
 
-react-free-style@^4.3.1:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/react-free-style/-/react-free-style-4.3.1.tgz#9d4358f3cec8ed9d999b57e19912de7abe27cb4a"
+react-free-style@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/react-free-style/-/react-free-style-4.3.2.tgz#88d3844966991ce3551c80755005740128a9ad1f"
   dependencies:
     free-style "^2.3.1"
     prop-types "^15.5.10"
