@@ -160,7 +160,7 @@ export function samStepFactory({
         {
           false: [logDisallowedAction],
           true: [
-            ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP is in progress, log a warning.
+            ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP are in progress, log an info.
             guardSignalInterrupt,
             {
               false: [logInterruptFailed],

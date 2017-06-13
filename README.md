@@ -1,14 +1,14 @@
 # SAM and Cerebral
 - Example implementation of the **SAM pattern** ([home](http://sam.js.org/)).
 - Uses the **Cerebral** framework ([home](http://cerebraljs.com/)).
-- Folder structure according to the **Control-Entity-Boundary** (ECB) pattern ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
+- Project folder structure according to the **Control-Entity-Boundary** (ECB) pattern ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
 
 ## Quick Start
 - `yarn` installs all dependencies (`[prettier eslint babel-eslint eslint-plugin-react]` assumed globally).
-- `npm start` starts the **Budo** development-webserver and serves the directory.
-- `npm run format` runs **Prettier** which formats the code.
-- `npm run lint` runs **ES-lint** checks a small number of rules to prevent common runtime errors.
-- `npm run build` formats the code, lints it, then creates a transpiled `dist.js`.
+- `yarn start` starts the **Budo** development-webserver and serves the directory.
+- `yarn run format` runs **Prettier** which formats the code.
+- `yarn run lint` runs **ES-lint** checks a small number of rules to prevent common runtime errors.
+- `yarn run build` formats the code, lints it, then creates a transpiled `dist.js`.
 
 ## SAM pattern
 Each Cerebral signal is wrapped in a SAM-step signal:

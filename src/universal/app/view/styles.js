@@ -39,8 +39,10 @@ export const styles = {
     color: "white",
   }),
   view: Style.registerStyle({
+    padding: ["1rem", "0.8rem"],
     section: {
       marginBottom: "1rem",
+      maxWidth: "15rem",
     },
   }),
 };

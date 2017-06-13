@@ -16,12 +16,11 @@ export async function cancel() {
 
 export function computeControlState(model) {
   if (Number.isInteger(model.count)) {
-    if (model.count < -5)
-      return ["small", ["increase", "cancel", "findJobBrute"]];
+    if (model.count < -5) return ["small", ["increase", "cancel"]];
 
-    if (model.count > 5) return ["big", ["decrease", "cancel", "findJobBrute"]];
+    if (model.count > 5) return ["big", ["decrease", "cancel"]];
 
-    return ["normal", ["increase", "decrease", "cancel", "findJobBrute"]];
+    return ["normal", ["increase", "decrease", "cancel"]];
   }
 }
 
