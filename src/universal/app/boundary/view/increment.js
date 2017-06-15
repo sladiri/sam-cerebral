@@ -7,7 +7,7 @@ import {
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
-} from "../../lib/computed";
+} from "../../../lib/computed";
 
 export default connect(
   {

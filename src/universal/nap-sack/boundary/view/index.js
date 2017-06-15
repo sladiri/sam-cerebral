@@ -5,10 +5,8 @@ import {
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
-} from "../../lib/computed.js";
+} from "../../../lib/computed.js";
 import view from "./view";
-
-export { default as NapSack } from "./view";
 
 export default connect(
   {

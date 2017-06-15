@@ -2,11 +2,7 @@ import { connect } from "cerebral/react";
 import { state, signal } from "cerebral/tags";
 import { wrap } from "react-free-style";
 import { Style } from "./styles";
-import { views } from "./view";
-
-export const App = wrap(function App({ controlStateName, ...props }) {
-  return controlStateName ? views[controlStateName](props) : null;
-}, Style);
+import { views } from "./main";
 
 export default connect(
   {
@@ -20,5 +16,7 @@ export default connect(
     ...connectedProps,
     actions: { increase, decrease, cancel },
   }),
-  App,
+  wrap(function App({ controlStateName, ...props }) {
+    return controlStateName ? views[controlStateName](props) : null;
+  }, Style),
 );

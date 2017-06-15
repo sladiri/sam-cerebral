@@ -20,29 +20,43 @@ export const styles = {
     backgroundColor: colors.warn,
     color: "white",
   }),
+
   buttonHint: Style.registerStyle({
     marginLeft: "0.5rem",
   }),
+
   attention: Style.registerStyle({
     color: colors.warn,
     animation: `${attentionKeyframes} 0.1s steps(5, start) infinite`,
   }),
+
   fog: Style.registerStyle({
     opacity: 0.4,
   }),
-  state: Style.registerStyle({
-    backgroundColor: colors.hilightIdle,
-    marginBottom: "0.5rem",
+
+  samStates: Style.registerStyle({
+    display: "flex",
   }),
+
+  stateBlock: Style.registerStyle({
+    backgroundColor: colors.hilightIdle,
+    margin: "0.5rem",
+    padding: ["0.5rem", "0.3rem"],
+    display: "flex",
+    alignItems: "center",
+  }),
+
   stateActive: Style.registerStyle({
     backgroundColor: colors.hilight,
     color: "white",
   }),
+
   view: Style.registerStyle({
     padding: ["1rem", "0.8rem"],
+
     section: {
       marginBottom: "1rem",
-      maxWidth: "15rem",
+      maxWidth: "20rem",
     },
   }),
 };
