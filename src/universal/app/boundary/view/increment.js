@@ -1,13 +1,19 @@
 import React from "react";
 import classNames from "classnames";
+import { compute } from "cerebral";
 import { connect } from "cerebral/react";
-import { props } from "cerebral/tags";
+import { props, state } from "cerebral/tags";
 import {
-  appViewModel,
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
-} from "../../../lib/computed";
+} from "../../../computed";
+
+const appViewModel = compute(function appViewModel(get) {
+  return {
+    count: get(state`count`),
+  };
+});
 
 export default connect(
   {

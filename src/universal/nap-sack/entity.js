@@ -1,4 +1,4 @@
-import { wait } from "../lib/util";
+import { wait } from "../util";
 
 export const defaultState = {
   activities: [{ name: "foo" }, { name: "bar" }, { name: "baz" }],

@@ -1,4 +1,4 @@
-import { wait } from "../lib/util";
+import { wait } from "../util";
 
 export const defaultState = {
   count: 0,

@@ -1,5 +1,5 @@
 import Devtools from "cerebral/devtools";
-import { samStepFactory } from "../../lib/sam-step";
+import { samStepFactory } from "../../sam-step";
 import { defaultState, accept } from "../entity";
 import {
   init,

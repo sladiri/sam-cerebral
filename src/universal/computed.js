@@ -2,18 +2,6 @@ import { compute } from "cerebral";
 import { state } from "cerebral/tags";
 import { getModulePath } from "./util";
 
-export const appViewModel = compute(function appViewModel(get) {
-  return {
-    count: get(state`count`),
-  };
-});
-
-export const napSackViewModel = compute(function appViewModel(get) {
-  return {
-    activities: get(state`napSack.activities`),
-  };
-});
-
 export const actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {
     return (
