@@ -36,6 +36,8 @@ export const styles = {
 
   samStates: Style.registerStyle({
     display: "flex",
+    fontSize: "0.8rem",
+    fontFamily: "monospace",
   }),
 
   stateBlock: Style.registerStyle({

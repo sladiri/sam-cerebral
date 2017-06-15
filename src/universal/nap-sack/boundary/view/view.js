@@ -1,5 +1,8 @@
 import h from "react-hyperscript";
 import React from "react";
+import samStateIndicator from "../../../sam-state-indicator";
+
+const SamStateIndicator = samStateIndicator("napSack");
 
 export default function NapSack({
   model,
@@ -14,6 +17,8 @@ export default function NapSack({
 
   return (
     <section>
+
+      <SamStateIndicator styles={styles} />
 
       <input
         id="foo"

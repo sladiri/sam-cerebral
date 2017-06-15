@@ -1,15 +1,17 @@
 import React from "react";
 import classNames from "classnames";
 import { styles as Styles } from "./styles";
-import StateIndicator from "./state-indicator";
+import samStateIndicator from "../../../sam-state-indicator";
 import Increment from "./increment";
-import { component as NapSack } from "../../../nap-sack/boundary";
+import { view as NapSack } from "../../../nap-sack/boundary";
+
+const SamStateIndicator = samStateIndicator();
 
 export const views = {
   normal: ({ actions, styles = Styles, arrow = () => null }) => {
     return (
       <div className={styles.view}>
-        <StateIndicator styles={styles} />
+        <SamStateIndicator styles={styles} />
         <Increment actions={actions} styles={styles} arrow={arrow} />
         <NapSack styles={styles} />
       </div>

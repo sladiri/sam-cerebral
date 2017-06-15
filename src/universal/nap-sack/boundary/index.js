@@ -1,2 +1,2 @@
 export { default as module } from "./module";
-export { default as component } from "./view";
+export { default as view } from "./view";

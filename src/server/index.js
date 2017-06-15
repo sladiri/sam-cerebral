@@ -4,11 +4,11 @@ import h from "react-hyperscript";
 import { UniversalController } from "cerebral";
 import { Container } from "cerebral/react";
 import { renderToString } from "react-dom/server";
-import { module, component } from "../universal/app/boundary";
+import { module, view } from "../universal/app/boundary";
 
 const controller = UniversalController(module);
 
-const html = renderToString(h(Container, { controller }, h(component)));
+const html = renderToString(h(Container, { controller }, h(view)));
 console.log("server rendered string\n", html, "\n");
 
 controller
