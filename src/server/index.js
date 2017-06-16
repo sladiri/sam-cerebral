@@ -16,25 +16,6 @@ app.use(serve("./static"));
 app.use(async ctx => {
   const controller = UniversalController(module);
 
-  // return waitForNaps(["", "napSack"]);
-  // function waitForNaps(prefixes = []) {
-  //   return Promise.all(
-  //     prefixes.map(
-  //       prefix =>
-  //         new Promise((resolve, reject) => {
-  //           try {
-  //             controller.once(
-  //               `napDone${prefix ? `-${prefix}` : ""}`,
-  //               resolve,
-  //             );
-  //           } catch (error) {
-  //             reject(error);
-  //           }
-  //         }),
-  //     ),
-  //   );
-  // }
-
   await controller.run(
     [
       controller.module.signals.init.signal,

@@ -13,38 +13,18 @@ import { module, view } from "../universal/app/boundary";
     devtools: Devtools({ host: "localhost:8585", reconnect: true }),
   });
 
-  // controller.getSignal("init")({});
-  // controller.getSignal("napSack.init")({});
   await initAll();
 
   render(h(Container, { controller }, h(view)), document.querySelector("#app"));
 
+  // TODO: Edge fails to call NAP
   controller.emit("doNapAfterInit"); // Postpone NAP after first render, because server cannot run NAP.
   controller.emit("unblockActions"); // Required, if no NAP was called.
 
   function initAll() {
     controller.getSignal("init")({});
     controller.getSignal("napSack.init")({});
-    // return waitForNaps(["", "napSack"]);
     return waitForSignals(["init", "napSack.init"]);
-
-    function waitForNaps(prefixes = []) {
-      return Promise.all(
-        prefixes.map(
-          prefix =>
-            new Promise((resolve, reject) => {
-              try {
-                controller.once(
-                  `napDone${prefix ? `-${prefix}` : ""}`,
-                  resolve,
-                );
-              } catch (error) {
-                reject(error);
-              }
-            }),
-        ),
-      );
-    }
 
     function waitForSignals(signals = []) {
       return new Promise((resolve, reject) => {

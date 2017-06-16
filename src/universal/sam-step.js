@@ -31,8 +31,8 @@ export function samStepFactory({
       true: [
         when(state`${prefixedPath("sam.init")}`),
         {
-          true: [set(state`${prefixedPath("sam.init")}`, false)],
           false: [],
+          true: [set(state`${prefixedPath("sam.init")}`, false)],
         },
       ],
     },
@@ -159,18 +159,14 @@ export function samStepFactory({
       return { signalPath, signalInput };
     };
 
-    const emitNapDone = ({ props, state, controller }) => {
+    const emitUnblockActions = ({ state, controller }) => {
       // Without a NAP after initial render, unblock actions here.
-      if (props._isInit) {
-        controller.once("unblockActions", () => {
-          state.set(prefixedPath("sam.init"), false);
-        });
-      }
-      // Used to tell at first render if init is done completely.
-      controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+      controller.once("unblockActions", () => {
+        state.set(prefixedPath("sam.init"), false);
+      });
     };
 
-    const runNextAction = ({ props, controller }) => {
+    const runNextAction = ({ state, props, controller }) => {
       asap(() => {
         const signalInput = {
           ...props.signalInput,
@@ -187,7 +183,7 @@ export function samStepFactory({
         } else {
           const signalPath = prefixedPath(props.signalPath);
           // Delay NAP, so that initial browser and server renders match (no NAP on server).
-          if (props._isInit) {
+          if (state.get(prefixedPath("sam.init"))) {
             controller.once("doNapAfterInit", () => {
               controller.getSignal(signalPath)(signalInput);
             });
@@ -235,7 +231,11 @@ export function samStepFactory({
                     {
                       false: [
                         set(state`${prefixedPath("sam.napInProgress")}`, false),
-                        emitNapDone,
+                        when(state`${prefixedPath("sam.init")}`),
+                        {
+                          false: [],
+                          true: [emitUnblockActions],
+                        },
                       ],
                       true: [
                         set(
