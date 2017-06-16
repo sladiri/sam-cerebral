@@ -28,7 +28,13 @@ export function samStepFactory({
           napInProgress: false,
         }),
       ],
-      true: [],
+      true: [
+        when(state`${prefixedPath("sam.init")}`),
+        {
+          true: [set(state`${prefixedPath("sam.init")}`, false)],
+          false: [],
+        },
+      ],
     },
   ];
 
@@ -153,7 +159,13 @@ export function samStepFactory({
       return { signalPath, signalInput };
     };
 
-    const emitNapDone = ({ controller }) => {
+    const emitNapDone = ({ props, state, controller }) => {
+      // Without a NAP after initial render, unblock actions here.
+      if (props._isInit) {
+        controller.once("unblockActions", () => {
+          state.set(prefixedPath("sam.init"), false);
+        });
+      }
       // Used to tell at first render if init is done completely.
       controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
     };
@@ -176,7 +188,7 @@ export function samStepFactory({
           const signalPath = prefixedPath(props.signalPath);
           // Delay NAP, so that initial browser and server renders match (no NAP on server).
           if (props._isInit) {
-            controller.once("doInitNap", () => {
+            controller.once("doNapAfterInit", () => {
               controller.getSignal(signalPath)(signalInput);
             });
           } else {
@@ -189,6 +201,7 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureInitialSamState,
+        set(props`_isInit`, state`${prefixedPath("sam.init")}`),
         guardDisallowedAction,
         {
           false: [logDisallowedAction],
@@ -229,14 +242,8 @@ export function samStepFactory({
                           state`${prefixedPath("sam.napInProgress")}`,
                           props`signalPath`,
                         ),
-                        set(props`_isInit`, state`${prefixedPath("sam.init")}`),
                         runNextAction,
                       ],
-                    },
-                    when(state`${prefixedPath("sam.init")}`),
-                    {
-                      true: [set(state`${prefixedPath("sam.init")}`, false)],
-                      false: [],
                     },
                   ],
                 },

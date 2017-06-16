@@ -19,7 +19,8 @@ import { module, view } from "../universal/app/boundary";
 
   render(h(Container, { controller }, h(view)), document.querySelector("#app"));
 
-  controller.emit("doInitNap"); // Postpone NAP after first render, because server cannot run NAP.
+  controller.emit("doNapAfterInit"); // Postpone NAP after first render, because server cannot run NAP.
+  controller.emit("unblockActions"); // Required, if no NAP was called.
 
   function initAll() {
     controller.getSignal("init")({});
