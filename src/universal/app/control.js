@@ -3,11 +3,11 @@ import { wait } from "../util";
 export function init() {}
 
 export async function increase({ props: { value = 1 } }) {
-  return await wait(800, { value });
+  return await wait(800, { increment: value });
 }
 
 export async function decrease({ props: { value = 1 } }) {
-  return await wait(800, { value: value * -1 });
+  return await wait(800, { increment: value * -1 });
 }
 
 export async function cancel() {
