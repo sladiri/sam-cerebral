@@ -13,10 +13,35 @@ const app = new Koa();
 
 app.use(serve("./static"));
 
-app.use(ctx => {
+app.use(async ctx => {
   const controller = UniversalController(module);
-  controller.getSignal("init")({});
-  controller.getSignal("napSack.init")({});
+
+  // return waitForNaps(["", "napSack"]);
+  // function waitForNaps(prefixes = []) {
+  //   return Promise.all(
+  //     prefixes.map(
+  //       prefix =>
+  //         new Promise((resolve, reject) => {
+  //           try {
+  //             controller.once(
+  //               `napDone${prefix ? `-${prefix}` : ""}`,
+  //               resolve,
+  //             );
+  //           } catch (error) {
+  //             reject(error);
+  //           }
+  //         }),
+  //     ),
+  //   );
+  // }
+
+  await controller.run(
+    [
+      controller.module.signals.init.signal,
+      controller.module.modules.napSack.signals.init.signal,
+    ],
+    {},
+  );
 
   const html = renderToString(h(Container, { controller }, h(view)));
   const script = controller.getScript();

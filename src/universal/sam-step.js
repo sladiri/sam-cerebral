@@ -5,7 +5,7 @@ import FunctionTree from "function-tree";
 import { getId, getModulePath } from "./util";
 
 export function samStepFactory({
-  prefix,
+  prefix = "",
   accept,
   computeControlState,
   computeNextAction,
@@ -19,6 +19,7 @@ export function samStepFactory({
     {
       false: [
         set(state`${prefixedPath("sam")}`, {
+          prefix,
           init: true,
           stepId: GetId.next().value,
           controlState: { name: controlState, allowedActions },
@@ -27,7 +28,7 @@ export function samStepFactory({
           napInProgress: false,
         }),
       ],
-      true: [set(state`${prefixedPath("sam.init")}`, false)],
+      true: [],
     },
   ];
 
@@ -149,8 +150,40 @@ export function samStepFactory({
         state.get(prefixedPath("sam.controlState.name")),
       );
       const [signalPath, signalInput] = nextAction || [];
-
       return { signalPath, signalInput };
+    };
+
+    const emitNapDone = ({ controller }) => {
+      // Used to tell at first render if init is done completely.
+      controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+    };
+
+    const runNextAction = ({ props, controller }) => {
+      asap(() => {
+        const signalInput = {
+          ...props.signalInput,
+          _isNap: true, // TODO: Secure this
+        };
+
+        // TODO: UniversalController does not allow multiple run --> NAP
+        if (controller.constructor.name === "UniversalController") {
+          // const signal = prefix
+          //   ? controller.module.modules[prefix].signals[props.signalPath]
+          //   : controller.module.signals[props.signalPath].signal;
+          // if (!Array.isArray(signal)) console.log("xxxxxxxx2", signal);
+          // controller.run(signal, signalInput);
+        } else {
+          const signalPath = prefixedPath(props.signalPath);
+          // Delay NAP, so that initial browser and server renders match (no NAP on server).
+          if (props._isInit) {
+            controller.once("doInitNap", () => {
+              controller.getSignal(signalPath)(signalInput);
+            });
+          } else {
+            controller.getSignal(signalPath)(signalInput);
+          }
+        }
+      });
     };
 
     return {
@@ -189,14 +222,21 @@ export function samStepFactory({
                     {
                       false: [
                         set(state`${prefixedPath("sam.napInProgress")}`, false),
+                        emitNapDone,
                       ],
                       true: [
                         set(
                           state`${prefixedPath("sam.napInProgress")}`,
                           props`signalPath`,
                         ),
+                        set(props`_isInit`, state`${prefixedPath("sam.init")}`),
                         runNextAction,
                       ],
+                    },
+                    when(state`${prefixedPath("sam.init")}`),
+                    {
+                      true: [set(state`${prefixedPath("sam.init")}`, false)],
+                      false: [],
                     },
                   ],
                 },
@@ -230,21 +270,4 @@ function parseAction(action) {
     action = null;
   }
   return action;
-}
-
-function runNextAction({ props, controller }) {
-  asap(() => {
-    const { signalPath, signalInput } = props;
-    const samStep = controller.module.signals[signalPath];
-    try {
-      controller.runSignal(signalPath, samStep.signal, {
-        ...signalInput,
-        _isNap: true, // TODO: Secure this
-      });
-    } catch (error) {
-      controller.runSignal(signalPath, Array.from(samStep.catch.values()), {
-        error,
-      });
-    }
-  });
 }
