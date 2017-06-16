@@ -12,13 +12,13 @@
     "start-server": "node dist-server/src/server/index.js",
     "prelint-browser": "prettier --write --trailing-comma all \"src/{browser,universal}/**/*.js\"",
     "lint-browser": "eslint \"src/{browser,universal}/**/*.js\"",
-    "prebuild-browser": "mkdir -p dist && npm run lint-browser",
-    "build-browser": "browserify src/browser/index.js -d -o dist/bundle.js -t [babelify]",
+    "prebuild-browser": "npm run lint-browser && mkdir -p static/dist",
+    "build-browser": "browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
     "prelint": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "eslint \"src/**/*.js\"",
     "build": "npm run build-server && npm run build-browser",
-    "clean": "rm -rf dist && rm -rf dist-server",
-    "start": "budo src/browser/index.js:dist/bundle.js --pushstate --live -- -t babelify"
+    "clean": "rm -rf static/dist && rm -rf dist-server",
+    "start": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -47,6 +47,8 @@
     "color": "^1.0.3",
     "dynamics": "^1.0.0",
     "function-tree": "beta",
+    "koa": "^2.2.0",
+    "koa-static": "^3.0.0",
     "postcss-js": "^1.0.0",
     "pull-stream": "^3.6.0",
     "ramda": "^0.24.1",

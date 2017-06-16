@@ -14,6 +14,10 @@ export const views = {
         <SamStateIndicator styles={styles} />
         <Increment actions={actions} styles={styles} arrow={arrow} />
         <NapSack styles={styles} />
+
+        {/* Use token value in hidden input field in forms. */}
+        <meta name="csrf-param" content="request_forgery_protection_token" />
+        <meta name="csrf-token" content="form_authenticity_token" />
       </div>
     );
   },

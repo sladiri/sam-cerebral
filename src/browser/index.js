@@ -2,10 +2,16 @@ import "babel-polyfill";
 import "setimmediate";
 import h from "react-hyperscript";
 import { render } from "react-dom";
+import Devtools from "cerebral/devtools";
+import { Controller } from "cerebral";
 import { Container } from "cerebral/react";
-import { controller, view } from "../universal/app/boundary";
+import { module, view } from "../universal/app/boundary";
 
-render(
-  h("div", [h(Container, { controller }, h(view))]),
-  document.querySelector("#app"),
-);
+const controller = Controller({
+  ...module,
+  devtools: Devtools({ host: "localhost:8585", reconnect: true }),
+});
+
+controller.getSignal("init")({});
+controller.getSignal("napSack.init")({});
+render(h(Container, { controller }, h(view)), document.querySelector("#app"));

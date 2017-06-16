@@ -1,4 +1,3 @@
-import Devtools from "cerebral/devtools";
 import { samStepFactory } from "../../sam-step";
 import { defaultState, accept } from "../entity";
 import {
@@ -34,10 +33,6 @@ export default {
   catch: new Map([[Error, logError]]),
   // Add a global provider when module instantiates
   // provider(context, functionDetails, payload) {},
-  // TODO: Cerebral should support server-side?
-  devtools: typeof window !== "undefined"
-    ? Devtools({ host: "localhost:8585", reconnect: true })
-    : undefined,
 };
 
 function logError({ props: { error } }) {
