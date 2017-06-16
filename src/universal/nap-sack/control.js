@@ -12,7 +12,7 @@ const activities = [
 ];
 
 export async function findJobBrute({ time = 1 }) {
-  await wait(500);
+  await wait(1300);
   return { activities: shuffle(activities) };
 }
 

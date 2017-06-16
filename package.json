@@ -7,18 +7,22 @@
   "scripts": {
     "prelint-server": "prettier --write --trailing-comma all \"src/{server,universal}/**/*.js\"",
     "lint-server": "eslint \"src/{server,universal}/**/*.js\"",
-    "prebuild-server": "mkdir -p dist-server && npm run lint-server",
+    "prebuild-server": "mkdir -p dist-server && yarn run lint-server",
     "build-server": "babel \"src/{server,universal}/**/*.js\" --out-dir dist-server",
+    "build-server-watch": "nodemon --watch src/server/ --watch src/universal/ --exec yarn run build-server",
     "start-server": "node dist-server/src/server/index.js",
+    "start-server-watch": "nodemon --watch dist-server --inspect dist-server/src/server/index.js",
     "prelint-browser": "prettier --write --trailing-comma all \"src/{browser,universal}/**/*.js\"",
     "lint-browser": "eslint \"src/{browser,universal}/**/*.js\"",
-    "prebuild-browser": "npm run lint-browser && mkdir -p static/dist",
+    "prebuild-browser": "yarn run lint-browser && mkdir -p static/dist",
     "build-browser": "browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
+    "build-browser-watch": "nodemon --watch src/browser/ --watch src/universal/ --exec yarn run build-browser",
     "prelint": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "eslint \"src/**/*.js\"",
-    "build": "npm run build-server && npm run build-browser",
+    "build": "yarn run build-server && yarn run build-browser",
     "clean": "rm -rf static/dist && rm -rf dist-server",
-    "start": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify"
+    "start-dev": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify",
+    "start": "parallelshell \"yarn run build-browser-watch\" \"yarn run build-server-watch\" \"yarn run start-server-watch\""
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -38,6 +42,8 @@
     "eslint": "^4.0.0",
     "eslint-plugin-react": "^7.0.1",
     "jsverify": "^0.8.2",
+    "nodemon": "^1.11.0",
+    "parallelshell": "^3.0.1",
     "tape": "^4.6.3"
   },
   "dependencies": {
