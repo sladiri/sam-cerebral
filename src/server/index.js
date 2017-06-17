@@ -20,8 +20,11 @@ app.use(async ctx => {
     [
       controller.module.signals.init.signal,
       controller.module.modules.napSack.signals.init.signal,
+      ({ state }) => {
+        state.set("count", 7);
+      },
     ],
-    {},
+    { _serverInit: true }, // TODO: Secure this.
   );
 
   const html = renderToString(h(Container, { controller }, h(view)));
@@ -43,8 +46,8 @@ app.use(async ctx => {
     <body>
       <div id="app">${html}</div>
       <script src="vendor/rq.js"></script>
-      <script src="dist/bundle.js"></script>
-      ${script}`;
+      ${script}
+      <script src="dist/bundle.js"></script>`;
 });
 
 app.listen(3000);

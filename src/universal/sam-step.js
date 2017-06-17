@@ -17,6 +17,7 @@ export function samStepFactory({
   const ensureInitialSamState = [
     when(state`${prefixedPath("sam")}`),
     {
+      true: [],
       false: [
         set(state`${prefixedPath("sam")}`, {
           prefix,
@@ -27,13 +28,6 @@ export function samStepFactory({
           acceptInProgress: false,
           napInProgress: false,
         }),
-      ],
-      true: [
-        when(state`${prefixedPath("sam.init")}`),
-        {
-          false: [],
-          true: [set(state`${prefixedPath("sam.init")}`, false)],
-        },
       ],
     },
   ];
@@ -49,8 +43,12 @@ export function samStepFactory({
 
     const guardDisallowedAction = when(
       state`${prefixedPath("sam.controlState")}`,
-      controlState =>
-        !controlState.name || controlState.allowedActions.includes(action.name),
+      state`${prefixedPath("sam.init")}`,
+      props`_browserInit`,
+      (controlState, init, browserInit) =>
+        (init && browserInit) ||
+        !controlState.name ||
+        controlState.allowedActions.includes(action.name),
     );
 
     const logDisallowedAction = ({ state, props }) => {
@@ -159,13 +157,6 @@ export function samStepFactory({
       return { signalPath, signalInput };
     };
 
-    const emitUnblockActions = ({ state, controller }) => {
-      // Without a NAP after initial render, unblock actions here.
-      controller.once("unblockActions", () => {
-        state.set(prefixedPath("sam.init"), false);
-      });
-    };
-
     const runNextAction = ({ state, props, controller }) => {
       asap(() => {
         const signalInput = {
@@ -182,14 +173,8 @@ export function samStepFactory({
           // controller.run(signal, signalInput);
         } else {
           const signalPath = prefixedPath(props.signalPath);
-          // Delay NAP, so that initial browser and server renders match (no NAP on server).
-          if (state.get(prefixedPath("sam.init"))) {
-            controller.once("doNapAfterInit", () => {
-              controller.getSignal(signalPath)(signalInput);
-            });
-          } else {
-            controller.getSignal(signalPath)(signalInput);
-          }
+          state.set(prefixedPath("sam.napInProgress"), signalPath);
+          controller.getSignal(signalPath)(signalInput);
         }
       });
     };
@@ -197,11 +182,19 @@ export function samStepFactory({
     return {
       signal: [
         ...ensureInitialSamState,
-        set(props`_isInit`, state`${prefixedPath("sam.init")}`),
         guardDisallowedAction,
         {
           false: [logDisallowedAction],
           true: [
+            when(
+              state`${prefixedPath("sam.init")}`,
+              props`_serverInit`,
+              (init, serverInit) => init && !serverInit,
+            ),
+            {
+              false: [],
+              true: [set(state`${prefixedPath("sam.init")}`, false)],
+            },
             ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP are in progress, log an info.
             guardSignalInterrupt,
             {
@@ -231,19 +224,8 @@ export function samStepFactory({
                     {
                       false: [
                         set(state`${prefixedPath("sam.napInProgress")}`, false),
-                        when(state`${prefixedPath("sam.init")}`),
-                        {
-                          false: [],
-                          true: [emitUnblockActions],
-                        },
                       ],
-                      true: [
-                        set(
-                          state`${prefixedPath("sam.napInProgress")}`,
-                          props`signalPath`,
-                        ),
-                        runNextAction,
-                      ],
+                      true: [runNextAction],
                     },
                   ],
                 },

@@ -1,7 +1,7 @@
 import { wait } from "../util";
 
 export const defaultState = {
-  count: 7,
+  count: 0,
 };
 
 export async function accept({ state, props: { increment } }) {
