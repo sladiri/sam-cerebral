@@ -32,16 +32,8 @@ export function samStepFactory({
     },
   ];
 
-  return function samStep(action) {
-    action = parseAction(action);
-
-    if (!action) {
-      throw new Error(
-        "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
-      );
-    }
-
-    const guardDisallowedAction = when(
+  const stepActionsFactory = action => ({
+    guardDisallowedAction: when(
       state`${prefixedPath("sam.controlState")}`,
       state`${prefixedPath("sam.init")}`,
       props`_browserInit`,
@@ -49,9 +41,9 @@ export function samStepFactory({
         (init && browserInit) ||
         !controlState.name ||
         controlState.allowedActions.includes(action.name),
-    );
+    ),
 
-    const logDisallowedAction = ({ state, props }) => {
+    logDisallowedAction({ state, props }) {
       const { controlState, stepId } = state.get(prefixedPath("sam"));
       console.info(
         `Disallowed action [${prefixedPath(
@@ -59,10 +51,10 @@ export function samStepFactory({
         )}] blocked in control-state [${controlState.name}] in step-ID [${stepId}]. Props:`,
         props,
       );
-    };
+    },
 
     // TODO: If NAP is allowed on server, this check should be changed.
-    const setIsInitialSignal = [
+    setIsInitialSignal: [
       when(
         state`${prefixedPath("sam.init")}`,
         props`_browserInit`,
@@ -72,9 +64,9 @@ export function samStepFactory({
         false: [],
         true: [set(state`${prefixedPath("sam.init")}`, false)],
       },
-    ];
+    ],
 
-    const logPossibleInterrupt = [
+    logPossibleInterrupt: [
       when(
         state`${prefixedPath("sam.proposeInProgress")}`,
         state`${prefixedPath("sam.napInProgress")}`,
@@ -99,17 +91,17 @@ export function samStepFactory({
           },
         ],
       },
-    ];
+    ],
 
-    const guardSignalInterrupt = when(
+    guardSignalInterrupt: when(
       state`${prefixedPath("sam.napInProgress")}`,
       state`${prefixedPath("sam.acceptInProgress")}`,
       props`_isNap`,
       (napInProgress, acceptInProgress, isNap) =>
         (!napInProgress && !acceptInProgress) || isNap,
-    );
+    ),
 
-    const logInterruptFailed = ({ state, props }) => {
+    logInterruptFailed({ state, props }) {
       const {
         napInProgress,
         acceptInProgress,
@@ -127,34 +119,35 @@ export function samStepFactory({
         )}], ${progressMsg} in progress in step-ID [${stepId}]. Props:`,
         props,
       );
-    };
+    },
 
-    const getProposal = input =>
-      action.tree
+    getProposal(input) {
+      return action.tree
         ? new FunctionTree().run(action.name, action.tree, input.props)
         : action(input) || {};
+    },
 
-    const guardStaleProposal = when(
+    guardStaleProposal: when(
       state`${prefixedPath("sam.init")}`,
       state`${prefixedPath("sam.stepId")}`,
       props`_stepId`,
       (init, stepId, actionStepId) => init || stepId === actionStepId,
-    );
+    ),
 
-    const logStaleProposal = ({ state, props }) => {
+    logStaleProposal({ state, props }) {
       console.info(
         `Canceled (stale) proposal from action [${prefixedPath(
           action.name,
         )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}]. Props:`,
         props,
       );
-    };
+    },
 
-    const incrementStepId = ({ state }) => {
+    incrementStepId({ state }) {
       state.set(prefixedPath("sam.stepId"), GetId.next().value);
-    };
+    },
 
-    const setControlState = ({ state }) => {
+    setControlState({ state }) {
       const states = computeControlState(state.get()) || [];
       if (states.length < 1) throw new Error("Invalid control state.");
 
@@ -173,21 +166,21 @@ export function samStepFactory({
         ]);
 
       state.set(prefixedPath("sam.controlState"), { name, allowedActions });
-    };
+    },
 
-    const getNextAction = ({ state }) => {
+    getNextAction({ state }) {
       const nextAction = computeNextAction(
         state.get(prefixedPath("sam.controlState.name")),
       );
       const [signalPath, signalInput] = nextAction || [];
       return { signalPath, signalInput };
-    };
+    },
 
-    const emitNapDone = ({ controller }) => {
+    emitNapDone({ controller }) {
       controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
-    };
+    },
 
-    const runNextAction = ({ state, props, controller }) => {
+    runNextAction({ state, props, controller }) {
       asap(() => {
         const signalPath = prefixedPath(props.signalPath);
         const signalInput = {
@@ -203,7 +196,38 @@ export function samStepFactory({
           controller.getSignal(signalPath)(signalInput);
         }
       });
-    };
+    },
+  });
+
+  return function samStep(action) {
+    if (Array.isArray(action)) {
+      const [name, tree] = action;
+      action = { name, tree };
+    } else if (
+      Object.prototype.toString.call(action) !== "[object Function]" ||
+      !action.name.length
+    ) {
+      throw new Error(
+        "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
+      );
+    }
+
+    const {
+      guardDisallowedAction,
+      logDisallowedAction,
+      setIsInitialSignal,
+      logPossibleInterrupt,
+      guardSignalInterrupt,
+      logInterruptFailed,
+      getProposal,
+      guardStaleProposal,
+      logStaleProposal,
+      incrementStepId,
+      setControlState,
+      getNextAction,
+      emitNapDone,
+      runNextAction,
+    } = stepActionsFactory(action);
 
     return {
       signal: [
@@ -265,17 +289,4 @@ export function samStepFactory({
       ]),
     };
   };
-}
-
-function parseAction(action) {
-  if (Array.isArray(action)) {
-    const [name, tree] = action;
-    action = { name, tree };
-  } else if (
-    Object.prototype.toString.call(action) !== "[object Function]" ||
-    !action.name.length
-  ) {
-    action = null;
-  }
-  return action;
 }
