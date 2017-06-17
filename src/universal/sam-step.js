@@ -198,7 +198,7 @@ export function samStepFactory({
 
         if (controller.constructor.name === "UniversalController") {
           const signal = prefix
-            ? controller.module.modules[prefix].signals[props.signalPath]
+            ? controller.module.modules[prefix].signals[props.signalPath].signal
             : controller.module.signals[props.signalPath].signal;
           controller.run(signal, signalInput);
         } else {
