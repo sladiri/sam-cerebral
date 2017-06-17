@@ -15,9 +15,16 @@ import { module, view } from "../universal/app/boundary";
 
   render(h(Container, { controller }, h(view)), document.querySelector("#app"));
 
-  const props = { _browserInit: true }; // TODO: Secure this?
-  // Since NAP can be only called on the client, client needs to call an "empty" signal (init in our case),
-  // (init has already been called on the server).
-  controller.getSignal("init")(props);
-  controller.getSignal("napSack.init")(props);
+  if (!window.CEREBRAL_STATE) {
+    controller.getSignal("init")({});
+    controller.getSignal("napSack.init")({});
+  }
+
+  // Unblock actions on client after first signal.
+  controller.runSignal("unblockActions", [
+    ({ state }) => {
+      state.set("sam.init", false);
+      state.set("napSack.sam.init", false);
+    },
+  ]);
 })();

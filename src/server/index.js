@@ -14,19 +14,14 @@ const app = new Koa();
 app.use(serve("./static"));
 
 app.use(async ctx => {
-  const controller = UniversalController(module);
+  const controller = UniversalController(module, { allowMultipleRuns: true });
 
-  // TODO: NAP are not allowed on UniversalController, we just populate the view here with init.
-  await controller.run(
-    [
-      controller.module.signals.init.signal,
-      controller.module.modules.napSack.signals.init.signal,
-      ({ state }) => {
-        state.set("count", 7);
-      },
-    ],
-    { _serverInit: true }, // TODO: Secure this.
-  );
+  await completeInits(["", "napSack"]);
+
+  // Example server-side change.
+  const napsDone = waitForNaps([""]);
+  controller.run(controller.module.signals.increase.signal, { value: 7 });
+  await napsDone;
 
   const html = renderToString(h(Container, { controller }, h(view)));
   const script = controller.getScript();
@@ -49,6 +44,36 @@ app.use(async ctx => {
       <script src="vendor/rq.js"></script>
       ${script}
       <script src="dist/bundle.js"></script>`;
+
+  function completeInits(prefixes = []) {
+    const napsDone = waitForNaps(prefixes);
+
+    // TODO: Support nested modules.
+    const { module } = controller;
+    const initSignals = prefixes.map(prefix => {
+      return prefix
+        ? module.modules[prefix].signals.init.signal
+        : module.signals.init.signal;
+    });
+    controller.run(initSignals, {});
+
+    return napsDone;
+  }
+
+  function waitForNaps(prefixes = []) {
+    return Promise.all(
+      prefixes.map(
+        prefix =>
+          new Promise((resolve, reject) => {
+            try {
+              controller.once(`napDone${prefix ? `-${prefix}` : ""}`, resolve);
+            } catch (error) {
+              reject(error);
+            }
+          }),
+      ),
+    );
+  }
 });
 
 app.listen(3000);
