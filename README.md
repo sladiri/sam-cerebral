@@ -4,11 +4,10 @@
 - Project folder structure according to the **Control-Entity-Boundary** (ECB) pattern ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
 
 ## Quick Start
-- `yarn` installs all dependencies (`[prettier eslint babel-eslint eslint-plugin-react]` assumed globally).
-- `yarn start` starts the **Budo** development-webserver and serves the directory.
-- `yarn run format` runs **Prettier** which formats the code.
-- `yarn run lint` runs **ES-lint** checks a small number of rules to prevent common runtime errors.
-- `yarn run build` formats the code, lints it, then creates a transpiled `dist.js`.
+- `yarn` installs all dependencies.
+- `yarn run build` formats the code, lints it, then writes transpiled `bundle.js` and server files.
+- `yarn start` starts a **Koa** server which serves bundle.js (server-side-rendering ; watch + rebuild).
+- `yarn run start-dev` starts the **Budo** development-webserver and serves the directory (watch + rebuild + autoreload).
 
 ## SAM pattern
 Each Cerebral signal is wrapped in a SAM-step signal:
