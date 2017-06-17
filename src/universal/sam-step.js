@@ -61,6 +61,19 @@ export function samStepFactory({
       );
     };
 
+    // TODO: If NAP is allowed on server, this check should be changed.
+    const setIsInitialSignal = [
+      when(
+        state`${prefixedPath("sam.init")}`,
+        props`_browserInit`,
+        (init, browserInit) => init && browserInit,
+      ),
+      {
+        false: [],
+        true: [set(state`${prefixedPath("sam.init")}`, false)],
+      },
+    ];
+
     const logPossibleInterrupt = [
       when(
         state`${prefixedPath("sam.proposeInProgress")}`,
@@ -165,13 +178,7 @@ export function samStepFactory({
         };
 
         // TODO: UniversalController does not allow multiple run --> NAP
-        if (controller.constructor.name === "UniversalController") {
-          // const signal = prefix
-          //   ? controller.module.modules[prefix].signals[props.signalPath]
-          //   : controller.module.signals[props.signalPath].signal;
-          // if (!Array.isArray(signal)) console.log("xxxxxxxx2", signal);
-          // controller.run(signal, signalInput);
-        } else {
+        if (controller.constructor.name !== "UniversalController") {
           const signalPath = prefixedPath(props.signalPath);
           state.set(prefixedPath("sam.napInProgress"), signalPath);
           controller.getSignal(signalPath)(signalInput);
@@ -186,15 +193,7 @@ export function samStepFactory({
         {
           false: [logDisallowedAction],
           true: [
-            when(
-              state`${prefixedPath("sam.init")}`,
-              props`_serverInit`,
-              (init, serverInit) => init && !serverInit,
-            ),
-            {
-              false: [],
-              true: [set(state`${prefixedPath("sam.init")}`, false)],
-            },
+            ...setIsInitialSignal,
             ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP are in progress, log an info.
             guardSignalInterrupt,
             {

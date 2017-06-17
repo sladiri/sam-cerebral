@@ -16,6 +16,7 @@ app.use(serve("./static"));
 app.use(async ctx => {
   const controller = UniversalController(module);
 
+  // TODO: NAP are not allowed on UniversalController, we just populate the view here with init.
   await controller.run(
     [
       controller.module.signals.init.signal,
