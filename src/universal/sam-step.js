@@ -193,6 +193,8 @@ export function samStepFactory({
           ...props.signalInput,
           _isNap: true, // TODO: Secure this
         };
+        const signalPath = prefixedPath(props.signalPath);
+        state.set(prefixedPath("sam.napInProgress"), signalPath);
 
         if (controller.constructor.name === "UniversalController") {
           const signal = prefix
@@ -200,8 +202,6 @@ export function samStepFactory({
             : controller.module.signals[props.signalPath].signal;
           controller.run(signal, signalInput);
         } else {
-          const signalPath = prefixedPath(props.signalPath);
-          state.set(prefixedPath("sam.napInProgress"), signalPath);
           controller.getSignal(signalPath)(signalInput);
         }
       });
