@@ -18,6 +18,7 @@
     "build": "yarn run build-server && yarn run build-browser",
     "clean": "rm -rf static/dist && rm -rf dist-server",
     "start-dev": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify",
+    "prestart": "yarn run build",
     "start": "parallelshell \"yarn run build-browser-watch\" \"yarn run build-server-watch\" \"yarn run startup-server-watch\""
   },
   "devDependencies": {
