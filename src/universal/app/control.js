@@ -15,13 +15,15 @@ export async function cancel() {
 }
 
 export function computeControlState(model) {
+  const states = [];
+
   if (Number.isInteger(model.count)) {
-    if (model.count < -5) return ["small", ["increase", "cancel"]];
-
-    if (model.count > 5) return ["big", ["decrease", "cancel"]];
-
-    return ["normal", ["increase", "decrease", "cancel"]];
+    if (model.count < -5) states.push(["small", ["increase", "cancel"]]);
+    else if (model.count > 5) states.push(["big", ["decrease", "cancel"]]);
+    else states.push(["normal", ["increase", "decrease", "cancel"]]);
   }
+
+  return states;
 }
 
 export function computeNextAction(controlState) {

@@ -155,10 +155,23 @@ export function samStepFactory({
     };
 
     const setControlState = ({ state }) => {
-      const [name, allowedActions] = computeControlState(state.get()) || [];
-      if (!name) {
-        throw new Error("Invalid control state name.");
-      }
+      const states = computeControlState(state.get()) || [];
+      if (states.length < 1) throw new Error("Invalid control state.");
+
+      const [[name, allowedActions]] = states
+        .reduce(
+          ([[nameSet, allowedActionsSet]], [name, allowedActions]) => {
+            nameSet.add(name);
+            allowedActions.forEach(::allowedActionsSet.add);
+            return [[nameSet, allowedActionsSet]];
+          },
+          [[new Set(), new Set()]],
+        )
+        .map(([nameSet, allowedActionsSet]) => [
+          [...nameSet.values()].join(),
+          [...allowedActionsSet.values()],
+        ]);
+
       state.set(prefixedPath("sam.controlState"), { name, allowedActions });
     };
 

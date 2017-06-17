@@ -19,7 +19,11 @@ export async function findJobBrute({ time = 1 }) {
 export async function cancel() {}
 
 export function computeControlState(model) {
-  return ["normal", ["findJobBrute", "cancel"]];
+  const states = [];
+
+  states.push(["normal", ["findJobBrute", "cancel"]]);
+
+  return states;
 }
 
 export function computeNextAction(controlState) {}
