@@ -8,6 +8,7 @@ import { UniversalController } from "cerebral";
 import { Container } from "cerebral/react";
 import { renderToString } from "react-dom/server";
 import { module, view } from "../universal/app/boundary";
+import { getModulePath, getSignal } from "../universal/util";
 
 const app = new Koa();
 
@@ -48,13 +49,9 @@ app.use(async ctx => {
   function completeInits(prefixes = []) {
     const napsDone = waitForNaps(prefixes);
 
-    // TODO: Support nested modules.
-    const { module } = controller;
-    const initSignals = prefixes.map(prefix => {
-      return prefix
-        ? module.modules[prefix].signals.init.signal
-        : module.signals.init.signal;
-    });
+    const initSignals = prefixes
+      .map(prefix => getModulePath(prefix, "init"))
+      .map(getSignal(controller));
     controller.run(initSignals, {});
 
     return napsDone;

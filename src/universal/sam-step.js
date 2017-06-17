@@ -2,7 +2,7 @@ import asap from "asap";
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
 import FunctionTree from "function-tree";
-import { getId, getModulePath } from "./util";
+import { getId, getModulePath, getSignal } from "./util";
 
 export function samStepFactory({
   prefix = "",
@@ -189,17 +189,15 @@ export function samStepFactory({
 
     const runNextAction = ({ state, props, controller }) => {
       asap(() => {
+        const signalPath = prefixedPath(props.signalPath);
         const signalInput = {
           ...props.signalInput,
           _isNap: true, // TODO: Secure this
         };
-        const signalPath = prefixedPath(props.signalPath);
         state.set(prefixedPath("sam.napInProgress"), signalPath);
 
         if (controller.constructor.name === "UniversalController") {
-          const signal = prefix
-            ? controller.module.modules[prefix].signals[props.signalPath].signal
-            : controller.module.signals[props.signalPath].signal;
+          const signal = getSignal(controller, signalPath);
           controller.run(signal, signalInput);
         } else {
           controller.getSignal(signalPath)(signalInput);
