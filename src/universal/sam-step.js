@@ -2,6 +2,7 @@ import asap from "asap";
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
 import FunctionTree from "function-tree";
+import { innerJoin, drop } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
 export function samStepFactory({
@@ -11,6 +12,7 @@ export function samStepFactory({
   computeNextAction,
   controlState,
   allowedActions,
+  actions,
 }) {
   const prefixedPath = getModulePath(prefix);
   const GetId = getId();
@@ -37,10 +39,19 @@ export function samStepFactory({
       state`${prefixedPath("sam.controlState")}`,
       state`${prefixedPath("sam.init")}`,
       props`_browserInit`,
-      (controlState, init, browserInit) =>
-        (init && browserInit) ||
-        !controlState.name ||
-        controlState.allowedActions.includes(action.name),
+      (controlState, init, browserInit) => {
+        const actions = action.name.split(",");
+        const commonActionsSet = innerJoin(
+          (allowed, actionName) => allowed === actionName,
+          controlState.allowedActions,
+          actions,
+        );
+        return (
+          !controlState.name ||
+          (init && browserInit) ||
+          commonActionsSet.length === actions.length
+        );
+      },
     ),
 
     logDisallowedAction({ state, props }) {
@@ -151,55 +162,57 @@ export function samStepFactory({
       const states = computeControlState(state.get()) || [];
       if (states.length < 1) throw new Error("Invalid control state.");
 
-      const [[name, allowedActions]] = states
-        .reduce(
-          ([[nameSet, allowedActionsSet]], [name, allowedActions]) => {
-            nameSet.add(name);
-            allowedActions.forEach(::allowedActionsSet.add);
-            return [[nameSet, allowedActionsSet]];
-          },
-          [[new Set(), new Set()]],
-        )
-        .map(([nameSet, allowedActionsSet]) => [
-          [...nameSet.values()].join(),
-          [...allowedActionsSet.values()],
-        ]);
+      const [[name, allowedActions]] = mergeControlStates(states);
 
       state.set(prefixedPath("sam.controlState"), { name, allowedActions });
     },
 
-    getNextAction({ state }) {
-      const nextAction = computeNextAction(
-        state.get(prefixedPath("sam.controlState.name")),
-      );
-      const [signalPath, signalInput] = nextAction || [];
-      return { signalPath, signalInput };
+    getNextAction({ state, props }) {
+      const controlStateName = state.get(prefixedPath("sam.controlState.name"));
+      return { nextActions: computeNextAction(controlStateName) || [] };
     },
 
     emitNapDone({ controller }) {
       controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
     },
 
-    runNextAction({ state, props, controller }) {
-      asap(() => {
-        const signalPath = prefixedPath(props.signalPath);
-        const signalInput = {
-          ...props.signalInput,
-          _isNap: true, // TODO: Secure this
-        };
-        state.set(prefixedPath("sam.napInProgress"), signalPath);
+    runNextAction({ props, controller }) {
+      const { nextActions } = props;
+      const napProp = { _isNap: true }; // TODO: Secure this
 
-        if (controller.constructor.name === "UniversalController") {
-          const signal = getSignal(controller, signalPath);
-          controller.run(signal, signalInput);
-        } else {
-          controller.getSignal(signalPath)(signalInput);
-        }
+      let args;
+      if (nextActions.length === 1) {
+        const [signalName, signalInput = {}] = nextActions[0];
+        const signal = getSignal(controller, prefixedPath(signalName));
+        args = [signalName, signal, { ...signalInput, ...napProp }];
+      } else {
+        const [[compoundName, proposalPromises]] = mergeActions(
+          actions,
+          nextActions,
+        );
+        const compoundAction = async () => {
+          const proposals = await Promise.all(proposalPromises);
+          return [...proposals, napProp].reduce(
+            (acc, proposal) => ({ ...acc, ...proposal }),
+            {},
+          );
+        };
+        const { signal } = samStep([compoundName, [compoundAction]]);
+        args = [compoundName, signal, napProp];
+      }
+
+      if (controller.constructor.name === "UniversalController") {
+        args = drop(1, args);
+      }
+      asap(() => {
+        controller.run(...args);
       });
     },
   });
 
-  return function samStep(action) {
+  return samStep;
+
+  function samStep(action) {
     if (Array.isArray(action)) {
       const [name, tree] = action;
       action = { name, tree };
@@ -262,13 +275,21 @@ export function samStepFactory({
                     set(state`${prefixedPath("sam.acceptInProgress")}`, false),
                     setControlState,
                     getNextAction,
-                    when(props`signalPath`),
+                    when(props`nextActions`, nextActions => nextActions.length),
                     {
                       false: [
                         set(state`${prefixedPath("sam.napInProgress")}`, false),
                         emitNapDone, // Defer server render after NAP is complete.
                       ],
-                      true: [runNextAction],
+                      true: [
+                        ({ props, state }) => {
+                          state.set(
+                            prefixedPath("sam.napInProgress"),
+                            props.nextActions.map(([name]) => name).join(","),
+                          );
+                        },
+                        runNextAction,
+                      ],
                     },
                   ],
                 },
@@ -288,5 +309,44 @@ export function samStepFactory({
         ],
       ]),
     };
-  };
+  }
 }
+
+const mergeControlStates = states =>
+  states
+    .reduce(
+      ([[nameSet, allowedActionsSet]], [name, allowedActions]) => {
+        nameSet.add(name);
+        allowedActions.forEach(::allowedActionsSet.add);
+        return [[nameSet, allowedActionsSet]];
+      },
+      [[new Set(), new Set()]],
+    )
+    .map(([nameSet, allowedActionsSet]) => [
+      [...nameSet.values()].join(","),
+      [...allowedActionsSet.values()],
+    ]);
+
+const mergeActions = (actions, nextActions) =>
+  nextActions
+    .reduce(
+      (
+        [[compoundNameSet, proposalPromises]],
+        [signalName, signalInput = {}],
+      ) => {
+        compoundNameSet.add(signalName);
+        proposalPromises.push(
+          Promise.resolve(
+            actions[signalName]({ props: signalInput }),
+          ).catch(e => {
+            debugger;
+          }),
+        );
+        return [[compoundNameSet, proposalPromises]];
+      },
+      [[new Set(), []]],
+    )
+    .map(([compoundNameSet, proposalPromises]) => [
+      [...compoundNameSet.values()].join(","),
+      proposalPromises,
+    ]);

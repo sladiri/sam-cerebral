@@ -16,6 +16,7 @@ const samStep = samStepFactory({
   computeNextAction,
   controlState: "normal",
   allowedActions: ["init"],
+  actions: { init, increase, decrease, cancel },
 });
 
 export default {

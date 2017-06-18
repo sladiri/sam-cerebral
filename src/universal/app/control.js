@@ -27,6 +27,15 @@ export function computeControlState(model) {
 }
 
 export function computeNextAction(controlState) {
-  if (controlState === "small") return ["increase", { value: 3 }];
-  if (controlState === "big") return ["decrease", {}];
+  const nextActions = [];
+
+  if (controlState === "small") {
+    // Example of compound NAP
+    nextActions.push(["cancel"]);
+    nextActions.push(["increase", { value: 3 }]);
+  }
+
+  if (controlState === "big") nextActions.push(["decrease", {}]);
+
+  return nextActions;
 }
