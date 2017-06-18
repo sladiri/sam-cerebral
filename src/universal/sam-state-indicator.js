@@ -14,18 +14,45 @@ export default (prefix, name = "StateIndicator") =>
       )}`,
       acceptInProgress: state`${getModulePath(prefix, "sam.acceptInProgress")}`,
       napInProgress: state`${getModulePath(prefix, "sam.napInProgress")}`,
+      syncNap: state`${getModulePath(prefix, "sam.syncNap")}`,
     },
     Object.defineProperty(
-      ({ proposeInProgress, acceptInProgress, napInProgress, styles }) => {
+      ({
+        proposeInProgress,
+        acceptInProgress,
+        napInProgress,
+        syncNap,
+        styles,
+      }) => {
         const stateBlocks = [
-          [proposeInProgress, ["propose", h("br"), "(cancelable action)"]],
-          [acceptInProgress, ["accept", h("br"), "(no cancel)"]],
-          [napInProgress, ["NAP", h("br"), "(no cancel)"]],
+          [
+            proposeInProgress,
+            [h("p", "propose"), h("p", "(cancelable action)")],
+          ],
+          [acceptInProgress, [h("p", "accept"), h("p", "(no cancel)")]],
+          [
+            napInProgress,
+            [
+              h("p", "NAP"),
+              h(
+                "p",
+                {
+                  style: {
+                    textDecoration: syncNap || !napInProgress
+                      ? "none"
+                      : "line-through",
+                    opacity: napInProgress ? 1 : 0.5,
+                  },
+                },
+                "(no cancel)",
+              ),
+            ],
+          ],
         ].map(([trigger, text]) =>
           h(
             "div",
             {
-              key: text,
+              key: text.html,
               className: classNames(
                 styles.stateBlock,
                 trigger && styles.stateActive,

@@ -45,7 +45,9 @@ export const styles = {
     margin: "0.5rem",
     padding: ["0.5rem", "0.3rem"],
     display: "flex",
-    alignItems: "center",
+    flexDirection: "column",
+    justifyContent: "center",
+    ">p": { margin: 0 },
   }),
 
   stateActive: Style.registerStyle({

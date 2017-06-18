@@ -3,11 +3,11 @@ import { wait } from "../util";
 export function init() {}
 
 export async function increase({ props: { value = 1 } }) {
-  return await wait(800, { increment: value });
+  return await wait(1500, { increment: value });
 }
 
 export async function decrease({ props: { value = 1 } }) {
-  return await wait(800, { increment: value * -1 });
+  return await wait(1500, { increment: value * -1 });
 }
 
 export async function cancel() {
@@ -28,6 +28,7 @@ export function computeControlState(model) {
 
 export function computeNextAction(controlState) {
   const nextActions = [];
+  let allowNapInterrupt;
 
   if (controlState === "small") {
     // Example of compound NAP
@@ -35,7 +36,10 @@ export function computeNextAction(controlState) {
     nextActions.push(["increase", { value: 3 }]);
   }
 
-  if (controlState === "big") nextActions.push(["decrease", {}]);
+  if (controlState === "big") {
+    nextActions.push(["decrease", {}]);
+    allowNapInterrupt = true; // Example of cancellable NAP.
+  }
 
-  return nextActions;
+  return [nextActions, allowNapInterrupt];
 }

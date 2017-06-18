@@ -28,6 +28,7 @@ export function samStepFactory({
           proposeInProgress: false,
           acceptInProgress: false,
           napInProgress: false,
+          syncNap: true,
         }),
       ],
     },
@@ -80,8 +81,9 @@ export function samStepFactory({
       when(
         state`${prefixedPath("sam.proposeInProgress")}`,
         state`${prefixedPath("sam.napInProgress")}`,
-        (proposeInProgress, napInProgress) =>
-          proposeInProgress && !napInProgress,
+        state`${prefixedPath("sam.syncNap")}`,
+        (proposeInProgress, napInProgress, syncNap) =>
+          proposeInProgress || (proposeInProgress && napInProgress && !syncNap),
       ),
       {
         false: [],
@@ -104,11 +106,12 @@ export function samStepFactory({
     ],
 
     guardSignalInterrupt: when(
-      state`${prefixedPath("sam.napInProgress")}`,
-      state`${prefixedPath("sam.acceptInProgress")}`,
       props`_isNap`,
-      (napInProgress, acceptInProgress, isNap) =>
-        (!napInProgress && !acceptInProgress) || isNap,
+      state`${prefixedPath("sam.acceptInProgress")}`,
+      state`${prefixedPath("sam.napInProgress")}`,
+      state`${prefixedPath("sam.syncNap")}`,
+      (isNap, acceptInProgress, napInProgress, syncNap) =>
+        isNap || !(acceptInProgress || (napInProgress && syncNap)),
     ),
 
     logInterruptFailed({ state, props }) {
@@ -119,9 +122,9 @@ export function samStepFactory({
         stepId,
       } = state.get(prefixedPath("sam"));
       const progressMsg = napInProgress
-        ? `automatic (NAP) action [${prefixedPath(
+        ? `synchronous automatic action [${prefixedPath(
             napInProgress,
-          )}] for control-state [${controlState.name}]`
+          )}] (NAP) for control-state [${controlState.name}]`
         : `accept for action [${acceptInProgress}]`;
       console.info(
         `Blocked action [${prefixedPath(
@@ -174,11 +177,26 @@ export function samStepFactory({
 
     getNextAction({ state }) {
       const controlStateName = state.get(prefixedPath("sam.controlState.name"));
-      return { nextActions: computeNextAction(controlStateName) || [] };
+      const [nextActions, allowNapInterrupt = false] = computeNextAction(
+        controlStateName,
+      ) || [[]];
+
+      if (!Array.isArray(nextActions)) {
+        throw new Error(`Invalid NAP after action [${action.name}]`);
+      }
+
+      return { nextActions, _syncNap: !allowNapInterrupt };
     },
 
     emitNapDone({ controller }) {
       controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+    },
+
+    setNapInprogress({ props, state }) {
+      state.set(
+        prefixedPath("sam.napInProgress"),
+        props.nextActions.map(([name]) => name).join(","),
+      );
     },
 
     runNextAction({ props, controller }) {
@@ -248,6 +266,7 @@ export function samStepFactory({
       setControlState,
       getNextAction,
       emitNapDone,
+      setNapInprogress,
       runNextAction,
     } = stepActionsFactory(action);
 
@@ -284,19 +303,16 @@ export function samStepFactory({
                     set(state`${prefixedPath("sam.acceptInProgress")}`, false),
                     setControlState,
                     getNextAction,
+                    set(state`${prefixedPath("sam.napInProgress")}`, false),
                     when(props`nextActions`, nextActions => nextActions.length),
                     {
-                      false: [
-                        set(state`${prefixedPath("sam.napInProgress")}`, false),
-                        emitNapDone, // Defer server render after NAP is complete.
-                      ],
+                      false: [emitNapDone], // Defer server until render after NAP is complete.
                       true: [
-                        ({ props, state }) => {
-                          state.set(
-                            prefixedPath("sam.napInProgress"),
-                            props.nextActions.map(([name]) => name).join(","),
-                          );
-                        },
+                        set(
+                          state`${prefixedPath("sam.syncNap")}`,
+                          props`_syncNap`,
+                        ),
+                        setNapInprogress,
                         runNextAction,
                       ],
                     },

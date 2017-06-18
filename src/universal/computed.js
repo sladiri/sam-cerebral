@@ -16,7 +16,8 @@ export const cancelDisabled = prefix =>
     return (
       get(state`${getModulePath(prefix, "sam.init")}`) ||
       get(state`${getModulePath(prefix, "sam.acceptInProgress")}`) ||
-      get(state`${getModulePath(prefix, "sam.napInProgress")}`)
+      (get(state`${getModulePath(prefix, "sam.napInProgress")}`) &&
+        get(state`${getModulePath(prefix, "sam.syncNap")}`))
     );
   });
 
