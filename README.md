@@ -5,9 +5,10 @@
 
 ## Quick Start
 - `yarn` installs all dependencies.
-- `yarn run build` formats the code, lints it, then writes transpiled `bundle.js` and server files.
-- `yarn start` starts a **Koa** server which serves bundle.js (server-side-rendering ; watch + rebuild).
-- `yarn run start-dev` starts the **Budo** development-webserver and serves the directory (watch + rebuild + autoreload).
+- `yarn run build` formats the code with **Prettier**, lints it with **Eslint**, then writes transpiled `bundle.js` and server files.
+- `yarn start` starts a **Koa** webserver which serves bundle.js (server-side-rendering).
+- `yarn run start-dev` starts the webserver in babel-node (watch + rebuild).
+- `yarn run start-budo` starts the **Budo** development-webserver and serves the directory (watch + rebuild + autoreload).
 
 ## SAM pattern
 Each Cerebral signal is wrapped in a SAM-step signal:

@@ -5,21 +5,19 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
-    "startup-server": "node dist-server/src/server/index.js",
-    "startup-server-watch": "nodemon --watch dist-server --inspect dist-server/src/server/index.js",
     "build-server": "mkdir -p dist-server && babel \"src/{server,universal}/**/*.js\" --out-dir dist-server",
-    "build-server-watch": "nodemon --watch src/server/ --watch src/universal/ --exec yarn run build-server",
-    "build-browser": "mkdir -p static/dist && browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
-    "build-browser-watch": "nodemon --watch src/browser/ --watch src/universal/ --exec yarn run build-browser",
+    "build-browser": "mkdir -p static/dist && retry -- browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "prelint": "yarn run format",
     "lint": "eslint \"src/**/*.js\"",
     "prebuild": "yarn run lint",
     "build": "yarn run build-server && yarn run build-browser",
     "clean": "rm -rf static/dist && rm -rf dist-server",
-    "start-dev": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify",
-    "prestart": "yarn run build",
-    "start": "parallelshell \"yarn run build-browser-watch\" \"yarn run build-server-watch\" \"yarn run startup-server-watch\""
+    "start-budo": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify",
+    "startup-server-dev-watch": "nodemon --delay 100ms --watch src/server/ --watch src/universal/ server --exec \"babel-node src/server/index.js\"",
+    "build-browser-watch": "nodemon --delay 100ms --watch src/browser/ --watch src/universal/ --exec yarn run build-browser",
+    "start-dev": "parallelshell \"yarn run build-browser-watch\" \"yarn run startup-server-dev-watch\"",
+    "start": "node dist-server/src/server/index.js"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -42,6 +40,7 @@
     "nodemon": "^1.11.0",
     "parallelshell": "^3.0.1",
     "prettier": "^1.4.4",
+    "retry-cli": "^0.4.0",
     "tape": "^4.6.3"
   },
   "dependencies": {

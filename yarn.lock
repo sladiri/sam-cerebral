@@ -2557,6 +2557,10 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
+node-getopt@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/node-getopt/-/node-getopt-0.2.3.tgz#69abbc7e5400600d1dacf00db8cb79b5487e924b"
+
 node-pre-gyp@^0.6.29:
   version "0.6.36"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.6.36.tgz#db604112cb74e0d477554e9b505b17abddfab786"
@@ -3268,6 +3272,17 @@ resumer@~0.0.0:
   resolved "https://registry.yarnpkg.com/resumer/-/resumer-0.0.0.tgz#f1e8f461e4064ba39e82af3cdc2a8c893d076759"
   dependencies:
     through "~2.3.4"
+
+retry-cli@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/retry-cli/-/retry-cli-0.4.0.tgz#2707314076006c57958a66331516f7b8da91d42f"
+  dependencies:
+    node-getopt "^0.2.3"
+    retry "^0.9.0"
+
+retry@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/retry/-/retry-0.9.0.tgz#6f697e50a0e4ddc8c8f7fb547a9b60dead43678d"
 
 right-now@^1.0.0:
   version "1.0.0"
