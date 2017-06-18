@@ -1,7 +1,6 @@
 import asap from "asap";
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
-import FunctionTree from "function-tree";
 import { innerJoin, drop } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
@@ -134,9 +133,14 @@ export function samStepFactory({
 
     getProposal(input) {
       return action.tree
-        ? input.controller.run(action.name, action.tree, input.props)
-        : // ? new FunctionTree().run(action.name, action.tree, input.props)
-          action(input) || {};
+        ? do {
+            let args = [action.name, action.tree, input.props];
+            if (input.controller.constructor.name === "UniversalController") {
+              args = drop(1, args);
+            }
+            input.controller.run(...args);
+          }
+        : action(input) || {};
     },
 
     guardStaleProposal: when(
