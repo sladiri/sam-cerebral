@@ -21,7 +21,7 @@ import { module, view } from "../universal/app/boundary";
   }
 
   // Unblock actions on client after first signal.
-  controller.runSignal("unblockActions", [
+  controller.runSignal("setBrowserInit", [
     ({ state }) => {
       state.set("sam.init", false);
       state.set("napSack.sam.init", false);
