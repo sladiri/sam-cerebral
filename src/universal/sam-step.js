@@ -134,8 +134,9 @@ export function samStepFactory({
 
     getProposal(input) {
       return action.tree
-        ? new FunctionTree().run(action.name, action.tree, input.props)
-        : action(input) || {};
+        ? input.controller.run(action.name, action.tree, input.props)
+        : // ? new FunctionTree().run(action.name, action.tree, input.props)
+          action(input) || {};
     },
 
     guardStaleProposal: when(
@@ -167,7 +168,7 @@ export function samStepFactory({
       state.set(prefixedPath("sam.controlState"), { name, allowedActions });
     },
 
-    getNextAction({ state, props }) {
+    getNextAction({ state }) {
       const controlStateName = state.get(prefixedPath("sam.controlState.name"));
       return { nextActions: computeNextAction(controlStateName) || [] };
     },
@@ -190,14 +191,18 @@ export function samStepFactory({
           actions,
           nextActions,
         );
-        const compoundAction = async () => {
-          const proposals = await Promise.all(proposalPromises);
-          return [...proposals, napProp].reduce(
-            (acc, proposal) => ({ ...acc, ...proposal }),
-            {},
-          );
-        };
-        const { signal } = samStep([compoundName, [compoundAction]]);
+        const compoundAction = Object.defineProperty(
+          async () => {
+            const proposals = await Promise.all(proposalPromises);
+            return [...proposals, napProp].reduce(
+              (acc, proposal) => ({ ...acc, ...proposal }),
+              {},
+            );
+          },
+          "name",
+          { value: compoundName },
+        );
+        const { signal } = samStep(compoundAction);
         args = [compoundName, signal, napProp];
       }
 
@@ -336,11 +341,7 @@ const mergeActions = (actions, nextActions) =>
       ) => {
         compoundNameSet.add(signalName);
         proposalPromises.push(
-          Promise.resolve(
-            actions[signalName]({ props: signalInput }),
-          ).catch(e => {
-            debugger;
-          }),
+          Promise.resolve(actions[signalName]({ props: signalInput })),
         );
         return [[compoundNameSet, proposalPromises]];
       },
