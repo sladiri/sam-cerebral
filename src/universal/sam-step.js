@@ -141,7 +141,7 @@ export function samStepFactory({
             if (input.controller.constructor.name === "UniversalController") {
               args = drop(1, args);
             }
-            input.controller.run(...args);
+            input.controller.run(...args); // This shows up as separate signal in the debugger.
           }
         : action(input) || {};
     },
