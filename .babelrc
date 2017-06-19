@@ -13,6 +13,7 @@
     "transform-object-rest-spread",
     "transform-async-generator-functions",
     "syntax-trailing-function-commas",
+    "transform-do-expressions",
     "transform-function-bind",
     "transform-react-jsx"
   ],
