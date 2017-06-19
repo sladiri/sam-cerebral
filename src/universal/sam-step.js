@@ -243,10 +243,7 @@ export function samStepFactory({
     if (Array.isArray(action)) {
       const [name, tree] = action;
       action = { name, tree };
-    } else if (
-      Object.prototype.toString.call(action) !== "[object Function]" ||
-      !action.name.length
-    ) {
+    } else if (!action.name.length) {
       throw new Error(
         "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
       );
