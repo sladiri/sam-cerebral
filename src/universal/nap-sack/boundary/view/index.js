@@ -1,18 +1,12 @@
-import { compute } from "cerebral";
 import { connect } from "cerebral/react";
-import { props, signal, state } from "cerebral/tags";
+import { props, signal } from "cerebral/tags";
 import {
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
 } from "../../../computed.js";
+import { napSackViewModel } from "../computed";
 import view from "./view";
-
-const napSackViewModel = compute(function appViewModel(get) {
-  return {
-    activities: get(state`napSack.activities`),
-  };
-});
 
 export default connect(
   {

@@ -1,19 +1,13 @@
 import React from "react";
 import classNames from "classnames";
-import { compute } from "cerebral";
 import { connect } from "cerebral/react";
-import { props, state } from "cerebral/tags";
+import { props } from "cerebral/tags";
 import {
   actionsDisabled,
   cancelDisabled,
   addButtonStyles,
 } from "../../../computed";
-
-const appViewModel = compute(function appViewModel(get) {
-  return {
-    count: get(state`count`),
-  };
-});
+import { appViewModel } from "../computed";
 
 export default connect(
   {
@@ -36,7 +30,7 @@ export default connect(
         <button
           disabled={actionsDisabled}
           onClick={() => {
-            actions.increase({ value: 2 });
+            actions.increase({ value: 8 });
           }}
           className={classNames(styles.increase, styles.buttonFog)}
         >
@@ -48,7 +42,7 @@ export default connect(
         <button
           disabled={actionsDisabled}
           onClick={() => {
-            actions.decrease({ value: 15 });
+            actions.decrease({ value: 8 });
           }}
           className={classNames(styles.decrease, styles.buttonFog)}
         >
