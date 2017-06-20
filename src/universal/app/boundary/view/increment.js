@@ -36,7 +36,7 @@ export default connect(
         <button
           disabled={actionsDisabled}
           onClick={() => {
-            actions.increase({ value: 10 });
+            actions.increase({ value: 2 });
           }}
           className={classNames(styles.increase, styles.buttonFog)}
         >

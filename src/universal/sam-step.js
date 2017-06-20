@@ -88,7 +88,7 @@ export function samStepFactory({
       {
         false: [],
         true: [
-          ({ state, props }) => {
+          function logPossibleInterrupt({ state, props }) {
             const { proposeInProgress, stepId } = state.get(
               prefixedPath("sam"),
             );
