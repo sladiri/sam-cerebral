@@ -1,39 +1,36 @@
 {
-    "parser": "babel-eslint",
-    "parserOptions": {
-        "sourceType": "module"
-    },
-    "env": {
-        "es6": true
-    },
-    "plugins": [
-        "react"
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true
+  },
+  "rules": {
+    "eol-last": [
+      "error",
+      "always"
     ],
-    "rules": {
-        "eol-last": [
-            "error",
-            "always"
-        ],
-        "eqeqeq": "warn",
-        "no-const-assign": "error",
-        "no-dupe-args": "error",
-        "no-dupe-class-members": "error",
-        "no-dupe-keys": "error",
-        "no-duplicate-case": "error",
-        "no-eval": "error",
-        "no-fallthrough": "error",
-        "no-global-assign": "error",
-        "no-redeclare": "error",
-        "no-trailing-spaces": "error",
-        "no-undef": "error",
-        "no-unused-vars": "warn",
-        "no-with": "error",
-        "unicode-bom": "error",
-        "valid-typeof": "error",
-        "yoda": "error",
-        "react/jsx-no-comment-textnodes": "error",
-        "react/jsx-no-undef": "error",
-        "react/jsx-uses-react": "error",
-        "react/jsx-uses-vars": "error"
-    }
+    "eqeqeq": "warn",
+    "no-const-assign": "error",
+    "no-dupe-args": "error",
+    "no-dupe-class-members": "error",
+    "no-dupe-keys": "error",
+    "no-duplicate-case": "error",
+    "no-eval": "error",
+    "no-fallthrough": "error",
+    "no-global-assign": "error",
+    "no-redeclare": "error",
+    "no-trailing-spaces": "error",
+    "no-undef": "error",
+    "no-unused-vars": "warn",
+    "no-with": "error",
+    "unicode-bom": "error",
+    "valid-typeof": "error",
+    "yoda": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-undef": "error",
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error"
+  }
 }
