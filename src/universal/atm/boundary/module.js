@@ -2,14 +2,13 @@ import { samStepFactory } from "../../sam-step";
 import { defaultState, accept } from "../entity";
 import {
   init,
-  findJobBrute,
-  cancel,
+  insertCard,
   computeControlState,
   computeNextAction,
 } from "../control";
 
 const samStep = samStepFactory({
-  prefix: "napSack",
+  prefix: "atm",
   accept,
   computeControlState,
   computeNextAction,
@@ -17,18 +16,17 @@ const samStep = samStepFactory({
   allowedActions: ["init"],
 });
 
-export const napSackInit = samStep(init);
+export const atmInit = samStep(init);
 
 export default {
   state: defaultState,
   signals: {
-    init: napSackInit,
-    findJobBrute: samStep(findJobBrute),
-    cancel: samStep(cancel),
+    init: atmInit,
+    insertCard: samStep(insertCard),
   },
   catch: new Map([[Error, logError]]),
 };
 
 function logError({ props: { error } }) {
-  console.error("NapSack catched an error", error);
+  console.error("ATM catched an error", error);
 }

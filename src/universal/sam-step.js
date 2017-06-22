@@ -37,9 +37,9 @@ export function samStepFactory({
   const stepActionsFactory = action => ({
     guardDisallowedAction: when(
       state`${prefixedPath("sam.controlState")}`,
-      state`${prefixedPath("sam.init")}`,
-      props`_browserInit`,
-      (controlState, init, browserInit) => {
+      // state`${prefixedPath("sam.init")}`,
+      // (controlState, init) => {
+      controlState => {
         const actions = action.name.split(",");
         const commonActionsSet = innerJoin(
           (allowed, actionName) => allowed === actionName,
@@ -48,7 +48,7 @@ export function samStepFactory({
         );
         return (
           !controlState.name ||
-          (init && browserInit) ||
+          // init ||
           commonActionsSet.length === actions.length
         );
       },
@@ -66,11 +66,7 @@ export function samStepFactory({
 
     // TODO: If NAP is allowed on server, this check should be changed.
     setIsInitialSignal: [
-      when(
-        state`${prefixedPath("sam.init")}`,
-        props`_browserInit`,
-        (init, browserInit) => init && browserInit,
-      ),
+      when(state`${prefixedPath("sam.init")}`),
       {
         false: [],
         true: [set(state`${prefixedPath("sam.init")}`, false)],
@@ -243,7 +239,8 @@ export function samStepFactory({
     if (Array.isArray(action)) {
       const [name, tree] = action;
       action = { name, tree };
-    } else if (!action.name.length) {
+    } else if (!action.name) {
+      console.log("action", action);
       throw new Error(
         "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
       );

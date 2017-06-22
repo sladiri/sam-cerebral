@@ -6,6 +6,8 @@ import Koa from "koa";
 import * as ReactFreeStyle from "react-free-style";
 import { UniversalController } from "cerebral";
 import { Container } from "cerebral/react";
+import { set } from "cerebral/operators";
+import { state } from "cerebral/tags";
 import { renderToString } from "react-dom/server";
 import { module, view } from "../universal/app/boundary";
 import { getModulePath, getSignal } from "../universal/util";
@@ -17,12 +19,34 @@ app.use(serve("./static"));
 app.use(async ctx => {
   const controller = UniversalController(module, { allowMultipleRuns: true });
 
-  await completeInits(controller, ["", "napSack"]);
+  let currentPage;
+  let prefixes;
+  switch (ctx.url) {
+    case "/": {
+      currentPage = "root";
+      prefixes = [""];
+      break;
+    }
+    case "/napsack": {
+      currentPage = "napSack";
+      prefixes = ["", currentPage];
+      break;
+    }
+    case "/atm": {
+      currentPage = "atm";
+      prefixes = ["", currentPage];
+      break;
+    }
+  }
+  controller.run(set(state`currentPage`, currentPage));
+  await completeInits(controller, prefixes);
 
   // Example server-side change.
-  const napsDone = waitForNaps(controller, [""]);
-  controller.run(controller.module.signals.increase.signal, { value: 7 });
-  await napsDone;
+  await waitForNaps(
+    controller,
+    [""],
+    [controller.module.signals.increase.signal, { value: 6 }],
+  );
 
   const html = renderToString(h(Container, { controller }, h(view)));
   const script = controller.getScript();
@@ -50,19 +74,16 @@ app.use(async ctx => {
 app.listen(3000);
 console.log("Listening on http://localhost:3000");
 
-function completeInits(controller, prefixes = []) {
-  const napsDone = waitForNaps(controller, prefixes);
-
+function completeInits(controller, prefixes) {
   const initSignals = prefixes
     .map(prefix => getModulePath(prefix, "init"))
     .map(getSignal(controller));
-  controller.run(initSignals, {});
 
-  return napsDone;
+  return waitForNaps(controller, prefixes, [initSignals, {}]);
 }
 
-function waitForNaps(controller, prefixes = []) {
-  return Promise.all(
+function waitForNaps(controller, prefixes, [signal, payload]) {
+  const napsDone = Promise.all(
     prefixes.map(
       prefix =>
         new Promise((resolve, reject) => {
@@ -74,4 +95,6 @@ function waitForNaps(controller, prefixes = []) {
         }),
     ),
   );
+  controller.run(signal, payload);
+  return napsDone;
 }
