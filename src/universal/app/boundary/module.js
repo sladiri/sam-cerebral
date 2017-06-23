@@ -1,6 +1,6 @@
 import { parallel } from "cerebral";
-import { set } from "cerebral/operators";
-import { state } from "cerebral/tags";
+import { set, when } from "cerebral/operators";
+import { state, props } from "cerebral/tags";
 import { samStepFactory } from "../../sam-step";
 import { defaultState, accept } from "../entity";
 import {
@@ -28,6 +28,8 @@ const samStep = samStepFactory({
 
 const initFactory = (page, initSignal, rootInitSignal = []) => [
   ({ path }) => {
+    if (typeof window === "undefined") return path.isServerRender();
+
     /*eslint-disable no-undef*/
     const stateIsInitialised = window.CEREBRAL_STATE instanceof Set;
     const stateIsFromServer =
@@ -49,25 +51,18 @@ const initFactory = (page, initSignal, rootInitSignal = []) => [
 
     initialisedPages.add(page);
 
-    return path[pathKey]({ initialisedPages, initialiseRoot });
+    return path[pathKey]({ initialiseRoot });
   },
   {
+    isServerRender: [],
     skipInit: [set(state`currentPage`, page)],
     initialisePage: [
       set(state`currentPageLoading`, true),
       set(state`currentPage`, page),
-      ({ path, props: { initialisedPages, initialiseRoot } }) => {
-        const pathKey = initialiseRoot
-          ? do {
-              initialisedPages.add("root");
-              ("initWithRoot");
-            }
-          : "init";
-        return path[pathKey]();
-      },
+      when(props`initialiseRoot`),
       {
-        initWithRoot: parallel([rootInitSignal, initSignal]),
-        init: [initSignal],
+        false: [initSignal],
+        true: parallel([rootInitSignal, initSignal]),
       },
       set(state`currentPageLoading`, false),
     ],

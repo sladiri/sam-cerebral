@@ -16,8 +16,19 @@ const app = new Koa();
 
 app.use(serve("./static"));
 
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    console.log(error);
+    ctx.status = error.status || 500;
+    ctx.body = error.message;
+    ctx.app.emit("error", error, ctx);
+  }
+});
+
 app.use(async ctx => {
-  const controller = UniversalController(module, { allowMultipleRuns: true });
+  const controller = UniversalController(module);
 
   let currentPage;
   let prefixes;
