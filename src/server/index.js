@@ -12,6 +12,10 @@ import { renderToString } from "react-dom/server";
 import { module, view } from "../universal/app/boundary";
 import { getModulePath, getSignal } from "../universal/util";
 
+process.on('unhandledRejection', r => console.log(r));
+
+delete module.modules.router; // SSR causes error in Router
+
 const app = new Koa();
 
 app.use(serve("./static"));

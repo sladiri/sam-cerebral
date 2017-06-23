@@ -28,7 +28,8 @@ const samStep = samStepFactory({
 
 const initFactory = (page, initSignal, rootInitSignal = []) => [
   ({ path }) => {
-    if (typeof window === "undefined") return path.isServerRender();
+    // Readd when router is supported on server.
+    // if (typeof window === "undefined") return path.isServerRender();
 
     /*eslint-disable no-undef*/
     const stateIsInitialised = window.CEREBRAL_STATE instanceof Set;
@@ -54,7 +55,7 @@ const initFactory = (page, initSignal, rootInitSignal = []) => [
     return path[pathKey]({ initialiseRoot });
   },
   {
-    isServerRender: [],
+    // isServerRender: [],
     skipInit: [set(state`currentPage`, page)],
     initialisePage: [
       set(state`currentPageLoading`, true),
