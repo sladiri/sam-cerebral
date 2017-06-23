@@ -9,7 +9,7 @@ import { module, view } from "../universal/app/boundary";
 
 const controller = Controller({
   ...module,
-  devtools: Devtools({ host: "localhost:8585", reconnect: true }),
+  devtools: Devtools({ host: "SLADI-LAPTOP:8585", reconnect: true }),
 });
 
 render(h(Container, { controller }, h(view)), document.querySelector("#app"));
