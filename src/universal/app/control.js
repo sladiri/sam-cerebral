@@ -11,7 +11,7 @@ export async function decrease({ props: { value = 1 } }) {
 }
 
 export async function cancel() {
-  return await wait(100, {});
+  return await wait(100, { cancel: true });
 }
 
 export function computeControlState(model) {

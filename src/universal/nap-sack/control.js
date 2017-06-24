@@ -16,7 +16,9 @@ export async function findJobBrute({ time = 1 }) {
   return { activities: shuffle(activities) };
 }
 
-export async function cancel() {}
+export function cancel() {
+  return { cancel: true };
+}
 
 export function computeControlState(model) {
   const states = [];

@@ -4,6 +4,7 @@ import { state, props } from "cerebral/tags";
 import { innerJoin, drop } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
+// TODO: Use initial action to populate default state.
 export function samStepFactory({
   prefix = "",
   accept,
@@ -38,8 +39,6 @@ export function samStepFactory({
   const stepActionsFactory = action => ({
     guardDisallowedAction: when(
       state`${prefixedPath("sam.controlState")}`,
-      // state`${prefixedPath("sam.init")}`,
-      // (controlState, init) => {
       controlState => {
         const actions = action.name.split(",");
         const commonActionsSet = innerJoin(
@@ -47,11 +46,7 @@ export function samStepFactory({
           controlState.allowedActions,
           actions,
         );
-        return (
-          !controlState.name ||
-          // init ||
-          commonActionsSet.length === actions.length
-        );
+        return !controlState.name || commonActionsSet.length === actions.length;
       },
     ),
 
@@ -64,15 +59,6 @@ export function samStepFactory({
         props,
       );
     },
-
-    // TODO: If NAP is allowed on server, this check should be changed.
-    setIsInitialSignal: [
-      when(state`${prefixedPath("sam.init")}`),
-      {
-        false: [],
-        true: [set(state`${prefixedPath("sam.init")}`, false)],
-      },
-    ],
 
     logPossibleInterrupt: [
       when(
@@ -131,8 +117,8 @@ export function samStepFactory({
       );
     },
 
-    getProposal(input) {
-      return action.tree
+    async getProposal(input) {
+      const proposal = await (action.tree
         ? do {
             let args = [action.name, action.tree, input.props];
             // if (input.controller.constructor.name === "UniversalController") {
@@ -140,8 +126,36 @@ export function samStepFactory({
             // }
             input.controller.run(...args); // This shows up as separate signal in the debugger.
           }
-        : action(input) || {};
+        : action(input));
+
+      return proposal !== undefined && Object.keys(proposal).length > 1 // filter _stepId
+        ? proposal
+        : { _abortAction: true };
     },
+
+    // TODO: When init sets default state, init can be removed.
+    guardEmptyProposal: when(
+      state`${prefixedPath("sam.init")}`,
+      props`_abortAction`,
+      (isInit, abortAction) => isInit || !abortAction,
+    ),
+
+    logEmptyProposal({ state, props }) {
+      console.info(
+        `Aborted empty proposal from action [${prefixedPath(
+          action.name,
+        )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}].`,
+      );
+    },
+
+    // TODO: If NAP is allowed on server, this check should be changed.
+    setIsInitialSignal: [
+      when(state`${prefixedPath("sam.init")}`),
+      {
+        false: [],
+        true: [set(state`${prefixedPath("sam.init")}`, false)],
+      },
+    ],
 
     guardStaleProposal: when(
       state`${prefixedPath("sam.init")}`,
@@ -258,11 +272,13 @@ export function samStepFactory({
     const {
       guardDisallowedAction,
       logDisallowedAction,
-      setIsInitialSignal,
       logPossibleInterrupt,
       guardSignalInterrupt,
       logInterruptFailed,
       getProposal,
+      guardEmptyProposal,
+      logEmptyProposal,
+      setIsInitialSignal,
       guardStaleProposal,
       logStaleProposal,
       incrementStepId,
@@ -280,7 +296,6 @@ export function samStepFactory({
         {
           false: [logDisallowedAction],
           true: [
-            ...setIsInitialSignal,
             ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP are in progress, log an info.
             guardSignalInterrupt,
             {
@@ -292,31 +307,51 @@ export function samStepFactory({
                 ),
                 set(props`_stepId`, state`${prefixedPath("sam.stepId")}`),
                 getProposal,
-                guardStaleProposal,
+                guardEmptyProposal,
                 {
-                  false: [logStaleProposal],
-                  true: [
+                  false: [
+                    logEmptyProposal,
                     set(state`${prefixedPath("sam.proposeInProgress")}`, false),
-                    set(
-                      state`${prefixedPath("sam.acceptInProgress")}`,
-                      action.name,
-                    ),
-                    incrementStepId,
-                    accept,
-                    set(state`${prefixedPath("sam.acceptInProgress")}`, false),
-                    setControlState,
-                    getNextAction,
-                    set(state`${prefixedPath("sam.napInProgress")}`, false),
-                    when(props`nextActions`, nextActions => nextActions.length),
+                    emitNapDone,
+                  ],
+                  true: [
+                    ...setIsInitialSignal,
+                    guardStaleProposal,
                     {
-                      false: [emitNapDone], // Defer server until render after NAP is complete.
+                      false: [logStaleProposal],
                       true: [
                         set(
-                          state`${prefixedPath("sam.syncNap")}`,
-                          props`_syncNap`,
+                          state`${prefixedPath("sam.proposeInProgress")}`,
+                          false,
                         ),
-                        setNapInprogress,
-                        runNextAction,
+                        set(
+                          state`${prefixedPath("sam.acceptInProgress")}`,
+                          action.name,
+                        ),
+                        incrementStepId,
+                        accept,
+                        set(
+                          state`${prefixedPath("sam.acceptInProgress")}`,
+                          false,
+                        ),
+                        setControlState,
+                        getNextAction,
+                        set(state`${prefixedPath("sam.napInProgress")}`, false),
+                        when(
+                          props`nextActions`,
+                          nextActions => nextActions.length,
+                        ),
+                        {
+                          false: [emitNapDone], // Defer server until render after NAP is complete.
+                          true: [
+                            set(
+                              state`${prefixedPath("sam.syncNap")}`,
+                              props`_syncNap`,
+                            ),
+                            setNapInprogress,
+                            runNextAction,
+                          ],
+                        },
                       ],
                     },
                   ],
