@@ -12,6 +12,7 @@ export function samStepFactory({
   controlState,
   allowedActions,
   actions,
+  preventCompoundState = true,
 }) {
   const prefixedPath = getModulePath(prefix);
   const GetId = getId();
@@ -164,7 +165,15 @@ export function samStepFactory({
 
     setControlState({ state }) {
       const states = computeControlState(state.get()) || [];
-      if (states.length < 1) throw new Error("Invalid control state.");
+
+      if (states.length < 1) {
+        throw new Error("Invalid control state.");
+      }
+
+      if (preventCompoundState && states.length > 1) {
+        const names = states.map(([name]) => name).join(";");
+        throw new Error("State is compound state:", names);
+      }
 
       const [[name, allowedActions]] = mergeControlStates(states);
 
