@@ -14,7 +14,7 @@ import { getModulePath, getSignal } from "../universal/util";
 
 process.on('unhandledRejection', r => console.log(r));
 
-delete module.modules.router; // SSR causes error in Router
+// delete module.modules.router; // SSR causes error in Router
 
 const app = new Koa();
 
@@ -33,6 +33,7 @@ app.use(async (ctx, next) => {
 
 app.use(async ctx => {
   const controller = UniversalController(module);
+  // ctx.body = 'nope'
 
   let currentPage;
   let prefixes;
@@ -53,7 +54,7 @@ app.use(async ctx => {
       break;
     }
   }
-  controller.run(set(state`currentPage`, currentPage));
+  controller.runOnServer(set(state`currentPage`, currentPage), {});
   await completeInits(controller, prefixes);
 
   // Example server-side change.
@@ -110,6 +111,6 @@ function waitForNaps(controller, prefixes, [signal, payload]) {
         }),
     ),
   );
-  controller.run(signal, payload);
+  controller.runOnServer(signal, payload);
   return napsDone;
 }

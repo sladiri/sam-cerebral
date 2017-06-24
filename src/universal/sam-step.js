@@ -134,9 +134,9 @@ export function samStepFactory({
       return action.tree
         ? do {
             let args = [action.name, action.tree, input.props];
-            if (input.controller.constructor.name === "UniversalController") {
-              args = drop(1, args);
-            }
+            // if (input.controller.constructor.name === "UniversalController") {
+            //   args = drop(1, args);
+            // }
             input.controller.run(...args); // This shows up as separate signal in the debugger.
           }
         : action(input) || {};
@@ -224,9 +224,9 @@ export function samStepFactory({
         args = [compoundName, signal, napProp];
       }
 
-      if (controller.constructor.name === "UniversalController") {
-        args = drop(1, args);
-      }
+      // if (controller.constructor.name === "UniversalController") {
+      //   args = drop(1, args);
+      // }
       asap(() => {
         controller.run(...args);
       });
