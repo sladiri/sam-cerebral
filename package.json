@@ -13,7 +13,7 @@
     "prebuild": "npm run lint",
     "build": "npm run build-server && npm run build-browser",
     "clean": "rm -rf static/dist && rm -rf dist-server",
-    "start-budo": "budo src/browser/index.js:static/dist/bundle.js --pushstate --live -- -t babelify",
+    "start-budo": "budo src/browser/index.js:static/dist/bundle.js --host localhost --pushstate --live -- -t babelify",
     "startup-server-dev-watch": "nodemon --delay 100ms --watch src/server/ --watch src/universal/ server --exec \"babel-node src/server/index.js\"",
     "build-browser-watch": "nodemon --delay 100ms --watch src/browser/ --watch src/universal/ --exec npm run build-browser",
     "start-dev": "parallelshell \"npm run build-browser-watch\" \"npm run startup-server-dev-watch\"",
