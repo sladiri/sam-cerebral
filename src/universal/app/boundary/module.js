@@ -1,13 +1,11 @@
 import { samFactory } from "../../sam-step";
-import { defaultState, accept } from "../entity";
 import {
-  init,
-  increase,
-  decrease,
-  cancel,
+  defaultState,
+  accept,
   computeControlState,
   computeNextAction,
-} from "../control";
+} from "../entity";
+import { init, increase, decrease, cancel } from "../control";
 import { router, routedFactory } from "./router";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";

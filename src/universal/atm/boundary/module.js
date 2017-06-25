@@ -1,14 +1,11 @@
 import { samFactory } from "../../sam-step";
-import { defaultState, accept } from "../entity";
 import {
-  init,
-  abort,
-  card,
-  pin,
-  changeBalance,
+  defaultState,
+  accept,
   computeControlState,
   computeNextAction,
-} from "../control";
+} from "../entity";
+import { init, abort, card, pin, changeBalance } from "../control";
 
 const samStep = samFactory({
   prefix: "atm",

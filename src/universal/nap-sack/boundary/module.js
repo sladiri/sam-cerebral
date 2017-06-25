@@ -1,12 +1,11 @@
 import { samFactory } from "../../sam-step";
-import { defaultState, accept } from "../entity";
 import {
-  init,
-  findJobBrute,
-  cancel,
+  defaultState,
+  accept,
   computeControlState,
   computeNextAction,
-} from "../control";
+} from "../entity";
+import { init, findJobBrute, cancel } from "../control";
 
 const samStep = samFactory({
   prefix: "napSack",

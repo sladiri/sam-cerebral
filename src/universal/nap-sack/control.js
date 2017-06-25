@@ -20,16 +20,6 @@ export function cancel() {
   return { cancel: true };
 }
 
-export function computeControlState(model) {
-  const states = [];
-
-  states.push(["normal", ["findJobBrute", "cancel"]]);
-
-  return states;
-}
-
-export function computeNextAction(controlState) {}
-
 function shuffle(_array) {
   const array = [..._array];
 

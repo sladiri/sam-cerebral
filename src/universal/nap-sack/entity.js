@@ -8,3 +8,13 @@ export async function accept({ state, props: { activities } }) {
   await wait(1700);
   if (activities) state.set("napSack.activities", activities);
 }
+
+export function computeControlState(model) {
+  const states = [];
+
+  states.push(["normal", ["findJobBrute", "cancel"]]);
+
+  return states;
+}
+
+export function computeNextAction(controlState) {}

@@ -53,7 +53,7 @@ export function samFactory({
 
         logPossibleInterrupt(props, getState("sam"));
 
-        if (!guardSignalInterrupt(props._isNap, getState("sam"))) {
+        if (!guardSignalInterrupt(props, getState("sam"))) {
           logInterruptFailed(props, getState("sam"));
           return;
         }
@@ -155,9 +155,9 @@ export function samFactory({
       }
     }
 
-    function guardSignalInterrupt(isNap, sam) {
+    function guardSignalInterrupt(props, sam) {
       const { acceptInProgress, napInProgress, syncNap } = sam;
-      return isNap || !(acceptInProgress || (napInProgress && syncNap));
+      return props._isNap || !(acceptInProgress || (napInProgress && syncNap));
     }
 
     function logInterruptFailed(props, sam) {
