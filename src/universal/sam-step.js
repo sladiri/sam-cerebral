@@ -1,11 +1,7 @@
-import asap from "asap";
-import { set, when } from "cerebral/operators";
-import { state, props } from "cerebral/tags";
-import { innerJoin, drop } from "ramda";
+import { innerJoin } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
-// TODO: Use initial action to populate default state.
-export function samStepFactory({
+export function samFactory({
   prefix = "",
   accept,
   computeControlState,
@@ -16,94 +12,156 @@ export function samStepFactory({
   preventCompoundState = true,
 }) {
   const prefixedPath = getModulePath(prefix);
-  const GetId = getId();
-  const ensureInitialSamState = [
-    when(state`${prefixedPath("sam")}`),
-    {
-      true: [],
-      false: [
-        set(state`${prefixedPath("sam")}`, {
-          prefix,
-          init: true,
-          stepId: GetId.next().value,
-          controlState: { name: controlState, allowedActions },
-          proposeInProgress: false,
-          acceptInProgress: false,
-          napInProgress: false,
-          syncNap: true,
-        }),
-      ],
-    },
-  ];
+  const _GetId = getId(); // Reuse this for automatic next-actions.
 
-  const stepActionsFactory = action => ({
-    guardDisallowedAction: when(
-      state`${prefixedPath("sam.controlState")}`,
-      controlState => {
-        const actions = action.name.split(",");
-        const commonActionsSet = innerJoin(
-          (allowed, actionName) => allowed === actionName,
-          controlState.allowedActions,
-          actions,
+  return function samStepFactory(action, GetId = _GetId) {
+    if (Array.isArray(action)) {
+      const [name, tree] = action;
+      action = { name, tree };
+    } else if (!action.name) {
+      console.log("action", action);
+      throw new Error(
+        "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
+      );
+    }
+
+    const actionName = action.name;
+
+    return samStep;
+
+    async function samStep(input) {
+      try {
+        const { controller, state, props } = input;
+
+        if (getState("sam.stepId") === undefined) {
+          setState("sam", {
+            stepId: GetId.next().value,
+            init: true,
+            controlState: { name: controlState, allowedActions },
+            proposeInProgress: false,
+            acceptInProgress: false,
+            napInProgress: false,
+            syncNap: true,
+            prefix,
+          });
+        }
+
+        if (!guardDisallowedAction(getState("sam"))) {
+          logDisallowedAction(props, getState("sam"));
+          return;
+        }
+
+        logPossibleInterrupt(props, getState("sam"));
+
+        if (!guardSignalInterrupt(props._isNap, getState("sam"))) {
+          logInterruptFailed(props, getState("sam"));
+          return;
+        }
+
+        setState("sam.proposeInProgress", actionName);
+        const stepId = getState("sam.stepId");
+        const { _abortAction, ...proposal } = await getProposal(
+          props,
+          controller,
         );
-        return !controlState.name || commonActionsSet.length === actions.length;
-      },
-    ),
 
-    logDisallowedAction({ state, props }) {
-      const { controlState, stepId } = state.get(prefixedPath("sam"));
+        if (!guardEmptyProposal(_abortAction, getState("sam"))) {
+          logEmptyProposal(getState("sam"));
+          setState("sam.proposeInProgress", false);
+          emitNapDone(prefix)({ controller });
+          return;
+        }
+
+        if (!guardStaleProposal(stepId, getState("sam"))) {
+          logStaleProposal(props, getState("sam"));
+          return;
+        }
+
+        if (getState("sam.init")) {
+          setState("sam.init", false);
+        }
+
+        setState("sam.proposeInProgress", false);
+        setState("sam.acceptInProgress", actionName);
+        setState("sam.stepId", GetId.next().value);
+        await accept({ state, props: proposal });
+        setState("sam.acceptInProgress", false);
+        setState("sam.controlState", getControlState(getState("")));
+
+        const { nextActions, _syncNap } = getNextAction(getState("sam"));
+
+        if (nextActions.length < 1) {
+          setState("sam.napInProgress", false);
+          emitNapDone(prefix)({ controller });
+          return;
+        }
+
+        setState(
+          "sam.napInProgress",
+          nextActions.map(([name]) => name).join(","),
+        );
+        setState("sam.syncNap", _syncNap);
+
+        await runNextAction(controller, nextActions, samStep);
+
+        function getState(path) {
+          const fullPath = `${prefixedPath(path)}`;
+          return state.get(fullPath === "" ? undefined : fullPath);
+        }
+
+        function setState(path, value) {
+          state.set(`${prefixedPath(path)}`, value);
+        }
+      } catch (error) {
+        console.error("SAM step catched an error", error);
+      }
+    }
+
+    function guardDisallowedAction(sam) {
+      const { controlState } = sam;
+      const actions = actionName.split(",");
+      const commonActionsSet = innerJoin(
+        (allowed, actionName) => allowed === actionName,
+        controlState.allowedActions,
+        actions,
+      );
+      return !controlState.name || commonActionsSet.length === actions.length;
+    }
+
+    function logDisallowedAction(props, sam) {
+      const { controlState, stepId } = sam;
       console.info(
         `Disallowed action [${prefixedPath(
-          action.name,
+          actionName,
         )}] blocked in control-state [${controlState.name}] in step-ID [${stepId}]. Props:`,
         props,
       );
-    },
+    }
 
-    logPossibleInterrupt: [
-      when(
-        state`${prefixedPath("sam.proposeInProgress")}`,
-        state`${prefixedPath("sam.napInProgress")}`,
-        state`${prefixedPath("sam.syncNap")}`,
-        (proposeInProgress, napInProgress, syncNap) =>
-          proposeInProgress || (proposeInProgress && napInProgress && !syncNap),
-      ),
-      {
-        false: [],
-        true: [
-          function logPossibleInterrupt({ state, props }) {
-            const { proposeInProgress, stepId } = state.get(
-              prefixedPath("sam"),
-            );
-            console.info(
-              `Possible cancelation by action [${prefixedPath(
-                action.name,
-              )}] for pending action [${prefixedPath(
-                proposeInProgress,
-              )}] in step-ID [${stepId}]. Props:`,
-              props,
-            );
-          },
-        ],
-      },
-    ],
+    function logPossibleInterrupt(props, sam) {
+      const { proposeInProgress, napInProgress, syncNap, stepId } = sam;
+      if (
+        proposeInProgress ||
+        (proposeInProgress && napInProgress && !syncNap)
+      ) {
+        console.info(
+          `Possible cancelation by action [${prefixedPath(
+            actionName,
+          )}] for pending action [${prefixedPath(
+            proposeInProgress,
+          )}] in step-ID [${stepId}]. Props:`,
+          props,
+        );
+      }
+    }
 
-    guardSignalInterrupt: when(
-      props`_isNap`,
-      state`${prefixedPath("sam.acceptInProgress")}`,
-      state`${prefixedPath("sam.napInProgress")}`,
-      state`${prefixedPath("sam.syncNap")}`,
-      (isNap, acceptInProgress, napInProgress, syncNap) =>
-        isNap || !(acceptInProgress || (napInProgress && syncNap)),
-    ),
+    function guardSignalInterrupt(isNap, sam) {
+      const { acceptInProgress, napInProgress, syncNap } = sam;
+      return isNap || !(acceptInProgress || (napInProgress && syncNap));
+    }
 
-    logInterruptFailed({ state, props }) {
-      const {
-        napInProgress,
-        acceptInProgress,
-        controlState,
-        stepId,
-      } = state.get(prefixedPath("sam"));
+    function logInterruptFailed(props, sam) {
+      const { napInProgress, acceptInProgress, controlState, stepId } = sam;
       const progressMsg = napInProgress
         ? `synchronous automatic action [${prefixedPath(
             napInProgress,
@@ -111,74 +169,56 @@ export function samStepFactory({
         : `accept for action [${acceptInProgress}]`;
       console.info(
         `Blocked action [${prefixedPath(
-          action.name,
+          actionName,
         )}], ${progressMsg} in progress in step-ID [${stepId}]. Props:`,
         props,
       );
-    },
+    }
 
-    async getProposal(input) {
+    async function getProposal(props, controller) {
       const proposal = await (action.tree
         ? do {
-            let args = [action.name, action.tree, input.props];
+            let args = [actionName, action.tree, props];
             // if (input.controller.constructor.name === "UniversalController") {
             //   args = drop(1, args);
             // }
-            input.controller.run(...args); // This shows up as separate signal in the debugger.
+            controller.run(...args); // This shows up as separate signal in the debugger.
           }
-        : action(input));
+        : action({ props }));
 
-      return proposal !== undefined && Object.keys(proposal).length > 1 // filter _stepId
+      return proposal !== undefined && Object.keys(proposal).length > 0
         ? proposal
         : { _abortAction: true };
-    },
+    }
 
-    // TODO: When init sets default state, init can be removed.
-    guardEmptyProposal: when(
-      state`${prefixedPath("sam.init")}`,
-      props`_abortAction`,
-      (isInit, abortAction) => isInit || !abortAction,
-    ),
+    function guardEmptyProposal(abortAction, sam) {
+      return !sam.isInit || abortAction;
+    }
 
-    logEmptyProposal({ state, props }) {
+    function logEmptyProposal(sam) {
       console.info(
         `Aborted empty proposal from action [${prefixedPath(
-          action.name,
-        )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}].`,
+          actionName,
+        )}] in step-ID [${sam.stepId}].`,
       );
-    },
+    }
 
-    // TODO: If NAP is allowed on server, this check should be changed.
-    setIsInitialSignal: [
-      when(state`${prefixedPath("sam.init")}`),
-      {
-        false: [],
-        true: [set(state`${prefixedPath("sam.init")}`, false)],
-      },
-    ],
+    function guardStaleProposal(actionStepId, sam) {
+      const { init, stepId } = sam;
+      return init || stepId === actionStepId;
+    }
 
-    guardStaleProposal: when(
-      state`${prefixedPath("sam.init")}`,
-      state`${prefixedPath("sam.stepId")}`,
-      props`_stepId`,
-      (init, stepId, actionStepId) => init || stepId === actionStepId,
-    ),
-
-    logStaleProposal({ state, props }) {
+    function logStaleProposal(props, sam) {
       console.info(
         `Canceled (stale) proposal from action [${prefixedPath(
-          action.name,
-        )}] in step-ID [${state.get(prefixedPath("sam.stepId"))}]. Props:`,
+          actionName,
+        )}] in step-ID [${sam.stepId}]. Props:`,
         props,
       );
-    },
+    }
 
-    incrementStepId({ state }) {
-      state.set(prefixedPath("sam.stepId"), GetId.next().value);
-    },
-
-    setControlState({ state }) {
-      const states = computeControlState(state.get()) || [];
+    function getControlState(state) {
+      const states = computeControlState(state) || [];
 
       if (states.length < 1) {
         throw new Error("Invalid control state.");
@@ -191,35 +231,23 @@ export function samStepFactory({
 
       const [[name, allowedActions]] = mergeControlStates(states);
 
-      state.set(prefixedPath("sam.controlState"), { name, allowedActions });
-    },
+      return { name, allowedActions };
+    }
 
-    getNextAction({ state }) {
-      const controlStateName = state.get(prefixedPath("sam.controlState.name"));
+    function getNextAction(sam) {
+      const controlStateName = sam.controlState.name;
       const [nextActions, allowNapInterrupt = false] = computeNextAction(
         controlStateName,
       ) || [[]];
 
       if (!Array.isArray(nextActions)) {
-        throw new Error(`Invalid NAP after action [${action.name}]`);
+        throw new Error(`Invalid NAP after action [${actionName}]`);
       }
 
       return { nextActions, _syncNap: !allowNapInterrupt };
-    },
+    }
 
-    emitNapDone({ controller }) {
-      controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
-    },
-
-    setNapInprogress({ props, state }) {
-      state.set(
-        prefixedPath("sam.napInProgress"),
-        props.nextActions.map(([name]) => name).join(","),
-      );
-    },
-
-    runNextAction({ props, controller }) {
-      const { nextActions } = props;
+    function runNextAction(controller, nextActions) {
       const napProp = { _isNap: true }; // TODO: Secure this
 
       let args;
@@ -243,140 +271,21 @@ export function samStepFactory({
           "name",
           { value: compoundName },
         );
-        const { signal } = samStep(compoundAction);
+        const signal = samStepFactory(compoundAction, GetId);
         args = [compoundName, signal, napProp];
       }
 
       // if (controller.constructor.name === "UniversalController") {
       //   args = drop(1, args);
       // }
-      asap(() => {
-        controller.run(...args);
-      });
-    },
-  });
 
-  return samStep;
-
-  function samStep(action) {
-    if (Array.isArray(action)) {
-      const [name, tree] = action;
-      action = { name, tree };
-    } else if (!action.name) {
-      console.log("action", action);
-      throw new Error(
-        "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
-      );
+      return controller.run(...args);
     }
-
-    const {
-      guardDisallowedAction,
-      logDisallowedAction,
-      logPossibleInterrupt,
-      guardSignalInterrupt,
-      logInterruptFailed,
-      getProposal,
-      guardEmptyProposal,
-      logEmptyProposal,
-      setIsInitialSignal,
-      guardStaleProposal,
-      logStaleProposal,
-      incrementStepId,
-      setControlState,
-      getNextAction,
-      emitNapDone,
-      setNapInprogress,
-      runNextAction,
-    } = stepActionsFactory(action);
-
-    return {
-      signal: [
-        ...ensureInitialSamState,
-        guardDisallowedAction,
-        {
-          false: [logDisallowedAction],
-          true: [
-            ...logPossibleInterrupt, // If GUI allows clicks while model's accept or NAP are in progress, log an info.
-            guardSignalInterrupt,
-            {
-              false: [logInterruptFailed],
-              true: [
-                set(
-                  state`${prefixedPath("sam.proposeInProgress")}`,
-                  action.name,
-                ),
-                set(props`_stepId`, state`${prefixedPath("sam.stepId")}`),
-                getProposal,
-                guardEmptyProposal,
-                {
-                  false: [
-                    logEmptyProposal,
-                    set(state`${prefixedPath("sam.proposeInProgress")}`, false),
-                    emitNapDone,
-                  ],
-                  true: [
-                    ...setIsInitialSignal,
-                    guardStaleProposal,
-                    {
-                      false: [logStaleProposal],
-                      true: [
-                        set(
-                          state`${prefixedPath("sam.proposeInProgress")}`,
-                          false,
-                        ),
-                        set(
-                          state`${prefixedPath("sam.acceptInProgress")}`,
-                          action.name,
-                        ),
-                        incrementStepId,
-                        accept,
-                        set(
-                          state`${prefixedPath("sam.acceptInProgress")}`,
-                          false,
-                        ),
-                        setControlState,
-                        getNextAction,
-                        set(state`${prefixedPath("sam.napInProgress")}`, false),
-                        when(
-                          props`nextActions`,
-                          nextActions => nextActions.length,
-                        ),
-                        {
-                          false: [emitNapDone], // Defer server until render after NAP is complete.
-                          true: [
-                            set(
-                              state`${prefixedPath("sam.syncNap")}`,
-                              props`_syncNap`,
-                            ),
-                            setNapInprogress,
-                            runNextAction,
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      catch: new Map([
-        [
-          Error,
-          [
-            ({ props: { error } }) => {
-              console.error("SAM step catched an error", error);
-            },
-          ],
-        ],
-      ]),
-    };
-  }
+  };
 }
 
-const mergeControlStates = states =>
-  states
+function mergeControlStates(states) {
+  return states
     .reduce(
       ([[nameSet, allowedActionsSet]], [name, allowedActions]) => {
         nameSet.add(name);
@@ -389,9 +298,10 @@ const mergeControlStates = states =>
       [...nameSet.values()].join(","),
       [...allowedActionsSet.values()],
     ]);
+}
 
-const mergeActions = (actions, nextActions) =>
-  nextActions
+function mergeActions(actions, nextActions) {
+  return nextActions
     .reduce(
       (
         [[compoundNameSet, proposalPromises]],
@@ -409,3 +319,8 @@ const mergeActions = (actions, nextActions) =>
       [...compoundNameSet.values()].join(","),
       proposalPromises,
     ]);
+}
+
+export const emitNapDone = prefix => ({ controller }) => {
+  controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+};

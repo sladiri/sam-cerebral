@@ -21,7 +21,8 @@ export function* getId() {
 }
 
 export const getModulePath = curry(
-  (prefix, path) => `${`${prefix ? `${prefix}.` : ""}`}${path}`,
+  (prefix, path) =>
+    path ? `${`${prefix ? `${prefix}.` : ""}`}${path}` : prefix,
 );
 
 // TODO: Copied from Cerebral Controller for UniversalController.

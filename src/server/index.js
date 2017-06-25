@@ -6,15 +6,10 @@ import Koa from "koa";
 import * as ReactFreeStyle from "react-free-style";
 import { UniversalController } from "cerebral";
 import { Container } from "cerebral/react";
-import { set } from "cerebral/operators";
-import { state } from "cerebral/tags";
 import { renderToString } from "react-dom/server";
-import { module, view } from "../universal/app/boundary";
-import { getModulePath, getSignal } from "../universal/util";
+import { moduleFactory, routeMap, view } from "../universal/app/boundary";
 
 process.on("unhandledRejection", r => console.log(r));
-
-// delete module.modules.router; // SSR causes error in Router
 
 const app = new Koa();
 
@@ -32,41 +27,31 @@ app.use(async (ctx, next) => {
 });
 
 app.use(async ctx => {
-  const controller = UniversalController(module);
-  // ctx.body = 'nope'
+  const { page: rootPage, module: rootPageModulePrefix } = routeMap["/"];
+  const { page: currentPage, module: pageModulePrefix } =
+    routeMap[ctx.url] || {};
 
-  let currentPage;
-  let prefixes;
-  switch (ctx.url) {
-    case "/": {
-      currentPage = "root";
-      prefixes = [""];
-      break;
-    }
-    case "/napsack": {
-      currentPage = "napSack";
-      prefixes = ["", currentPage];
-      break;
-    }
-    case "/atm": {
-      currentPage = "atm";
-      prefixes = ["", currentPage];
-      break;
-    }
+  if (!currentPage) {
+    ctx.body = "<h1>404 - Not Found</h1>";
+    ctx.status = 404;
+    return;
   }
-  controller.runOnServer(set(state`currentPage`, currentPage), {});
-  await completeInits(controller, prefixes);
 
-  // Example server-side change.
-  await waitForNaps(
-    controller,
-    [""],
-    [controller.module.signals.increase.signal, { value: 6 }],
-  );
+  const controller = UniversalController(moduleFactory());
 
+  // TODO: Wait for rootRouted, it is always called. Can we prevent this?
+  await waitForNaps(controller, ["router", rootPageModulePrefix]);
+
+  if (currentPage !== rootPage) {
+    await waitForNaps(
+      controller,
+      ["router", pageModulePrefix],
+      [controller.module.signals[`${currentPage}Routed`].signal],
+    );
+  }
+
+  const script = controller.getScript().replace("<script>", "<script defer>");
   const html = renderToString(h(Container, { controller }, h(view)));
-  const script = controller.getScript();
-
   const styles = ReactFreeStyle.rewind().toString(); // Run last to prevent empty styles.
 
   ctx.body = `
@@ -77,28 +62,20 @@ app.use(async ctx => {
       <base href="/">
       <meta charset=utf-8>
       <title>SAM - Cerebral</title>
+      ${script}
       ${styles}
+      <script defer src="vendor/rq.js"></script>
+      <script defer src="dist/bundle.js"></script>
     </head>
 
     <body>
-      <div id="app">${html}</div>
-      <script src="vendor/rq.js"></script>
-      ${script}
-      <script src="dist/bundle.js"></script>`;
+      <div id="app">${html}</div>`;
 });
 
 app.listen(3000);
 console.log("Listening on http://localhost:3000");
 
-function completeInits(controller, prefixes) {
-  const initSignals = prefixes
-    .map(prefix => getModulePath(prefix, "init"))
-    .map(getSignal(controller));
-
-  return waitForNaps(controller, prefixes, [initSignals, {}]);
-}
-
-function waitForNaps(controller, prefixes, [signal, payload]) {
+function waitForNaps(controller, prefixes, [signal, payload] = []) {
   const napsDone = Promise.all(
     prefixes.map(
       prefix =>
@@ -111,6 +88,8 @@ function waitForNaps(controller, prefixes, [signal, payload]) {
         }),
     ),
   );
-  controller.runOnServer(signal, payload);
+  if (signal) {
+    controller.runOnServer(signal, payload);
+  }
   return napsDone;
 }
