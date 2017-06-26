@@ -50,7 +50,7 @@ app.use(async ctx => {
     );
   }
 
-  const script = controller.getScript().replace("<script>", "<script defer>");
+  const script = controller.getScript();
   const html = renderToString(h(Container, { controller }, h(view)));
   const styles = ReactFreeStyle.rewind().toString(); // Run last to prevent empty styles.
 

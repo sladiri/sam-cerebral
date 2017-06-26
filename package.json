@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@cerebral/router": "0.0.0-beta.3",
+    "asap": "^2.0.5",
     "cerebral": "beta",
     "classnames": "^2.2.5",
     "color": "^1.0.3",

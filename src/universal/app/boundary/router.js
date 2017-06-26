@@ -34,7 +34,7 @@ export const routedFactory = (
   ({ path }) => {
     // First page is always 'root' on server and has been initialised at this point.
     if (isServerRender()) {
-      return path.initialisePage({ _serverRender: true });
+      return path.initialisePage();
     }
 
     const { stateIsFromServer, initialisedPages } = getPageState();
