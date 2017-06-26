@@ -3,6 +3,7 @@
     "transform-es2015-modules-commonjs",
     "transform-object-rest-spread",
     "transform-async-generator-functions",
+    "transform-async-to-generator",
     "syntax-trailing-function-commas",
     "transform-do-expressions",
     "transform-function-bind",
