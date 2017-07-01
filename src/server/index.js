@@ -89,7 +89,7 @@ function waitForNaps(controller, prefixes, [signal, payload] = []) {
     ),
   );
   if (signal) {
-    controller.runOnServer(signal, payload);
+    controller.runSequence(signal, payload);
   }
   return napsDone;
 }
