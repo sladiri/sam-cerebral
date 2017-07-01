@@ -53,6 +53,7 @@
     "koa": "^2.3.0",
     "koa-static": "^3.0.0",
     "postcss-js": "^1.0.0",
+    "pouchdb": "^6.2.0",
     "pull-stream": "^3.6.0",
     "ramda": "^0.24.1",
     "react": "^15.5.4",
