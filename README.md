@@ -5,31 +5,40 @@
 
 ## Quick Start
 - `npm` installs all dependencies.
-- `npm run build` formats the code with **Prettier**, lints it with **Eslint**, then writes transpiled `bundle.js` and server files.
-- `npm start` starts a **Koa** webserver which serves bundle.js (server-side-rendering).
-- `npm run start-dev` starts the webserver in babel-node (watch + rebuild).
 - `npm run start-budo` starts the **Budo** development-webserver and serves the directory (watch + rebuild + autoreload).
+- **Currently these requires a forked version of Cerebral** ([pull request](https://github.com/cerebral/cerebral/pull/981))
+  - `npm run build` formats the code with **Prettier**, lints it with **Eslint**, then writes transpiled `bundle.js` and server files.
+  - `npm start` starts a **Koa** webserver which serves bundle.js (server-side-rendering).
+  - `npm run start-dev` starts the webserver in babel-node (watch + rebuild).
 
-## SAM pattern
-Each Cerebral signal is wrapped in a SAM-step signal:
-- This SAM-step signal calls the action, propose, and the listener functions: `compute control state`, `next action predicate`. The view update is triggered immediately by Cerebral, when the state is updated.
-- Only the `propose` function has write access to `state`.
-- Cerebral's connect plays the role of decoupling the model from the view and computing a view-model. (Simple mappings do not require a function.)
+## SAM pattern and Cerebral
+- Each Cerebral signal is a SAM-step action, and this ensures that the state is updated in a precisely defined step (as in TLA+).
+- Only the `propose` function inside the model has write access to `state` and persists data.
+- Cerebral's `connect` function computes the state-representation (view-model).
 
 ## Entity Control Boundary pattern
 The SAM pattern maps to the ECB pattern:
-- model, compute state, compute next action: entity
-- actions: control
-- Cerebral module: boundary
+- `entity --> model, compute state, compute next action`
+- `control --> actions + third party APIs`
+- `boundary --> Cerebral module + storage`
 
-## TODO
-- [ ] Async Ticker is not a good next action example. Ticker should be a singleton.
-- [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
-- [ ] Create Proxy to hide state API?
-- [ ] Use control state for page change (routing) example?
-- [ ] Add session control state example (log in <-> log out on authenticated route).
-- [ ] Allow for next action to not block step until complete (blockStep = true)?
-- [ ] Queue action when received signal while in (NAP?) progress? (see previous)
+## ToDo
+- [ ] Storage layer
+  - [ ] Save model to DB
+  - [ ] Specify _Bolt-on Shim Layer_ in TLA+
+  - [ ] Implement _Bolt-on Shim Layer_
+- [ ] App features
+  - [ ] Use control state for page change (routing) example?
+  - [ ] Add session control state example (log in <-> log out on authenticated route).
+- [x] Allow for next action to not block step until complete (blockStep = true)?
+  - [ ] Queue action when received signal while in (NAP?) progress?
 - [ ] Add tests.
-- [x] Prevent or at least warn about concurrent mutations while a step is in progress?
+- [ ] Create Proxy to hide state API?
+- [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
 - [x] Check allowed action in step.
+
+## Wont Fix For Now
+- Prevent or at least warn about concurrent mutations while a step is in progress?
+
+## Notes
+- Async Ticker is not a simple next action example. Ticker could be a singleton.
