@@ -9,7 +9,11 @@ import { moduleFactory, view } from "../universal/app/boundary";
 
 const controller = Controller({
   ...moduleFactory(),
-  devtools: Devtools({ host: "localhost:8585", reconnect: true }),
+  devtools: Devtools({
+    host: "localhost:8585",
+    reconnect: true,
+    preventExternalMutations: false,
+  }),
 });
 
 render(h(Container, { controller }, h(view)), document.querySelector("#app"));
