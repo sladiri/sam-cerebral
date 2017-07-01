@@ -2,7 +2,7 @@ import { innerJoin } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
 export function samFactory({
-  prefix = "",
+  prefix,
   accept,
   computeControlState,
   computeNextAction,
@@ -86,7 +86,7 @@ export function samFactory({
         setState("sam.stepId", GetId.next().value);
         await accept({ state, props: proposal });
         setState("sam.acceptInProgress", false);
-        setState("sam.controlState", getControlState(getState("")));
+        setState("sam.controlState", getControlState(getState()));
 
         const { nextActions, _syncNap } = getNextAction(getState("sam"));
 
@@ -105,12 +105,11 @@ export function samFactory({
         await runNextAction(controller, nextActions, samStep);
 
         function getState(path) {
-          const fullPath = `${prefixedPath(path)}`;
-          return state.get(fullPath === "" ? undefined : fullPath);
+          return state.get(prefixedPath(path));
         }
 
         function setState(path, value) {
-          state.set(`${prefixedPath(path)}`, value);
+          state.set(prefixedPath(path), value);
         }
       } catch (error) {
         console.error("SAM step catched an error", error);
