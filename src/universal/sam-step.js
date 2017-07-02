@@ -193,7 +193,7 @@ export function samFactory({
     }
 
     function guardEmptyProposal(abortAction, sam) {
-      return !sam.isInit || abortAction;
+      return sam.init || !abortAction;
     }
 
     function logEmptyProposal(sam) {
