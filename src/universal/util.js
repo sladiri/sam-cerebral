@@ -25,32 +25,6 @@ export const getModulePath = curry(
     path ? `${`${prefix ? `${prefix}.` : ""}`}${path}` : prefix,
 );
 
-// TODO: Copied from Cerebral Controller for UniversalController.
-export const getSignal = curry((controller, path) => {
-  const pathArray = ensurePath(path);
-  const signalKey = pathArray.pop();
-  const module = pathArray.reduce((currentModule, key) => {
-    return currentModule ? currentModule.modules[key] : undefined;
-  }, controller.module);
-  const signal = module && module.signals[signalKey];
-
-  if (!signal) {
-    throw new Error(`There is no signal at path "${path}"`);
-  }
-
-  return signal.signal;
-});
-
-function ensurePath(path = []) {
-  if (Array.isArray(path)) {
-    return path;
-  } else if (typeof path === "string") {
-    return path.split(".");
-  }
-
-  return [];
-}
-
 export function addSamState(_prefix, state) {
   return { ...state, _prefix, _sam: {} };
 }

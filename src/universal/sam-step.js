@@ -1,5 +1,5 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
-import { getId, getModulePath, getSignal } from "./util";
+import { getId, getModulePath } from "./util";
 
 export function samFactory({
   prefix = "", // Cannot save undefined to state
@@ -245,11 +245,14 @@ export function samFactory({
     function runNextAction({ controller, nextActions, db }) {
       const napProp = { _isNap: true }; // TODO: Secure this
 
-      let args;
+      let signalRun;
+
       if (nextActions.length === 1) {
         const [signalName, signalInput = {}] = nextActions[0];
-        const signal = getSignal(controller, prefixedPath(signalName));
-        args = [signalName, signal, { ...signalInput, ...napProp }];
+        signalRun = controller.getSignal(prefixedPath(signalName))({
+          ...signalInput,
+          ...napProp,
+        });
       } else {
         const [[compoundName, proposalPromises]] = mergeActions({
           controller,
@@ -257,22 +260,16 @@ export function samFactory({
           nextActions,
           db,
         });
-        const compoundAction = Object.defineProperty(
-          async () => {
-            const proposals = await Promise.all(proposalPromises);
-            return [...proposals, napProp].reduce(
-              (acc, proposal) => ({ ...acc, ...proposal }),
-              {},
-            );
-          },
-          "name",
-          { value: compoundName },
+        const compoundAction = getCompoundSignal(
+          compoundName,
+          proposalPromises,
+          napProp,
         );
         const signal = samStepFactory(compoundAction, GetId);
-        args = [compoundName, signal, napProp];
+        signalRun = controller.run(compoundName, signal, napProp);
       }
 
-      return controller.run(...args);
+      return signalRun;
     }
   }
 }
@@ -343,6 +340,20 @@ function mergeActions({ controller, actions, nextActions, db }) {
       [...compoundNameSet.values()].join(","),
       proposalPromises,
     ]);
+}
+
+function getCompoundSignal(compoundName, proposalPromises, props) {
+  return Object.defineProperty(
+    async () => {
+      const proposals = await Promise.all(proposalPromises);
+      return [...proposals, props].reduce(
+        (acc, proposal) => ({ ...acc, ...proposal }),
+        {},
+      );
+    },
+    "name",
+    { value: compoundName },
+  );
 }
 
 export const emitNapDone = prefix => ({ controller }) => {
