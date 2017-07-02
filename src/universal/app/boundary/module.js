@@ -7,6 +7,7 @@ import {
 } from "../entity";
 import { init, increase, decrease, cancel } from "../control";
 import { router, routedFactory } from "./router";
+import { pouchdbProviderFactory } from "./persist";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
 import { napSackInit } from "../../nap-sack/boundary/module";
@@ -41,8 +42,7 @@ export default () => ({
     atmRouted: routedFactory("atm", atmInit, appInit),
   },
   catch: new Map([[Error, logError]]),
-  // Add a global provider when module instantiates
-  // provider(context, functionDetails, payload) {},
+  providers: [pouchdbProviderFactory({ inMemory: true })],
 });
 
 function logError({ props: { error } }) {

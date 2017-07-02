@@ -24,6 +24,7 @@ The SAM pattern maps to the ECB pattern:
 
 ## ToDo
 - [ ] Storage layer
+  - [x] Add PouchDB provider to Cerebral context
   - [ ] Save model to DB
   - [ ] Specify _Bolt-on Shim Layer_ in TLA+
   - [ ] Implement _Bolt-on Shim Layer_

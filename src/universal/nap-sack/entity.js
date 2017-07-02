@@ -6,7 +6,7 @@ export const defaultState = {
 
 export async function accept({ state, props: { activities } }) {
   await wait(1700);
-  if (activities) state.set("napSack.activities", activities);
+  if (activities) state.set("activities", activities);
 }
 
 export function computeControlState(model) {

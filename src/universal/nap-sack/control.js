@@ -16,9 +16,7 @@ export async function findJobBrute({ time = 1 }) {
   return { activities: shuffle(activities) };
 }
 
-export function cancel() {
-  return { cancel: true };
-}
+export function cancel() {}
 
 function shuffle(_array) {
   const array = [..._array];

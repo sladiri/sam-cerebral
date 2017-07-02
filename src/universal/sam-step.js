@@ -1,4 +1,4 @@
-import { innerJoin } from "ramda";
+import { innerJoin, memoize } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
 export function samFactory({
@@ -12,6 +12,13 @@ export function samFactory({
   preventCompoundState = true,
 }) {
   const prefixedPath = getModulePath(prefix);
+  const getPrefixedStateProxy = memoize(state =>
+    Object.keys(state).reduce((acc, key) => {
+      acc[key] = (path, ...args) => state[key](prefixedPath(path), ...args);
+      return acc;
+    }, {}),
+  );
+
   const _GetId = getId(); // Reuse this for automatic next-actions.
 
   return function samStepFactory(action, GetId = _GetId) {
@@ -31,10 +38,13 @@ export function samFactory({
 
     async function samStep(input) {
       try {
-        const { controller, state, props } = input;
+        const { controller, props, db } = input;
+        await db.init;
 
-        if (getState("sam.stepId") === undefined) {
-          setState("sam", {
+        const state = getPrefixedStateProxy(input.state);
+
+        if (state.get("sam.stepId") === undefined) {
+          state.set("sam", {
             stepId: GetId.next().value,
             init: true,
             controlState: { name: controlState, allowedActions },
@@ -46,71 +56,63 @@ export function samFactory({
           });
         }
 
-        if (!guardDisallowedAction(getState("sam"))) {
-          logDisallowedAction(props, getState("sam"));
+        if (!guardDisallowedAction(state.get("sam"))) {
+          logDisallowedAction(props, state.get("sam"));
           return;
         }
 
-        logPossibleInterrupt(props, getState("sam"));
+        logPossibleInterrupt(props, state.get("sam"));
 
-        if (!guardSignalInterrupt(props, getState("sam"))) {
-          logInterruptFailed(props, getState("sam"));
+        if (!guardSignalInterrupt(props, state.get("sam"))) {
+          logInterruptFailed(props, state.get("sam"));
           return;
         }
 
-        setState("sam.proposeInProgress", actionName);
-        const stepId = getState("sam.stepId");
+        state.set("sam.proposeInProgress", actionName);
+        const stepId = state.get("sam.stepId");
         const { _abortAction, ...proposal } = await getProposal(
           props,
           controller,
         );
 
-        if (!guardEmptyProposal(_abortAction, getState("sam"))) {
-          logEmptyProposal(getState("sam"));
-          setState("sam.proposeInProgress", false);
+        if (!guardEmptyProposal(_abortAction, state.get("sam"))) {
+          logEmptyProposal(state.get("sam"));
+          state.set("sam.proposeInProgress", false);
           emitNapDone(prefix)({ controller });
           return;
         }
 
-        if (!guardStaleProposal(stepId, getState("sam"))) {
-          logStaleProposal(props, getState("sam"));
+        if (!guardStaleProposal(stepId, state.get("sam"))) {
+          logStaleProposal(props, state.get("sam"));
           return;
         }
 
-        if (getState("sam.init")) {
-          setState("sam.init", false);
+        if (state.get("sam.init")) {
+          state.set("sam.init", false);
         }
 
-        setState("sam.proposeInProgress", false);
-        setState("sam.acceptInProgress", actionName);
-        setState("sam.stepId", GetId.next().value);
-        await accept({ state, props: proposal });
-        setState("sam.acceptInProgress", false);
-        setState("sam.controlState", getControlState(getState()));
+        state.set("sam.proposeInProgress", false);
+        state.set("sam.acceptInProgress", actionName);
+        state.set("sam.stepId", GetId.next().value);
+        await accept({ state, props: proposal, db });
+        state.set("sam.acceptInProgress", false);
+        state.set("sam.controlState", getControlState(state.get()));
 
-        const { nextActions, _syncNap } = getNextAction(getState("sam"));
+        const { nextActions, _syncNap } = getNextAction(state.get("sam"));
 
         if (nextActions.length < 1) {
-          setState("sam.napInProgress", false);
+          state.set("sam.napInProgress", false);
           emitNapDone(prefix)({ controller });
           return;
         }
 
-        setState(
+        state.set(
           "sam.napInProgress",
           nextActions.map(([name]) => name).join(","),
         );
-        setState("sam.syncNap", _syncNap);
+        state.set("sam.syncNap", _syncNap);
 
         await runNextAction(controller, nextActions, samStep);
-
-        function getState(path) {
-          return state.get(prefixedPath(path));
-        }
-
-        function setState(path, value) {
-          state.set(prefixedPath(path), value);
-        }
       } catch (error) {
         console.error("SAM step catched an error", error);
       }

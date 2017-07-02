@@ -6,7 +6,10 @@ export const defaultState = {
   count: 6,
 };
 
-export async function accept({ state, props }) {
+export async function accept({ state, props, db }) {
+  await db.foo();
+  console.log("entity", await db.local.get("dave@gmail.com").catch(e => e));
+
   const app = state.get();
   const { increment } = props;
 
