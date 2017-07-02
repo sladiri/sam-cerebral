@@ -32,16 +32,17 @@ export const routedFactory = (
   rootInitSignal = [() => {}],
 ) => [
   ({ path }) => {
-    // First page is always 'root' on server and has been initialised at this point.
+    // First page is always 'root' on server.
     if (isServerRender()) {
       return path.initialisePage();
     }
 
     const { stateIsFromServer, initialisedPages } = getPageState();
 
-    const pathKey = stateIsFromServer || initialisedPages.has(page)
-      ? "skipInit"
-      : "initialisePage";
+    const pathKey =
+      stateIsFromServer || initialisedPages.has(page)
+        ? "skipInit"
+        : "initialisePage";
 
     let initialiseRoot;
     if (page !== "root" && !initialisedPages.has("root")) {

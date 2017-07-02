@@ -7,26 +7,26 @@ import {
 } from "../entity";
 import { init, findJobBrute, cancel } from "../control";
 
-const samStep = samFactory({
-  prefix: "napSack",
-  accept,
-  computeControlState,
-  computeNextAction,
-  controlState: "normal",
-  allowedActions: ["init"],
-});
+export default () => {
+  const signals = samFactory({
+    prefix: "napSack",
+    accept,
+    computeControlState,
+    computeNextAction,
+    controlState: "normal",
+    allowedActions: ["init"],
+    actions: { init, findJobBrute, cancel },
+  });
 
-export const napSackInit = [samStep(init)];
-
-export default () => ({
-  state: defaultState,
-  signals: {
-    init: napSackInit,
-    findJobBrute: [samStep(findJobBrute)],
-    cancel: [samStep(cancel)],
-  },
-  catch: new Map([[Error, logError]]),
-});
+  return {
+    init: signals.init,
+    module: {
+      state: defaultState,
+      signals,
+      catch: new Map([[Error, logError]]),
+    },
+  };
+};
 
 function logError({ props: { error } }) {
   console.error("NapSack catched an error", error);

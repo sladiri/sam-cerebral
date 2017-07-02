@@ -3,7 +3,9 @@ import pouchMemory from "pouchdb-adapter-memory";
 
 // PouchDB.debug.enable("*");
 
-export const pouchdbProviderFactory = ({ cachedProvider, inMemory } = {}) =>
+export const pouchdbProviderFactory = (
+  { cachedProvider, inMemory = true } = {},
+) =>
   function pouchdbProvider(
     context, // The current context object, which can be mutated. You have to return the context after it has bee mutated
     // functionDetails, // The details of the action running, like name, index (id) etc.
@@ -18,12 +20,11 @@ export const pouchdbProviderFactory = ({ cachedProvider, inMemory } = {}) =>
 
         cachedProvider.foo = async () => {
           const david = await ensureDavid(local);
-          // console.log("david ready", david);
-          // console.log(
-          //   "david put",
-          //   await local.put({ ...david, age: david.age + 1 }),
-          // );
-          await local.put({ ...david, age: david.age + 1 });
+          console.log("david ready", david);
+          console.log(
+            "david put",
+            await local.put({ ...david, age: david.age + 1 }),
+          );
         };
       });
     }
@@ -76,6 +77,9 @@ async function ensureDbSync(inMemory) {
     );
   } catch (e) {
     console.log("No remote DB connected.");
+    if (hasServerSideState()) {
+      console.warn("Server side state from DB is not synced.");
+    }
     remote = null;
   }
 
@@ -104,4 +108,14 @@ async function ensureDbSync(inMemory) {
   }
 
   return { remote, local };
+}
+
+function hasServerSideState() {
+  /*eslint-disable no-undef*/
+  return (
+    typeof window !== "undefined" &&
+    window.CEREBRAL_STATE &&
+    !(window.CEREBRAL_STATE instanceof Set)
+  );
+  /*eslint-enable no-undef*/
 }

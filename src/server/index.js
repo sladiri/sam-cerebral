@@ -37,7 +37,7 @@ app.use(async ctx => {
     return;
   }
 
-  const controller = UniversalController(moduleFactory());
+  const controller = UniversalController(moduleFactory().module);
 
   // TODO: Wait for rootRouted, it is always called. Can we prevent this?
   await waitForNaps(controller, ["router", rootPageModulePrefix]);

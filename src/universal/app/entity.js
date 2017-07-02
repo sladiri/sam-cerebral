@@ -4,14 +4,12 @@ export const defaultState = {
   currentPage: null,
   currentPageLoading: false,
   count: 6,
+  david: {},
 };
 
 export async function accept({ state, props, db }) {
-  await db.foo();
-  console.log("entity", await db.local.get("dave@gmail.com").catch(e => e));
-
   const app = state.get();
-  const { increment } = props;
+  const { increment, david } = props;
 
   await wait(1200);
 
@@ -20,6 +18,14 @@ export async function accept({ state, props, db }) {
     if (Number.isSafeInteger(newValue)) {
       state.set("count", newValue);
     }
+  }
+
+  if (david) {
+    state.set("david", david);
+  } else {
+    // example
+    await db.foo();
+    state.set("david", await db.local.get("dave@gmail.com"));
   }
 }
 
@@ -46,7 +52,7 @@ export function computeNextAction(controlState) {
   }
 
   if (controlState === "big") {
-    nextActions.push(["decrease", {}]);
+    nextActions.push(["decrease", { value: 2 }]);
     allowNapInterrupt = true; // Example of cancellable NAP.
   }
 

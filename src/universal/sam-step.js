@@ -1,4 +1,4 @@
-import { innerJoin, memoize, omit, pickBy } from "ramda";
+import { innerJoin, memoize, omit, pickBy, type } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
 export function samFactory({
@@ -16,18 +16,13 @@ export function samFactory({
 
   const _GetId = getId(); // Reuse this for automatic next-actions.
 
-  return function samStepFactory(action, GetId = _GetId) {
-    if (Array.isArray(action)) {
-      const [name, tree] = action;
-      action = { name, tree };
-    } else if (!action.name) {
-      console.log("action", action);
-      throw new Error(
-        "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
-      );
-    }
+  return Object.keys(actions).reduce((acc, key) => {
+    acc[key] = [samStepFactory(actions[key])];
+    return acc;
+  }, {});
 
-    const actionName = action.name;
+  function samStepFactory(_action, GetId = _GetId) {
+    const [action, actionName] = parseAction(_action);
 
     return samStep;
 
@@ -65,10 +60,13 @@ export function samFactory({
 
         state.set("_sam.proposeInProgress", actionName);
         const stepId = state.get("_sam.stepId");
-        const { _abortAction, ...proposal } = await getProposal(
+        const { _abortAction, ...proposal } = await getProposal({
+          action,
+          actionName,
           props,
           controller,
-        );
+          db,
+        });
 
         if (!guardEmptyProposal(_abortAction, state.get("_sam"))) {
           logEmptyProposal(state.get("_sam"));
@@ -111,9 +109,12 @@ export function samFactory({
         );
         state.set("_sam.syncNap", _syncNap);
 
-        await runNextAction(controller, nextActions, samStep);
+        await runNextAction({ controller, nextActions, db });
       } catch (error) {
-        console.error("SAM step catched an error", error);
+        console.error(
+          `${getModuleName(prefix)} - SAM step catched an error`,
+          error,
+        );
       }
     }
 
@@ -131,7 +132,7 @@ export function samFactory({
     function logDisallowedAction(props, sam) {
       const { controlState, stepId } = sam;
       console.info(
-        `Disallowed action [${prefixedPath(
+        `${getModuleName(prefix)} - Disallowed action [${prefixedPath(
           actionName,
         )}] blocked in control-state [${controlState.name}] in step-ID [${stepId}]. Props:`,
         props,
@@ -145,7 +146,9 @@ export function samFactory({
         (proposeInProgress && napInProgress && !syncNap)
       ) {
         console.info(
-          `Possible cancelation by action [${prefixedPath(
+          `${getModuleName(
+            prefix,
+          )} - Possible cancelation by action [${prefixedPath(
             actionName,
           )}] for pending action [${prefixedPath(
             proposeInProgress,
@@ -168,21 +171,11 @@ export function samFactory({
           )}] (NAP) for control-state [${controlState.name}]`
         : `accept for action [${acceptInProgress}]`;
       console.info(
-        `Blocked action [${prefixedPath(
+        `${getModuleName(prefix)} - Blocked action [${prefixedPath(
           actionName,
         )}], ${progressMsg} in progress in step-ID [${stepId}]. Props:`,
         props,
       );
-    }
-
-    async function getProposal(props, controller) {
-      const proposal = await (action.tree
-        ? controller.run(actionName, action.tree, props)
-        : action({ props }));
-
-      return proposal !== undefined && Object.keys(proposal).length > 0
-        ? proposal
-        : { _abortAction: true };
     }
 
     function guardEmptyProposal(abortAction, sam) {
@@ -191,7 +184,9 @@ export function samFactory({
 
     function logEmptyProposal(sam) {
       console.info(
-        `Aborted empty proposal from action [${prefixedPath(
+        `${getModuleName(
+          prefix,
+        )} - Aborted empty proposal from action [${prefixedPath(
           actionName,
         )}] in step-ID [${sam.stepId}].`,
       );
@@ -204,7 +199,9 @@ export function samFactory({
 
     function logStaleProposal(props, sam) {
       console.info(
-        `Canceled (stale) proposal from action [${prefixedPath(
+        `${getModuleName(
+          prefix,
+        )} - Canceled (stale) proposal from action [${prefixedPath(
           actionName,
         )}] in step-ID [${sam.stepId}]. Props:`,
         props,
@@ -220,7 +217,9 @@ export function samFactory({
 
       if (preventCompoundState && states.length > 1) {
         const names = states.map(([name]) => name).join(";");
-        throw new Error("State is compound state:", names);
+        throw new Error(
+          `${getModuleName(prefix)} - State is compound state: ${names}`,
+        );
       }
 
       const [[name, allowedActions]] = mergeControlStates(states);
@@ -235,13 +234,15 @@ export function samFactory({
       ) || [[]];
 
       if (!Array.isArray(nextActions)) {
-        throw new Error(`Invalid NAP after action [${actionName}]`);
+        throw new Error(
+          `${getModuleName(prefix)} - Invalid NAP after action [${actionName}]`,
+        );
       }
 
       return { nextActions, _syncNap: !allowNapInterrupt };
     }
 
-    function runNextAction(controller, nextActions) {
+    function runNextAction({ controller, nextActions, db }) {
       const napProp = { _isNap: true }; // TODO: Secure this
 
       let args;
@@ -250,10 +251,12 @@ export function samFactory({
         const signal = getSignal(controller, prefixedPath(signalName));
         args = [signalName, signal, { ...signalInput, ...napProp }];
       } else {
-        const [[compoundName, proposalPromises]] = mergeActions(
+        const [[compoundName, proposalPromises]] = mergeActions({
+          controller,
           actions,
           nextActions,
-        );
+          db,
+        });
         const compoundAction = Object.defineProperty(
           async () => {
             const proposals = await Promise.all(proposalPromises);
@@ -271,7 +274,32 @@ export function samFactory({
 
       return controller.run(...args);
     }
-  };
+  }
+}
+
+function parseAction(action) {
+  if (Array.isArray(action)) {
+    const [name, tree] = action;
+    action = { name, tree };
+  }
+
+  if (!action.name) {
+    console.log("action", action);
+    throw new Error(
+      "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
+    );
+  }
+  return [action, action.name];
+}
+
+async function getProposal({ action, actionName, props, controller, db }) {
+  const proposal = await (action.tree
+    ? controller.run(actionName, action.tree, props)
+    : action({ props, db }));
+
+  return proposal !== undefined && Object.keys(proposal).length > 0
+    ? proposal
+    : { _abortAction: true };
 }
 
 function mergeControlStates(states) {
@@ -290,7 +318,7 @@ function mergeControlStates(states) {
     ]);
 }
 
-function mergeActions(actions, nextActions) {
+function mergeActions({ controller, actions, nextActions, db }) {
   return nextActions
     .reduce(
       (
@@ -298,9 +326,15 @@ function mergeActions(actions, nextActions) {
         [signalName, signalInput = {}],
       ) => {
         compoundNameSet.add(signalName);
-        proposalPromises.push(
-          Promise.resolve(actions[signalName]({ props: signalInput })),
-        );
+        const [action, actionName] = parseAction(actions[signalName]);
+        const proposal = getProposal({
+          action,
+          actionName,
+          signalInput,
+          controller,
+          db,
+        });
+        proposalPromises.push(proposal);
         return [[compoundNameSet, proposalPromises]];
       },
       [[new Set(), []]],
@@ -324,7 +358,8 @@ const getPrefixedStateProxy = prefixedPath =>
         let result = state[key](statePath, ...args);
         if (scoped && result) {
           result = pickBy((val, key) => {
-            return !result[key]._prefix;
+            const field = result[key];
+            return !type(field) !== "Object" || field._prefix === undefined;
           }, result);
           result = omit(["_sam", "_prefix"], result);
         }
@@ -333,3 +368,10 @@ const getPrefixedStateProxy = prefixedPath =>
       return acc;
     }, {}),
   );
+
+const getModuleName = name => (name === "" ? "root" : name);
+
+export const addSamState = (_prefix, object) =>
+  object.signals
+    ? { ...object, state: { ...object.state, _prefix, _sam: {} } }
+    : { ...object, _prefix, _sam: {} };

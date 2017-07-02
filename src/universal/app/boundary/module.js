@@ -1,4 +1,4 @@
-import { samFactory } from "../../sam-step";
+import { samFactory, addSamState } from "../../sam-step";
 import {
   defaultState,
   accept,
@@ -10,47 +10,50 @@ import { router, routedFactory } from "./router";
 import { pouchdbProviderFactory } from "./persist";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
-import { napSackInit } from "../../nap-sack/boundary/module";
-import { atmInit } from "../../atm/boundary/module";
 
-const samStep = samFactory({
-  accept,
-  computeControlState,
-  computeNextAction,
-  controlState: "normal",
-  allowedActions: ["init", "rootRouted", "napSackRouted", "atmRouted"], // init required for server-side-rendering
-  actions: { init, increase, decrease, cancel },
-});
+const pouchProvider = pouchdbProviderFactory({ inMemory: true });
 
-const appInit = [samStep(init)];
+export default () => {
+  const signals = samFactory({
+    accept,
+    computeControlState,
+    computeNextAction,
+    controlState: "normal",
+    allowedActions: ["init"], // init required for server-side-rendering
+    actions: {
+      init, // init is required for server-side-rendering
+      increase: ["increase", [increase]], // Example of action-tree.
+      decrease,
+      cancel,
+    },
+  });
 
-export default () => ({
-  modules: {
-    router,
-    napSack: addSamState("napSack", napSackFactory()),
-    atm: addSamState("atm", atmFactory()),
-  },
-  state: addSamState("", defaultState),
-  signals: {
-    // name: ...stuff outside of SAM, "blocking" SAM stuff,
-    init: appInit, // init required for server-side-rendering
-    increase: [samStep(["increase", [increase]])], // Example of action-tree.
-    decrease: [samStep(decrease)],
-    cancel: [samStep(cancel)],
-    rootRouted: routedFactory("root", appInit),
-    napSackRouted: routedFactory("napSack", napSackInit, appInit),
-    atmRouted: routedFactory("atm", atmInit, appInit),
-  },
-  catch: new Map([[Error, logError]]),
-  providers: [pouchdbProviderFactory({ inMemory: true })],
-});
+  const appInit = signals.init;
+
+  const napSack = napSackFactory();
+  const atm = atmFactory();
+
+  return {
+    init: appInit,
+    module: {
+      modules: {
+        router,
+        napSack: addSamState("napSack", napSack.module),
+        atm: addSamState("atm", atm.module),
+      },
+      state: addSamState("", defaultState),
+      signals: {
+        ...signals,
+        rootRouted: routedFactory("root", appInit),
+        napSackRouted: routedFactory("napSack", napSack.init, appInit),
+        atmRouted: routedFactory("atm", atm.init, appInit),
+      },
+      catch: new Map([[Error, logError]]),
+      providers: [pouchProvider],
+    },
+  };
+};
 
 function logError({ props: { error } }) {
   console.error("App catched an error", error);
-}
-
-function addSamState(_prefix, object) {
-  return object.signals
-    ? { ...object, state: { ...object.state, _prefix, _sam: {} } }
-    : { ...object, _prefix, _sam: {} };
 }

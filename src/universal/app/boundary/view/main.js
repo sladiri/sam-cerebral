@@ -12,6 +12,7 @@ export const views = {
   normal: ({
     currentPage,
     currentPageLoading,
+    david,
     actions,
     styles = Styles,
     arrow = () => null,
@@ -45,15 +46,14 @@ export const views = {
         )}
       >
         <p>
-          <a href="/">root</a>
-        </p>
-        <p>
-          <a href="/napsack">napsack</a>
-        </p>
-        <p>
+          <a href="/">root</a>, <a href="/napsack">napsack</a>,{" "}
           <a href="/atm">atm</a>
         </p>
+
         <SamStateIndicator styles={styles} />
+        <p>
+          App DB: {david._id} {david.age}
+        </p>
         {page}
 
         {/* TODO: Use token value in hidden input field in forms. */}
