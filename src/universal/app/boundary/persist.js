@@ -112,10 +112,6 @@ async function ensureDbSync(inMemory) {
 
 function hasServerSideState() {
   /*eslint-disable no-undef*/
-  return (
-    typeof window !== "undefined" &&
-    window.CEREBRAL_STATE &&
-    !(window.CEREBRAL_STATE instanceof Set)
-  );
+  return typeof window !== "undefined" && !!window.CEREBRAL_STATE;
   /*eslint-enable no-undef*/
 }
