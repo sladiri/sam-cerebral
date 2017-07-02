@@ -6,7 +6,7 @@ import { views } from "./main";
 
 export default connect(
   {
-    controlStateName: state`sam.controlState.name`,
+    controlStateName: state`_sam.controlState.name`,
     currentPage: state`currentPage`,
     currentPageLoading: state`currentPageLoading`,
     increase: signal`increase`,

@@ -1,8 +1,8 @@
-import { innerJoin, memoize } from "ramda";
+import { innerJoin, memoize, omit, pickBy } from "ramda";
 import { getId, getModulePath, getSignal } from "./util";
 
 export function samFactory({
-  prefix,
+  prefix = "", // Cannot save undefined to state
   accept,
   computeControlState,
   computeNextAction,
@@ -12,12 +12,7 @@ export function samFactory({
   preventCompoundState = true,
 }) {
   const prefixedPath = getModulePath(prefix);
-  const getPrefixedStateProxy = memoize(state =>
-    Object.keys(state).reduce((acc, key) => {
-      acc[key] = (path, ...args) => state[key](prefixedPath(path), ...args);
-      return acc;
-    }, {}),
-  );
+  const prefixedStateProxy = getPrefixedStateProxy(prefixedPath);
 
   const _GetId = getId(); // Reuse this for automatic next-actions.
 
@@ -41,10 +36,10 @@ export function samFactory({
         const { controller, props, db } = input;
         await db.init;
 
-        const state = getPrefixedStateProxy(input.state);
+        const state = prefixedStateProxy(input.state);
 
-        if (state.get("sam.stepId") === undefined) {
-          state.set("sam", {
+        if (state.get("_sam.stepId") === undefined) {
+          state.set("_sam", {
             stepId: GetId.next().value,
             init: true,
             controlState: { name: controlState, allowedActions },
@@ -56,61 +51,65 @@ export function samFactory({
           });
         }
 
-        if (!guardDisallowedAction(state.get("sam"))) {
-          logDisallowedAction(props, state.get("sam"));
+        if (!guardDisallowedAction(state.get("_sam"))) {
+          logDisallowedAction(props, state.get("_sam"));
           return;
         }
 
-        logPossibleInterrupt(props, state.get("sam"));
+        logPossibleInterrupt(props, state.get("_sam"));
 
-        if (!guardSignalInterrupt(props, state.get("sam"))) {
-          logInterruptFailed(props, state.get("sam"));
+        if (!guardSignalInterrupt(props, state.get("_sam"))) {
+          logInterruptFailed(props, state.get("_sam"));
           return;
         }
 
-        state.set("sam.proposeInProgress", actionName);
-        const stepId = state.get("sam.stepId");
+        state.set("_sam.proposeInProgress", actionName);
+        const stepId = state.get("_sam.stepId");
         const { _abortAction, ...proposal } = await getProposal(
           props,
           controller,
         );
 
-        if (!guardEmptyProposal(_abortAction, state.get("sam"))) {
-          logEmptyProposal(state.get("sam"));
-          state.set("sam.proposeInProgress", false);
+        if (!guardEmptyProposal(_abortAction, state.get("_sam"))) {
+          logEmptyProposal(state.get("_sam"));
+          state.set("_sam.proposeInProgress", false);
           emitNapDone(prefix)({ controller });
           return;
         }
 
-        if (!guardStaleProposal(stepId, state.get("sam"))) {
-          logStaleProposal(props, state.get("sam"));
+        if (!guardStaleProposal(stepId, state.get("_sam"))) {
+          logStaleProposal(props, state.get("_sam"));
           return;
         }
 
-        if (state.get("sam.init")) {
-          state.set("sam.init", false);
+        if (state.get("_sam.init")) {
+          state.set("_sam.init", false);
         }
 
-        state.set("sam.proposeInProgress", false);
-        state.set("sam.acceptInProgress", actionName);
-        state.set("sam.stepId", GetId.next().value);
-        await accept({ state, props: proposal, db });
-        state.set("sam.acceptInProgress", false);
-        state.set("sam.controlState", getControlState(state.get()));
+        state.set("_sam.proposeInProgress", false);
+        state.set("_sam.acceptInProgress", actionName);
+        state.set("_sam.stepId", GetId.next().value);
+        await accept({
+          state: prefixedStateProxy(input.state, true),
+          props: proposal,
+          db,
+        });
+        state.set("_sam.acceptInProgress", false);
+        state.set("_sam.controlState", getControlState(state.get()));
 
-        const { nextActions, _syncNap } = getNextAction(state.get("sam"));
+        const { nextActions, _syncNap } = getNextAction(state.get("_sam"));
 
         if (nextActions.length < 1) {
-          state.set("sam.napInProgress", false);
+          state.set("_sam.napInProgress", false);
           emitNapDone(prefix)({ controller });
           return;
         }
 
         state.set(
-          "sam.napInProgress",
+          "_sam.napInProgress",
           nextActions.map(([name]) => name).join(","),
         );
-        state.set("sam.syncNap", _syncNap);
+        state.set("_sam.syncNap", _syncNap);
 
         await runNextAction(controller, nextActions, samStep);
       } catch (error) {
@@ -178,13 +177,7 @@ export function samFactory({
 
     async function getProposal(props, controller) {
       const proposal = await (action.tree
-        ? do {
-            let args = [actionName, action.tree, props];
-            // if (input.controller.constructor.name === "UniversalController") {
-            //   args = drop(1, args);
-            // }
-            controller.run(...args); // This shows up as separate signal in the debugger.
-          }
+        ? controller.run(actionName, action.tree, props)
         : action({ props }));
 
       return proposal !== undefined && Object.keys(proposal).length > 0
@@ -276,10 +269,6 @@ export function samFactory({
         args = [compoundName, signal, napProp];
       }
 
-      // if (controller.constructor.name === "UniversalController") {
-      //   args = drop(1, args);
-      // }
-
       return controller.run(...args);
     }
   };
@@ -325,3 +314,22 @@ function mergeActions(actions, nextActions) {
 export const emitNapDone = prefix => ({ controller }) => {
   controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
 };
+
+const getPrefixedStateProxy = prefixedPath =>
+  memoize((state, scoped) =>
+    Object.keys(state).reduce((acc, key) => {
+      acc[key] = (statePath, ...args) => {
+        statePath = prefixedPath(statePath);
+        if (statePath === "") statePath = undefined;
+        let result = state[key](statePath, ...args);
+        if (scoped && result) {
+          result = pickBy((val, key) => {
+            return !result[key]._prefix;
+          }, result);
+          result = omit(["_sam", "_prefix"], result);
+        }
+        return result;
+      };
+      return acc;
+    }, {}),
+  );

@@ -50,3 +50,7 @@ function ensurePath(path = []) {
 
   return [];
 }
+
+export function addSamState(_prefix, state) {
+  return { ...state, _prefix, _sam: {} };
+}

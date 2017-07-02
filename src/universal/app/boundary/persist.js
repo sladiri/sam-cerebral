@@ -18,11 +18,12 @@ export const pouchdbProviderFactory = ({ cachedProvider, inMemory } = {}) =>
 
         cachedProvider.foo = async () => {
           const david = await ensureDavid(local);
-          console.log("david ready", david);
-          console.log(
-            "david put",
-            await local.put({ ...david, age: david.age + 1 }),
-          );
+          // console.log("david ready", david);
+          // console.log(
+          //   "david put",
+          //   await local.put({ ...david, age: david.age + 1 }),
+          // );
+          await local.put({ ...david, age: david.age + 1 });
         };
       });
     }
@@ -35,8 +36,9 @@ async function ensureDavid(db) {
   let response;
 
   response = await db.get(_id).catch(e => e);
-  if (!response.error)
+  if (!response.error) {
     return response.retrieved ? response : { ...response, retrieved: true };
+  }
 
   const david = {
     _id,
@@ -45,10 +47,11 @@ async function ensureDavid(db) {
     ran: `${Math.random()}`,
   };
   response = await db.put(david).then(o => ({ _rev: o.rev })).catch(e => e);
-  if (!response.error)
+  if (!response.error) {
     return response.created
       ? { ...response, ...david }
       : { ...response, ...david, created: true };
+  }
 }
 
 async function ensureDbSync(inMemory) {
@@ -72,7 +75,8 @@ async function ensureDbSync(inMemory) {
       response.rows.map(r => `${r.id}, ${r.value.rev}`),
     );
   } catch (e) {
-    console.warn("No remote DB connected.");
+    console.log("No remote DB connected.");
+    remote = null;
   }
 
   const local = new PouchDB("local_mydb", localDbOptions);

@@ -27,10 +27,10 @@ const appInit = [samStep(init)];
 export default () => ({
   modules: {
     router,
-    napSack: addSamState(napSackFactory()),
-    atm: addSamState(atmFactory()),
+    napSack: addSamState("napSack", napSackFactory()),
+    atm: addSamState("atm", atmFactory()),
   },
-  state: addSamState(defaultState),
+  state: addSamState("", defaultState),
   signals: {
     // name: ...stuff outside of SAM, "blocking" SAM stuff,
     init: appInit, // init required for server-side-rendering
@@ -49,6 +49,8 @@ function logError({ props: { error } }) {
   console.error("App catched an error", error);
 }
 
-function addSamState(state) {
-  return { ...state, sam: {} };
+function addSamState(_prefix, object) {
+  return object.signals
+    ? { ...object, state: { ...object.state, _prefix, _sam: {} } }
+    : { ...object, _prefix, _sam: {} };
 }

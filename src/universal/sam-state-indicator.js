@@ -10,11 +10,14 @@ export default (prefix, name = "StateIndicator") =>
     {
       proposeInProgress: state`${getModulePath(
         prefix,
-        "sam.proposeInProgress",
+        "_sam.proposeInProgress",
       )}`,
-      acceptInProgress: state`${getModulePath(prefix, "sam.acceptInProgress")}`,
-      napInProgress: state`${getModulePath(prefix, "sam.napInProgress")}`,
-      syncNap: state`${getModulePath(prefix, "sam.syncNap")}`,
+      acceptInProgress: state`${getModulePath(
+        prefix,
+        "_sam.acceptInProgress",
+      )}`,
+      napInProgress: state`${getModulePath(prefix, "_sam.napInProgress")}`,
+      syncNap: state`${getModulePath(prefix, "_sam.syncNap")}`,
     },
     Object.defineProperty(
       ({
@@ -38,9 +41,8 @@ export default (prefix, name = "StateIndicator") =>
                 "p",
                 {
                   style: {
-                    textDecoration: syncNap || !napInProgress
-                      ? "none"
-                      : "line-through",
+                    textDecoration:
+                      syncNap || !napInProgress ? "none" : "line-through",
                     opacity: napInProgress ? 1 : 0.5,
                   },
                 },
