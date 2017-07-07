@@ -11,7 +11,6 @@ const SamStateIndicator = samStateIndicator();
 export const views = {
   normal: ({
     currentPage,
-    currentPageLoading,
     david,
     actions,
     styles = Styles,
@@ -39,12 +38,7 @@ export const views = {
     }
 
     return (
-      <div
-        className={classNames(
-          styles.view,
-          currentPageLoading && styles.pageLoading,
-        )}
-      >
+      <div className={styles.view}>
         <p>
           <a href="/">root</a>, <a href="/napsack">napsack</a>,{" "}
           <a href="/atm">atm</a>

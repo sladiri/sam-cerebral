@@ -6,14 +6,14 @@ import {
   computeNextAction,
 } from "../entity";
 import { init, increase, decrease, cancel } from "../control";
-import { router, routedFactory } from "./router";
+import routerFactory from "./router";
 import { pouchdbProviderFactory } from "./persist";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
 
 const pouchProvider = pouchdbProviderFactory({ inMemory: true });
 
-export default () => {
+export default (routerptions) => {
   const signals = samFactory({
     accept,
     computeControlState,
@@ -32,6 +32,8 @@ export default () => {
 
   const napSack = napSackFactory();
   const atm = atmFactory();
+
+  const { router, routedFactory } = routerFactory(routerptions);
 
   return {
     init: appInit,

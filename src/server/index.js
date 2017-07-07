@@ -9,7 +9,9 @@ import { Container } from "cerebral/react";
 import { renderToString } from "react-dom/server";
 import { moduleFactory, routeMap, view } from "../universal/app/boundary";
 
-process.on("unhandledRejection", r => console.log(r));
+process.on("unhandledRejection", error => {
+  console.error("unhandledRejection\n", error);
+});
 
 const app = new Koa();
 
@@ -26,6 +28,7 @@ app.use(async (ctx, next) => {
   }
 });
 
+let workAroundNumber = 0;
 app.use(async ctx => {
   const { page: rootPage, module: rootPageModulePrefix } = routeMap["/"];
   const { page: currentPage, module: pageModulePrefix } =
@@ -37,18 +40,27 @@ app.use(async ctx => {
     return;
   }
 
-  const controller = UniversalController(moduleFactory().module);
+  const controller = UniversalController(
+    moduleFactory({ workAroundNumber }).module,
+  );
 
-  // TODO: Wait for rootRouted, it is always called. Can we prevent this?
-  await waitForNaps(controller, ["router", rootPageModulePrefix]);
-
+  // Check router documentation for "workAroundNumber".
+  workAroundNumber = getNextWorkaroundNumber(workAroundNumber);
+  const pagesToInit = [
+    waitForNap(controller, rootPageModulePrefix, [
+      "rootRouted",
+      { workAroundNumber },
+    ]),
+  ];
   if (currentPage !== rootPage) {
-    await waitForNaps(
-      controller,
-      ["router", pageModulePrefix],
-      [controller.module.signals[`${currentPage}Routed`].signal],
+    pagesToInit.push(
+      waitForNap(controller, pageModulePrefix, [
+        `${currentPage}Routed`,
+        { workAroundNumber },
+      ]),
     );
   }
+  await Promise.all(pagesToInit);
 
   const script = controller.getScript();
   const html = renderToString(h(Container, { controller }, h(view)));
@@ -75,21 +87,23 @@ app.use(async ctx => {
 app.listen(3000);
 console.log("Listening on http://localhost:3000");
 
-function waitForNaps(controller, prefixes, [signal, payload] = []) {
-  const napsDone = Promise.all(
-    prefixes.map(
-      prefix =>
-        new Promise((resolve, reject) => {
-          try {
-            controller.once(`napDone${prefix ? `-${prefix}` : ""}`, resolve);
-          } catch (error) {
-            reject(error);
-          }
-        }),
-    ),
-  );
-  if (signal) {
-    controller.runSequence(signal, payload);
+function waitForNap(controller, prefix, [sequence, payload] = []) {
+  const napDone = new Promise((resolve, reject) => {
+    try {
+      controller.once(`napDone${prefix ? `-${prefix}` : ""}`, resolve);
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+  if (sequence) {
+    const signal = controller.getSignal(sequence);
+    signal(payload);
   }
-  return napsDone;
+
+  return napDone;
+}
+
+function getNextWorkaroundNumber(workAroundNumber) {
+  return workAroundNumber + 1 > 7 ? 0 : workAroundNumber + 1;
 }

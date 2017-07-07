@@ -63,10 +63,4 @@ export const styles = {
       maxWidth: "20rem",
     },
   }),
-
-  pageLoading: Style.registerStyle({
-    section: {
-      opacity: 0.5,
-    },
-  }),
 };

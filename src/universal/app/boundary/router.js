@@ -2,7 +2,6 @@ import Router from "@cerebral/router";
 import { parallel } from "cerebral";
 import { set, when } from "cerebral/operators";
 import { state, props } from "cerebral/tags";
-import { emitNapDone } from "../../sam-step";
 
 export const routeMap = {
   "/": {
@@ -24,51 +23,66 @@ const routes = Object.entries(routeMap).map(([key, val]) => ({
   signal: `${val.page}Routed`,
 }));
 
-export const router = Router({ routes });
+/**
+ * getRouterFactory
+ * 
+ * workAroundNumber (server-side rendering only)
+ * Requests do not match URL in browser, there seem to be a stray requests.
+ * Filter these with "workaroundNumber".
+ * TODO: Is this a bug?
+ */
+export default ({ workAroundNumber } = {}) => {
+  const router = Router({ routes });
+  const routedFactory = (
+    page,
+    initSignal = [() => {}],
+    rootInitSignal = [() => {}],
+  ) => [
+    ({ path, props }) => {
+      if (isServerRender()) {
+        if (
+          props.workAroundNumber === undefined ||
+          props.workAroundNumber === workAroundNumber
+        ) {
+          return path.skipAll();
+        }
 
-export const routedFactory = (
-  page,
-  initSignal = [() => {}],
-  rootInitSignal = [() => {}],
-) => [
-  ({ path }) => {
-    // First page is always 'root' on server.
-    if (isServerRender()) {
-      return path.initialisePage();
-    }
+        return path.initialisePage({ page });
+      }
 
-    const { stateIsFromServer, initialisedPages } = getPageState();
+      const { stateIsFromServer, initialisedPages } = getPageState();
 
-    const pathKey =
-      stateIsFromServer || initialisedPages.has(page)
-        ? "skipInit"
-        : "initialisePage";
+      const pathKey =
+        stateIsFromServer || initialisedPages.has(page)
+          ? "skipInit"
+          : "initialisePage";
 
-    let initialiseRoot;
-    if (page !== "root" && !initialisedPages.has("root")) {
-      initialisedPages.add("root");
-      initialiseRoot = true;
-    }
+      let initialiseRoot;
+      if (page !== "root" && !initialisedPages.has("root")) {
+        initialisedPages.add("root");
+        initialiseRoot = true;
+      }
 
-    initialisedPages.add(page);
+      initialisedPages.add(page);
 
-    return path[pathKey]({ initialiseRoot });
-  },
-  {
-    skipInit: [set(state`currentPage`, page)],
-    initialisePage: [
-      set(state`currentPageLoading`, true),
-      set(state`currentPage`, page),
-      when(props`initialiseRoot`),
-      {
-        false: [initSignal],
-        true: [parallel([rootInitSignal, initSignal])],
-      },
-      set(state`currentPageLoading`, false),
-      emitNapDone("router"),
-    ],
-  },
-];
+      return path[pathKey]({ page, initialiseRoot });
+    },
+    {
+      skipAll: [],
+      skipInit: [set(state`currentPage`, page)],
+      initialisePage: [
+        set(state`currentPage`, props`page`),
+        when(props`initialiseRoot`),
+        {
+          false: [initSignal],
+          true: [parallel([rootInitSignal, initSignal])],
+        },
+      ],
+    },
+  ];
+
+  return { router, routedFactory };
+};
 
 function isServerRender() {
   /*eslint-disable no-undef*/

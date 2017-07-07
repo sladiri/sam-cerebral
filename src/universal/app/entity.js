@@ -2,7 +2,6 @@ import { wait } from "../util";
 
 export const defaultState = {
   currentPage: null,
-  currentPageLoading: false,
   count: 6,
   david: {},
 };
