@@ -10,9 +10,10 @@ export const pouchdbProviderFactory = (opts = {}) =>
     // payload, // The current payload passed to the action
     // prevPayload, // The previous payload
   ) {
-    const { cachedProvider = {}, inMemory = true } = opts;
+    const { cachedProvider = {}, ...pouchOptions } = opts;
+
     if (!cachedProvider.init) {
-      cachedProvider.init = ensureDbSync(inMemory).then(databases => {
+      cachedProvider.init = ensureDbSync(pouchOptions).then(databases => {
         const { local } = databases;
         cachedProvider.local = local;
 
@@ -53,9 +54,9 @@ async function ensureDavid(db) {
   }
 }
 
-async function ensureDbSync(inMemory) {
+async function ensureDbSync(options) {
   const localDbOptions = {};
-  if (inMemory) {
+  if (options.inMemory) {
     PouchDB.plugin(pouchMemory);
     localDbOptions.adapter = "memory";
   }

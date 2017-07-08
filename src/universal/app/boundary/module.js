@@ -11,9 +11,10 @@ import { pouchdbProviderFactory } from "./persist";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
 
-const pouchProvider = pouchdbProviderFactory({ inMemory: true });
+const pouchOptions = { inMemory: true };
+const cachedProvider = getCachedPouchProvider(pouchOptions);
 
-export default (routerptions) => {
+export default routerptions => {
   const signals = samFactory({
     accept,
     computeControlState,
@@ -28,34 +29,44 @@ export default (routerptions) => {
     },
   });
 
-  const appInit = signals.init;
+  const appInitSignal = signals.init;
 
-  const napSack = napSackFactory();
-  const atm = atmFactory();
+  const { module: napSackModule, init: napSackInitSignal } = napSackFactory();
+  const { module: atmModule, init: atmInitSignal } = atmFactory();
 
-  const { router, routedFactory } = routerFactory(routerptions);
+  const { router, routedSignalFactory } = routerFactory(routerptions);
 
   return {
-    init: appInit,
+    init: appInitSignal,
     module: {
       modules: {
         router,
-        napSack: addSamState("napSack", napSack.module),
-        atm: addSamState("atm", atm.module),
+        napSack: addSamState("napSack", napSackModule),
+        atm: addSamState("atm", atmModule),
       },
       state: addSamState("", defaultState),
       signals: {
         ...signals,
-        rootRouted: routedFactory("root", appInit),
-        napSackRouted: routedFactory("napSack", napSack.init, appInit),
-        atmRouted: routedFactory("atm", atm.init, appInit),
+        rootRouted: routedSignalFactory("root", appInitSignal),
+        napSackRouted: routedSignalFactory(
+          "napSack",
+          napSackInitSignal,
+          appInitSignal,
+        ),
+        atmRouted: routedSignalFactory("atm", atmInitSignal, appInitSignal),
       },
       catch: new Map([[Error, logError]]),
-      providers: [pouchProvider],
+      providers: [pouchdbProviderFactory({ ...pouchOptions, cachedProvider })],
     },
   };
 };
 
 function logError({ props: { error } }) {
   console.error("App catched an error", error);
+}
+
+function getCachedPouchProvider(pouchOptions) {
+  const pouchProvider = pouchdbProviderFactory(pouchOptions);
+  const { db: cachedProvider } = pouchProvider({});
+  return cachedProvider;
 }

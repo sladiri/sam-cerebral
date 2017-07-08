@@ -33,7 +33,8 @@ const routes = Object.entries(routeMap).map(([key, val]) => ({
  */
 export default ({ workAroundNumber } = {}) => {
   const router = Router({ routes });
-  const routedFactory = (
+
+  const routedSignalFactory = (
     page,
     initSignal = [() => {}],
     rootInitSignal = [() => {}],
@@ -81,7 +82,7 @@ export default ({ workAroundNumber } = {}) => {
     },
   ];
 
-  return { router, routedFactory };
+  return { router, routedSignalFactory };
 };
 
 function isServerRender() {
