@@ -11,7 +11,7 @@ const controller = Controller({
   ...moduleFactory().module,
   devtools: Devtools({
     host: "localhost:8585",
-    reconnect: true,
+    reconnect: false,
     preventExternalMutations: true, // TODO: This causes a bug, if used state is not inside a subobject.
   }),
 });
