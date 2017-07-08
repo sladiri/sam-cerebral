@@ -3,6 +3,7 @@ import { state } from "cerebral/tags";
 
 export const appViewModel = compute(function appViewModel(get) {
   return {
-    count: get(state`entity.count`),
+    count: get(state`count`),
+    david: get(state`david`),
   };
 });

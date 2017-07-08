@@ -3,12 +3,13 @@ import { state, signal } from "cerebral/tags";
 import { wrap } from "react-free-style";
 import { Style } from "./styles";
 import { views } from "./main";
+import { appViewModel } from "./computed";
 
 export default connect(
   {
     controlStateName: state`_sam.controlState.name`,
     currentPage: state`currentPage`,
-    david: state`entity.david`,
+    model: appViewModel,
     increase: signal`increase`,
     decrease: signal`decrease`,
     cancel: signal`cancel`,

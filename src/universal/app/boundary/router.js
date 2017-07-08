@@ -1,3 +1,5 @@
+import Router from "@cerebral/router";
+
 export const routeMap = {
   "/": {
     page: "root",
@@ -13,7 +15,9 @@ export const routeMap = {
   },
 };
 
-export const routes = Object.entries(routeMap).map(([key, val]) => ({
+const routes = Object.entries(routeMap).map(([key, val]) => ({
   path: key,
   signal: `${val.page}Routed`,
 }));
+
+export default Router({ routes });

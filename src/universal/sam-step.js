@@ -1,7 +1,6 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
 import { compute } from "cerebral";
 import { state, props } from "cerebral/tags";
-import Router from "@cerebral/router";
 import { parallel } from "cerebral";
 import { set, when } from "cerebral/operators";
 import { getId, getModulePath } from "./util";
@@ -90,9 +89,7 @@ export function samFactory({
         state.set("_sam.proposeInProgress", false);
         state.set("_sam.acceptInProgress", actionName);
         state.set("_sam.stepId", GetId.next().value);
-        const entityState = getPrefixedStateProxy(
-          getModulePath(getModulePath(prefix, "entity")),
-        )(input.state, true);
+        const entityState = prefixedStateProxy(input.state, true);
         await accept({
           state: entityState,
           props: proposal,
@@ -387,8 +384,8 @@ const getModuleName = name => (name === "" ? "root" : name);
 
 export const addSamState = (_prefix, object) =>
   object.signals
-    ? { ...object, state: { _prefix, _sam: {}, entity: object.state } }
-    : { _prefix, _sam: {}, entity: object };
+    ? { ...object, state: { _prefix, _sam: {}, ...object.state } }
+    : { _prefix, _sam: {}, ...object };
 
 export const actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {
@@ -418,9 +415,7 @@ export const cancelDisabled = prefix =>
  * Filter these with "workaroundNumber".
  * TODO: Is this a bug?
  */
-export const getRoutedFactory = ({ workAroundNumber, routes } = {}) => {
-  const router = Router({ routes });
-
+export const getRoutedFactory = workAroundNumber => {
   const routedSignalFactory = (
     page,
     initSignal = [() => {}],
@@ -469,7 +464,7 @@ export const getRoutedFactory = ({ workAroundNumber, routes } = {}) => {
     },
   ];
 
-  return { router, routedSignalFactory };
+  return routedSignalFactory;
 };
 
 function isServerRender() {

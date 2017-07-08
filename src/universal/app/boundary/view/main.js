@@ -11,7 +11,7 @@ const SamStateIndicator = samStateIndicator();
 export const views = {
   normal: ({
     currentPage,
-    david,
+    model: { david },
     actions,
     styles = Styles,
     arrow = () => null,

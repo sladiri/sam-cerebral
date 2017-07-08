@@ -2,7 +2,7 @@ import { connect } from "cerebral/react";
 import { props, signal } from "cerebral/tags";
 import { addButtonStyles } from "../../../computed.js";
 import { actionsDisabled, cancelDisabled } from "../../../sam-step";
-import { napSackViewModel } from "../computed";
+import { napSackViewModel } from "./computed";
 import view from "./view";
 
 export default connect(

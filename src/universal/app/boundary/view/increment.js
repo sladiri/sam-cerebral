@@ -4,7 +4,7 @@ import { connect } from "cerebral/react";
 import { props } from "cerebral/tags";
 import { addButtonStyles } from "../../../computed";
 import { actionsDisabled, cancelDisabled } from "../../../sam-step.js";
-import { appViewModel } from "../computed";
+import { appViewModel } from "./computed";
 
 export default connect(
   {

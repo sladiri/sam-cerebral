@@ -1,4 +1,5 @@
 import { samFactory, addSamState, getRoutedFactory } from "../../sam-step";
+
 import {
   defaultState,
   accept,
@@ -6,9 +7,11 @@ import {
   computeNextAction,
 } from "../entity";
 import { init, increase, decrease, cancel } from "../control";
-import { routes } from "./router";
+
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
+
+import router from "./router";
 
 export default workAroundNumber => {
   const signals = samFactory({
@@ -25,14 +28,11 @@ export default workAroundNumber => {
     },
   });
 
-  const appInitSignal = signals.init;
-
   const { module: napSackModule, init: napSackInitSignal } = napSackFactory();
   const { module: atmModule, init: atmInitSignal } = atmFactory();
 
-  const { router, routedSignalFactory } = getRoutedFactory({
+  const routedSignalFactory = getRoutedFactory({
     workAroundNumber,
-    routes,
   });
 
   return {
@@ -44,13 +44,13 @@ export default workAroundNumber => {
     state: addSamState("", defaultState),
     signals: {
       ...signals,
-      rootRouted: routedSignalFactory("root", appInitSignal),
+      rootRouted: routedSignalFactory("root", signals.init),
       napSackRouted: routedSignalFactory(
         "napSack",
         napSackInitSignal,
-        appInitSignal,
+        signals.init,
       ),
-      atmRouted: routedSignalFactory("atm", atmInitSignal, appInitSignal),
+      atmRouted: routedSignalFactory("atm", atmInitSignal, signals.init),
     },
     catch: new Map([[Error, logError]]),
   };

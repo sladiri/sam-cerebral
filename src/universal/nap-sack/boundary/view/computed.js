@@ -3,6 +3,6 @@ import { state } from "cerebral/tags";
 
 export const napSackViewModel = compute(function napSackViewModel(get) {
   return {
-    activities: get(state`napSack.entity.activities`),
+    activities: get(state`napSack.activities`),
   };
 });
