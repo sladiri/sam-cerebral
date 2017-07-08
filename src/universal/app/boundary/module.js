@@ -1,4 +1,4 @@
-import { samFactory, addSamState } from "../../sam-step";
+import { samFactory, addSamState, getRoutedFactory } from "../../sam-step";
 import {
   defaultState,
   accept,
@@ -6,15 +6,11 @@ import {
   computeNextAction,
 } from "../entity";
 import { init, increase, decrease, cancel } from "../control";
-import routerFactory from "./router";
-import { pouchdbProviderFactory } from "./persist";
+import { routes } from "./router";
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
 
-const pouchOptions = { inMemory: true };
-const cachedProvider = getCachedPouchProvider(pouchOptions);
-
-export default routerptions => {
+export default workAroundNumber => {
   const signals = samFactory({
     accept,
     computeControlState,
@@ -34,39 +30,32 @@ export default routerptions => {
   const { module: napSackModule, init: napSackInitSignal } = napSackFactory();
   const { module: atmModule, init: atmInitSignal } = atmFactory();
 
-  const { router, routedSignalFactory } = routerFactory(routerptions);
+  const { router, routedSignalFactory } = getRoutedFactory({
+    workAroundNumber,
+    routes,
+  });
 
   return {
-    init: appInitSignal,
-    module: {
-      modules: {
-        router,
-        napSack: addSamState("napSack", napSackModule),
-        atm: addSamState("atm", atmModule),
-      },
-      state: addSamState("", defaultState),
-      signals: {
-        ...signals,
-        rootRouted: routedSignalFactory("root", appInitSignal),
-        napSackRouted: routedSignalFactory(
-          "napSack",
-          napSackInitSignal,
-          appInitSignal,
-        ),
-        atmRouted: routedSignalFactory("atm", atmInitSignal, appInitSignal),
-      },
-      catch: new Map([[Error, logError]]),
-      providers: [pouchdbProviderFactory({ ...pouchOptions, cachedProvider })],
+    modules: {
+      router,
+      napSack: addSamState("napSack", napSackModule),
+      atm: addSamState("atm", atmModule),
     },
+    state: addSamState("", defaultState),
+    signals: {
+      ...signals,
+      rootRouted: routedSignalFactory("root", appInitSignal),
+      napSackRouted: routedSignalFactory(
+        "napSack",
+        napSackInitSignal,
+        appInitSignal,
+      ),
+      atmRouted: routedSignalFactory("atm", atmInitSignal, appInitSignal),
+    },
+    catch: new Map([[Error, logError]]),
   };
 };
 
 function logError({ props: { error } }) {
   console.error("App catched an error", error);
-}
-
-function getCachedPouchProvider(pouchOptions) {
-  const pouchProvider = pouchdbProviderFactory(pouchOptions);
-  const { db: cachedProvider } = pouchProvider({});
-  return cachedProvider;
 }

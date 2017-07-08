@@ -8,7 +8,7 @@ import { Container } from "cerebral/react";
 import { moduleFactory, view } from "../universal/app/boundary";
 
 const controller = Controller({
-  ...moduleFactory().module,
+  ...moduleFactory(),
   devtools: Devtools({
     host: "localhost:8585",
     reconnect: false,

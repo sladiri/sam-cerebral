@@ -1,6 +1,9 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
 import { compute } from "cerebral";
-import { state } from "cerebral/tags";
+import { state, props } from "cerebral/tags";
+import Router from "@cerebral/router";
+import { parallel } from "cerebral";
+import { set, when } from "cerebral/operators";
 import { getId, getModulePath } from "./util";
 
 export function samFactory({
@@ -30,8 +33,7 @@ export function samFactory({
 
     async function samStep(input) {
       try {
-        const { controller, props, db } = input;
-        await db.init;
+        const { controller, props } = input;
 
         const state = prefixedStateProxy(input.state);
 
@@ -67,7 +69,6 @@ export function samFactory({
           actionName,
           props,
           controller,
-          db,
         });
 
         if (!guardEmptyProposal(_abortAction, state.get("_sam"))) {
@@ -95,7 +96,6 @@ export function samFactory({
         await accept({
           state: entityState,
           props: proposal,
-          db,
         });
         state.set("_sam.acceptInProgress", false);
         state.set("_sam.controlState", getControlState(entityState.get()));
@@ -114,7 +114,7 @@ export function samFactory({
         );
         state.set("_sam.syncNap", _syncNap);
 
-        await runNextAction({ controller, nextActions, db });
+        await runNextAction({ controller, nextActions });
       } catch (error) {
         console.error(
           `${getModuleName(prefix)} - SAM step catched an error`,
@@ -247,7 +247,7 @@ export function samFactory({
       return { nextActions, _syncNap: !allowNapInterrupt };
     }
 
-    function runNextAction({ controller, nextActions, db }) {
+    function runNextAction({ controller, nextActions }) {
       const napProp = { _isNap: true }; // TODO: Secure this
 
       let signalRun;
@@ -263,7 +263,6 @@ export function samFactory({
           controller,
           actions,
           nextActions,
-          db,
         });
         const compoundAction = getCompoundSignal(
           compoundName,
@@ -294,10 +293,10 @@ function parseAction(action) {
   return [action, action.name];
 }
 
-async function getProposal({ action, actionName, props, controller, db }) {
+async function getProposal({ action, actionName, props, controller }) {
   const proposal = await (action.tree
     ? controller.run(actionName, action.tree, props)
-    : action({ props, db }));
+    : action({ props }));
 
   return proposal !== undefined && Object.keys(proposal).length > 0
     ? proposal
@@ -320,7 +319,7 @@ function mergeControlStates(states) {
     ]);
 }
 
-function mergeActions({ controller, actions, nextActions, db }) {
+function mergeActions({ controller, actions, nextActions }) {
   return nextActions
     .reduce(
       (
@@ -334,7 +333,6 @@ function mergeActions({ controller, actions, nextActions, db }) {
           actionName,
           signalInput,
           controller,
-          db,
         });
         proposalPromises.push(proposal);
         return [[compoundNameSet, proposalPromises]];
@@ -411,3 +409,92 @@ export const cancelDisabled = prefix =>
         get(state`${getModulePath(prefix, "_sam.syncNap")}`))
     );
   });
+
+/**
+ * getRouterFactory
+ * 
+ * workAroundNumber (server-side rendering only)
+ * Requests do not match URL in browser, there seem to be a stray requests.
+ * Filter these with "workaroundNumber".
+ * TODO: Is this a bug?
+ */
+export const getRoutedFactory = ({ workAroundNumber, routes } = {}) => {
+  const router = Router({ routes });
+
+  const routedSignalFactory = (
+    page,
+    initSignal = [() => {}],
+    rootInitSignal = [() => {}],
+  ) => [
+    ({ path, props }) => {
+      if (isServerRender()) {
+        if (
+          props.workAroundNumber === undefined ||
+          props.workAroundNumber === workAroundNumber
+        ) {
+          return path.skipAll();
+        }
+
+        return path.initialisePage({ page });
+      }
+
+      const { stateIsFromServer, initialisedPages } = getPageState();
+
+      const pathKey =
+        stateIsFromServer || initialisedPages.has(page)
+          ? "skipInit"
+          : "initialisePage";
+
+      let initialiseRoot;
+      if (page !== "root" && !initialisedPages.has("root")) {
+        initialisedPages.add("root");
+        initialiseRoot = true;
+      }
+
+      initialisedPages.add(page);
+
+      return path[pathKey]({ page, initialiseRoot });
+    },
+    {
+      skipAll: [],
+      skipInit: [set(state`currentPage`, page)],
+      initialisePage: [
+        set(state`currentPage`, props`page`),
+        when(props`initialiseRoot`),
+        {
+          false: [initSignal],
+          true: [parallel([rootInitSignal, initSignal])],
+        },
+      ],
+    },
+  ];
+
+  return { router, routedSignalFactory };
+};
+
+function isServerRender() {
+  /*eslint-disable no-undef*/
+  return typeof window === "undefined";
+  /*eslint-enable no-undef*/
+}
+
+function getPageState() {
+  /*eslint-disable no-undef*/
+
+  const stateIsInitialised = window.CEREBRAL_STATE instanceof Set;
+
+  const stateIsFromServer =
+    !stateIsInitialised && window.CEREBRAL_STATE instanceof Object;
+
+  if (stateIsFromServer) {
+    window.stateIsFromServer = true;
+  }
+
+  const initialisedPages = (window.CEREBRAL_STATE = stateIsInitialised
+    ? window.CEREBRAL_STATE
+    : new Set());
+
+  /*eslint-enable no-undef*/
+
+  return { stateIsFromServer, initialisedPages };
+}

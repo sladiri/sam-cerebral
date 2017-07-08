@@ -40,9 +40,7 @@ app.use(async ctx => {
     return;
   }
 
-  const controller = UniversalController(
-    moduleFactory({ workAroundNumber }).module,
-  );
+  const controller = UniversalController(moduleFactory({ workAroundNumber }));
 
   // Check router documentation for "workAroundNumber".
   workAroundNumber = getNextWorkaroundNumber(workAroundNumber);

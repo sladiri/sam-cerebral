@@ -1,3 +1,4 @@
+import { pouchDbFactory } from "../pouchdb";
 import { wait } from "../util";
 
 export const defaultState = {
@@ -6,9 +7,17 @@ export const defaultState = {
   david: {},
 };
 
-export async function accept({ state, props, db }) {
+const pouchOptions = {
+  inMemory: true,
+  remoteDbHost: "http://localhost:5984",
+  remoteDbName: "app-db",
+  localDbName: "local_app-db",
+};
+const db = pouchDbFactory(pouchOptions);
+
+export async function accept({ state, props }) {
   const app = state.get();
-  const { increment, david } = props;
+  const { increment } = props;
 
   await wait(1200);
 
@@ -19,12 +28,14 @@ export async function accept({ state, props, db }) {
     }
   }
 
-  if (david) {
+  // db example
+  await db.init;
+  await db.foo();
+
+  let david = await db.local.get("dave@gmail.com").catch(e => e);
+  console.log("entity", david);
+  if (!david.error) {
     state.set("david", david);
-  } else {
-    // example
-    await db.foo();
-    state.set("david", await db.local.get("dave@gmail.com"));
   }
 }
 
