@@ -3,17 +3,15 @@ import pouchMemory from "pouchdb-adapter-memory";
 
 // PouchDB.debug.enable("*");
 
-export const pouchdbProviderFactory = (
-  { cachedProvider, inMemory = true } = {},
-) =>
+export const pouchdbProviderFactory = (opts = {}) =>
   function pouchdbProvider(
     context, // The current context object, which can be mutated. You have to return the context after it has bee mutated
     // functionDetails, // The details of the action running, like name, index (id) etc.
     // payload, // The current payload passed to the action
     // prevPayload, // The previous payload
   ) {
-    if (!cachedProvider) {
-      cachedProvider = {};
+    const { cachedProvider = {}, inMemory = true } = opts;
+    if (!cachedProvider.init) {
       cachedProvider.init = ensureDbSync(inMemory).then(databases => {
         const { local } = databases;
         cachedProvider.local = local;
