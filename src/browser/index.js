@@ -12,7 +12,7 @@ const controller = Controller({
   devtools: Devtools({
     host: "localhost:8585",
     reconnect: true,
-    preventExternalMutations: false,
+    preventExternalMutations: true, // TODO: This causes a bug, if used state is not inside a subobject.
   }),
 });
 

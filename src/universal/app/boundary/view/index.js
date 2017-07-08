@@ -8,7 +8,7 @@ export default connect(
   {
     controlStateName: state`_sam.controlState.name`,
     currentPage: state`currentPage`,
-    david: state`david`,
+    david: state`entity.david`,
     increase: signal`increase`,
     decrease: signal`decrease`,
     cancel: signal`cancel`,

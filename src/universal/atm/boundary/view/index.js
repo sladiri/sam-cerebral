@@ -11,14 +11,10 @@ import view from "./view";
 export default connect(
   {
     model: atmViewModel,
-    findJobBrute: signal`napSack.findJobBrute`,
-    cancel: signal`napSack.cancel`,
-    actionsDisabled: actionsDisabled("napSack"),
-    cancelDisabled: cancelDisabled("napSack"),
     styles: addButtonStyles(
       props`styles`,
-      actionsDisabled("napSack"),
-      cancelDisabled("napSack"),
+      actionsDisabled("atm"),
+      cancelDisabled("atm"),
     ),
   },
   ({ findJobBrute, cancel, ...connectedProps }, parentProps) => {

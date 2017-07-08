@@ -87,13 +87,16 @@ export function samFactory({
         state.set("_sam.proposeInProgress", false);
         state.set("_sam.acceptInProgress", actionName);
         state.set("_sam.stepId", GetId.next().value);
+        const entityState = getPrefixedStateProxy(
+          getModulePath(getModulePath(prefix, "entity")),
+        )(input.state, true);
         await accept({
-          state: prefixedStateProxy(input.state, true),
+          state: entityState,
           props: proposal,
           db,
         });
         state.set("_sam.acceptInProgress", false);
-        state.set("_sam.controlState", getControlState(state.get()));
+        state.set("_sam.controlState", getControlState(entityState.get()));
 
         const { nextActions, _syncNap } = getNextAction(state.get("_sam"));
 
@@ -384,5 +387,5 @@ const getModuleName = name => (name === "" ? "root" : name);
 
 export const addSamState = (_prefix, object) =>
   object.signals
-    ? { ...object, state: { ...object.state, _prefix, _sam: {} } }
-    : { ...object, _prefix, _sam: {} };
+    ? { ...object, state: { _prefix, _sam: {}, entity: object.state } }
+    : { _prefix, _sam: {}, entity: object };

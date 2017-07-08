@@ -1,16 +1,6 @@
 import h from "react-hyperscript";
 import React from "react";
 
-export default function ATM({
-  model,
-  actions,
-  actionsDisabled,
-  cancelDisabled,
-  styles,
-}) {
-  return (
-    <section>
-      ATM
-    </section>
-  );
+export default function ATM() {
+  return <section>ATM</section>;
 }
