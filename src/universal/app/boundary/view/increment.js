@@ -2,11 +2,8 @@ import React from "react";
 import classNames from "classnames";
 import { connect } from "cerebral/react";
 import { props } from "cerebral/tags";
-import {
-  actionsDisabled,
-  cancelDisabled,
-  addButtonStyles,
-} from "../../../computed";
+import { addButtonStyles } from "../../../computed";
+import { actionsDisabled, cancelDisabled } from "../../../sam-step.js";
 import { appViewModel } from "../computed";
 
 export default connect(
@@ -26,7 +23,6 @@ export default connect(
   }) {
     return (
       <section>
-
         <button
           disabled={actionsDisabled}
           onClick={() => {
@@ -37,7 +33,10 @@ export default connect(
           {" + "}
         </button>
 
-        <div>{model.count}{arrow()}</div>
+        <div>
+          {model.count}
+          {arrow()}
+        </div>
 
         <button
           disabled={actionsDisabled}
@@ -59,7 +58,6 @@ export default connect(
         >
           cancel
         </button>
-
       </section>
     );
   },

@@ -1,4 +1,6 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
+import { compute } from "cerebral";
+import { state } from "cerebral/tags";
 import { getId, getModulePath } from "./util";
 
 export function samFactory({
@@ -389,3 +391,23 @@ export const addSamState = (_prefix, object) =>
   object.signals
     ? { ...object, state: { _prefix, _sam: {}, entity: object.state } }
     : { _prefix, _sam: {}, entity: object };
+
+export const actionsDisabled = prefix =>
+  compute(function actionsDisabled(get) {
+    return (
+      get(state`${getModulePath(prefix, "_sam.init")}`) ||
+      get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`) ||
+      get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
+      get(state`${getModulePath(prefix, "_sam.napInProgress")}`)
+    );
+  });
+
+export const cancelDisabled = prefix =>
+  compute(function cancelDisabled(get) {
+    return (
+      get(state`${getModulePath(prefix, "_sam.init")}`) ||
+      get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
+      (get(state`${getModulePath(prefix, "_sam.napInProgress")}`) &&
+        get(state`${getModulePath(prefix, "_sam.syncNap")}`))
+    );
+  });

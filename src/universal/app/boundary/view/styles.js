@@ -31,7 +31,7 @@ export const styles = {
   }),
 
   fog: Style.registerStyle({
-    opacity: 0.4,
+    opacity: 0.3,
   }),
 
   samStates: Style.registerStyle({
