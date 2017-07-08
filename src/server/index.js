@@ -28,7 +28,7 @@ app.use(async (ctx, next) => {
   }
 });
 
-let workAroundNumber = 0;
+let routerWorkAroundNumber = 0;
 app.use(async ctx => {
   const { page: rootPage, module: rootPageModulePrefix } = routeMap["/"];
   const { page: currentPage, module: pageModulePrefix } =
@@ -40,21 +40,21 @@ app.use(async ctx => {
     return;
   }
 
-  const controller = UniversalController(moduleFactory(workAroundNumber));
+  const controller = UniversalController(moduleFactory(routerWorkAroundNumber));
 
-  // Check router documentation for "workAroundNumber".
-  workAroundNumber = getNextWorkaroundNumber(workAroundNumber);
+  // Check router documentation for "routerWorkAroundNumber".
+  routerWorkAroundNumber = getNextWorkaroundNumber(routerWorkAroundNumber);
   const pagesToInit = [
     waitForNap(controller, rootPageModulePrefix, [
       "rootRouted",
-      { workAroundNumber },
+      { routerWorkAroundNumber },
     ]),
   ];
   if (currentPage !== rootPage) {
     pagesToInit.push(
       waitForNap(controller, pageModulePrefix, [
         `${currentPage}Routed`,
-        { workAroundNumber },
+        { routerWorkAroundNumber },
       ]),
     );
   }
@@ -102,6 +102,6 @@ function waitForNap(controller, prefix, [sequence, payload] = []) {
   return napDone;
 }
 
-function getNextWorkaroundNumber(workAroundNumber) {
-  return workAroundNumber + 1 > 7 ? 0 : workAroundNumber + 1;
+function getNextWorkaroundNumber(routerWorkAroundNumber) {
+  return routerWorkAroundNumber + 1 > 7 ? 0 : routerWorkAroundNumber + 1;
 }

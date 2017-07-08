@@ -410,12 +410,12 @@ export const cancelDisabled = prefix =>
 /**
  * getRouterFactory
  * 
- * workAroundNumber (server-side rendering only)
+ * routerWorkAroundNumber (server-side rendering only)
  * Requests do not match URL in browser, there seem to be a stray requests.
  * Filter these with "workaroundNumber".
  * TODO: Is this a bug?
  */
-export const getRoutedFactory = workAroundNumber => {
+export const getRoutedFactory = routerWorkAroundNumber => {
   const routedSignalFactory = (
     page,
     initSignal = [() => {}],
@@ -424,8 +424,8 @@ export const getRoutedFactory = workAroundNumber => {
     ({ path, props }) => {
       if (isServerRender()) {
         if (
-          props.workAroundNumber === undefined ||
-          props.workAroundNumber === workAroundNumber
+          props.routerWorkAroundNumber === undefined ||
+          props.routerWorkAroundNumber === routerWorkAroundNumber
         ) {
           return path.skipAll();
         }

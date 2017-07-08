@@ -13,7 +13,7 @@ import { moduleFactory as atmFactory } from "../../atm/boundary";
 
 import router from "./router";
 
-export default workAroundNumber => {
+export default routerWorkAroundNumber => {
   const signals = samFactory({
     accept,
     computeControlState,
@@ -32,7 +32,7 @@ export default workAroundNumber => {
   const { module: atmModule, init: atmInitSignal } = atmFactory();
 
   const routedSignalFactory = getRoutedFactory({
-    workAroundNumber,
+    routerWorkAroundNumber,
   });
 
   return {
