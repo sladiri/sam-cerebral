@@ -9,7 +9,7 @@ export async function login({ props: { userName } }) {
 export async function post({ props: { creator, message } }) {
   if ((creator && creator !== "system") || !message) return;
 
-  await wait(2000);
+  await wait(500);
   return {
     creator,
     created: Date.now(),

@@ -11,23 +11,53 @@ export default function Blog({
   cancelDisabled,
   styles,
 }) {
-  const posts = model.posts.map(({ id, creator, created, message, deleted }) =>
-    h("li", { key: id, className: deleted && styles.blogDeleted }, [
-      h("p", { className: styles.blogMetaInfo }, `${creator} on ${created}:`),
-      h("p", message),
-      deleted
-        ? undefined
-        : h(
-            "button",
-            {
-              onClick: () => {
-                actions.deletePost({ id });
+  const posts = model.posts.map(
+    ({ id, creator, created, message, deleted }) => {
+      return h("li", { key: id, className: deleted && styles.blogDeleted }, [
+        h("p", { className: styles.blogMetaInfo }, `${creator} on ${created}:`),
+        h("p", message),
+        deleted || model.userName !== creator
+          ? undefined
+          : h(
+              "button",
+              {
+                onClick: () => {
+                  actions.deletePost({ id });
+                },
               },
-            },
-            "delete",
-          ),
-    ]),
+              "delete",
+            ),
+      ]);
+    },
   );
+
+  const userPanel = model.userName
+    ? <p>
+        <button
+          disabled={actionsDisabled}
+          onClick={() => {
+            actions.login({});
+          }}
+          className={styles.buttonFog}
+        >
+          Logout
+        </button>
+      </p>
+    : <form
+        onSubmit={event => {
+          event.preventDefault();
+          actions.login({
+            userName: event.target.getElementsByTagName("input")[0].value,
+          });
+        }}
+      >
+        <input disabled={actionsDisabled} placeholder="Anton" />
+
+        <br />
+        <button disabled={actionsDisabled} className={styles.buttonFog}>
+          Login
+        </button>
+      </form>;
 
   return (
     <section>
@@ -37,33 +67,7 @@ export default function Blog({
         User: {model.userName || "none"}
       </p>
 
-      {model.userName
-        ? <p>
-            <button
-              disabled={actionsDisabled}
-              onClick={() => {
-                actions.login({});
-              }}
-              className={styles.buttonFog}
-            >
-              Logout
-            </button>
-          </p>
-        : <form
-            onSubmit={event => {
-              event.preventDefault();
-              actions.login({
-                userName: event.target.getElementsByTagName("input")[0].value,
-              });
-            }}
-          >
-            <input disabled={actionsDisabled} placeholder="Anton" />
-
-            <br />
-            <button disabled={actionsDisabled} className={styles.buttonFog}>
-              Login
-            </button>
-          </form>}
+      {userPanel}
 
       <br />
       <form
@@ -75,16 +79,22 @@ export default function Blog({
           event.target.getElementsByTagName("input")[0].value = "";
         }}
       >
-        <input disabled={actionsDisabled} placeholder="My two cents ..." />
+        <input
+          disabled={actionsDisabled || !model.userName}
+          placeholder="My two cents ..."
+        />
 
         <br />
-        <button disabled={actionsDisabled} className={styles.buttonFog}>
+        <button
+          disabled={actionsDisabled || !model.userName}
+          className={styles.buttonFog}
+        >
           Post!
         </button>
 
         <br />
         <button
-          disabled={cancelDisabled}
+          disabled={cancelDisabled || !model.userName}
           type="button"
           onClick={() => {
             actions.cancel();

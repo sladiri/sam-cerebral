@@ -49,10 +49,13 @@ export async function accept({ state, props }) {
     const { id, deleted } = props;
     if (id && deleted) {
       const post = await db.local.get(id);
-      post.deleted = deleted;
-      await db.local.put(post);
-      const index = blog.posts.findIndex(p => p._id === id);
-      state.set(`posts.${index}.deleted`, deleted);
+      const [, creator] = post._id.split("-");
+      if (creator === blog.userName) {
+        post.deleted = deleted;
+        await db.local.put(post);
+        const index = blog.posts.findIndex(p => p._id === id);
+        state.set(`posts.${index}.deleted`, deleted);
+      }
     }
   }
 }
