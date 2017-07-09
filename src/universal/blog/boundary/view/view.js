@@ -64,7 +64,7 @@ export default function Blog({
       <SamStateIndicator styles={styles} />
 
       <p>
-        User: {model.userName || "none"}
+        User: {model.userName || "none (log in to post)"}
       </p>
 
       {userPanel}
