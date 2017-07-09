@@ -50,7 +50,7 @@ async function ensureDbSync({
     });
     response = await remote.allDocs();
     console.log(
-      "remote connected",
+      `remote [${remoteDbName}] connected`,
       response,
       "\n",
       response.rows.map(r => `${r.id}, ${r.value.rev}`),
@@ -67,12 +67,12 @@ async function ensureDbSync({
 
   if (remote) {
     response = await local.sync(remote, { retry: true });
-    console.log("local synced", response);
+    console.log(`local [${localDbName}] synced`, response);
   }
 
   response = await local.allDocs();
   console.log(
-    "local ready",
+    `local [${localDbName}] ready`,
     response,
     "\n",
     response.rows.map(r => `${r.id}, ${r.value.rev}`),
@@ -83,7 +83,7 @@ async function ensureDbSync({
       .sync(remote, { live: true, retry: true })
       .on("error", console.error.bind(console))
       .on("change", function(change) {
-        console.log("Ch-Ch-Changes", change);
+        console.log(`Ch-Ch-Changes [${localDbName}]`, change);
       });
   }
 
