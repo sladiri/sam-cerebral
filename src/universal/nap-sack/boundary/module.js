@@ -23,11 +23,6 @@ export default () => {
     module: {
       state: defaultState,
       signals,
-      catch: new Map([[Error, logError]]),
     },
   };
 };
-
-function logError({ props: { error } }) {
-  console.error("NapSack catched an error", error);
-}

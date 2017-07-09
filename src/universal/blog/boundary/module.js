@@ -5,17 +5,17 @@ import {
   computeControlState,
   computeNextAction,
 } from "../entity";
-import { init, abort, card, pin, changeBalance } from "../control";
+import { init, login, post, deletePost, cancel } from "../control";
 
 export default () => {
   const signals = samFactory({
-    prefix: "atm",
+    prefix: "blog",
     accept,
     computeControlState,
     computeNextAction,
     controlState: "normal",
     allowedActions: ["init"],
-    actions: { init, abort, card, pin, changeBalance },
+    actions: { init, login, post, deletePost, cancel },
   });
 
   return {

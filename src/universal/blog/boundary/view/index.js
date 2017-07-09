@@ -8,21 +8,23 @@ import view from "./view";
 export default connect(
   {
     model,
-    findJobBrute: signal`napSack.findJobBrute`,
-    cancel: signal`napSack.cancel`,
-    actionsDisabled: actionsDisabled("napSack"),
-    cancelDisabled: cancelDisabled("napSack"),
+    login: signal`blog.login`,
+    post: signal`blog.post`,
+    deletePost: signal`blog.deletePost`,
+    cancel: signal`blog.cancel`,
+    actionsDisabled: actionsDisabled("blog"),
+    cancelDisabled: cancelDisabled("blog"),
     styles: addButtonStyles(
       props`styles`,
-      actionsDisabled("napSack"),
-      cancelDisabled("napSack"),
+      actionsDisabled("blog"),
+      cancelDisabled("blog"),
     ),
   },
-  ({ findJobBrute, cancel, ...connectedProps }, parentProps) => {
+  ({ login, post, deletePost, cancel, ...connectedProps }, parentProps) => {
     return {
       ...parentProps,
       ...connectedProps,
-      actions: { findJobBrute, cancel },
+      actions: { login, post, deletePost, cancel },
     };
   },
   view,

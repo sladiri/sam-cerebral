@@ -5,6 +5,7 @@ import samStateIndicator from "../../../sam-state-indicator";
 import Increment from "./increment";
 import { view as NapSack } from "../../../nap-sack/boundary";
 import { view as ATM } from "../../../atm/boundary";
+import { view as Blog } from "../../../blog/boundary";
 
 const SamStateIndicator = samStateIndicator();
 
@@ -31,6 +32,10 @@ export const views = {
         page = <ATM styles={styles} />;
         break;
       }
+      case "blog": {
+        page = <Blog styles={styles} />;
+        break;
+      }
       default: {
         page = <h1>Page Not Found</h1>;
         break;
@@ -39,14 +44,24 @@ export const views = {
 
     return (
       <div className={styles.view}>
-        <p>
-          <a href="/">root</a>, <a href="/napsack">napsack</a>,{" "}
-          <a href="/atm">atm</a>
-        </p>
+        <ul>
+          <li>
+            <a href="/">root</a>
+          </li>
+          <li>
+            <a href="/napsack">napsack</a>
+          </li>
+          <li>
+            <a href="/atm">atm</a>
+          </li>
+          <li>
+            <a href="/blog">blog</a>
+          </li>
+        </ul>
 
         <SamStateIndicator styles={styles} />
         <p>
-          App DB: {david._id} {david.age}
+          root DB: {david._id} {david.age}
         </p>
         {page}
 

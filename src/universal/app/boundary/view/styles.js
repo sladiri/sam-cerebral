@@ -63,4 +63,12 @@ export const styles = {
       maxWidth: "20rem",
     },
   }),
+
+  blogMetaInfo: Style.registerStyle({
+    fontSize: "70%",
+  }),
+
+  blogDeleted: Style.registerStyle({
+    textDecoration: "line-through",
+  }),
 };

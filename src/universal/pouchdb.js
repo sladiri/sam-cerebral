@@ -10,9 +10,18 @@ export function pouchDbFactory(pouchOptions = {}) {
     const { local } = await ensureDbSync(pouchOptions);
 
     db.local = {
-      get: ::local.get,
-      put: ::local.put,
-      post: ::local.post,
+      async get(id) {
+        return local.get(id);
+      },
+      async allDocs(options = { include_docs: true }) {
+        return local.allDocs(options);
+      },
+      async put(object) {
+        return local.put(object);
+      },
+      async post(object) {
+        return local.post(object);
+      },
     };
   };
 

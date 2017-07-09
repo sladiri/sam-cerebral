@@ -3,7 +3,7 @@ import { wait } from "../util";
 
 export const defaultState = {
   currentPage: null,
-  count: 8,
+  count: 0,
   david: {},
 };
 
@@ -16,6 +16,7 @@ const pouchOptions = {
 const db = pouchDbFactory(pouchOptions);
 
 export async function accept({ state, props }) {
+  await db.init;
   const app = state.get();
   const { increment } = props;
 
@@ -29,7 +30,6 @@ export async function accept({ state, props }) {
   }
 
   // db example
-  await db.init;
   let david = await ensureDavid(db.local);
   console.log("david ready", david);
   console.log(

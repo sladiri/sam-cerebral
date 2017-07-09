@@ -10,6 +10,7 @@ import { init, increase, decrease, cancel } from "../control";
 
 import { moduleFactory as napSackFactory } from "../../nap-sack/boundary";
 import { moduleFactory as atmFactory } from "../../atm/boundary";
+import { moduleFactory as blogFactory } from "../../blog/boundary";
 
 import router from "./router";
 
@@ -30,6 +31,7 @@ export default routerWorkAroundNumber => {
 
   const { module: napSackModule, init: napSackInitSignal } = napSackFactory();
   const { module: atmModule, init: atmInitSignal } = atmFactory();
+  const { module: blogModule, init: blogInitSignal } = blogFactory();
 
   const routedSignalFactory = getRoutedFactory({
     routerWorkAroundNumber,
@@ -40,6 +42,7 @@ export default routerWorkAroundNumber => {
       router,
       napSack: addSamState("napSack", napSackModule),
       atm: addSamState("atm", atmModule),
+      blog: addSamState("blog", blogModule),
     },
     state: addSamState("", defaultState),
     signals: {
@@ -51,11 +54,7 @@ export default routerWorkAroundNumber => {
         signals.init,
       ),
       atmRouted: routedSignalFactory("atm", atmInitSignal, signals.init),
+      blogRouted: routedSignalFactory("blog", blogInitSignal, signals.init),
     },
-    catch: new Map([[Error, logError]]),
   };
 };
-
-function logError({ props: { error } }) {
-  console.error("App catched an error", error);
-}

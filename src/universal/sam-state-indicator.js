@@ -65,10 +65,7 @@ export default (prefix, name = "StateIndicator") =>
         );
         return h("section", { className: styles.samStates }, [
           h("div", [
-            h("p", [
-              "SAM-step state",
-              ...(prefix ? [h("br"), ` (${prefix})`] : []),
-            ]),
+            h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
             ...take(2, stateBlocks),
           ]),
           last(stateBlocks),

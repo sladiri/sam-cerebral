@@ -13,6 +13,10 @@ export const routeMap = {
     page: "atm",
     module: "atm",
   },
+  "/blog": {
+    page: "blog",
+    module: "blog",
+  },
 };
 
 const routes = Object.entries(routeMap).map(([key, val]) => ({
