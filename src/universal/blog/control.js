@@ -3,6 +3,7 @@ import { wait } from "../util";
 export async function init() {}
 
 export async function login({ props: { userName } }) {
+  await wait(500);
   return { userName: userName || "" };
 }
 

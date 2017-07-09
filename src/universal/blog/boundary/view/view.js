@@ -87,7 +87,7 @@ export default function Blog({
         <br />
         <button
           disabled={actionsDisabled || !model.userName}
-          className={styles.buttonFog}
+          className={model.userName ? styles.buttonFog : styles.fog}
         >
           Post!
         </button>
@@ -99,7 +99,7 @@ export default function Blog({
           onClick={() => {
             actions.cancel();
           }}
-          className={styles.cancelButtonFog}
+          className={model.userName ? styles.cancelButtonFog : styles.fog}
         >
           Cancel
         </button>
