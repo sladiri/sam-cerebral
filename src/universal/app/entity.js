@@ -31,14 +31,12 @@ export async function accept({ state, props }) {
 
   // db example
   let david = await ensureDavid(db.local);
-  console.log("david ready", david);
-  console.log(
-    "david put",
-    await db.local.put({ ...david, age: david.age + 1 }),
-  );
+  // console.log("david ready", david);
+  david = await db.local.put({ ...david, age: david.age + 1 });
+  // console.log("david put", david);
 
   david = await db.local.get("dave@gmail.com").catch(e => e);
-  console.log("entity", david);
+  // console.log("entity", david);
   if (!david.error) {
     state.set("david", david);
   }
