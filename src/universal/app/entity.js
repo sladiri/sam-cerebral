@@ -30,12 +30,40 @@ export async function accept({ state, props }) {
 
   // db example
   await db.init;
-  await db.foo();
+  let david = await ensureDavid(db.local);
+  console.log("david ready", david);
+  console.log(
+    "david put",
+    await db.local.put({ ...david, age: david.age + 1 }),
+  );
 
-  let david = await db.local.get("dave@gmail.com").catch(e => e);
+  david = await db.local.get("dave@gmail.com").catch(e => e);
   console.log("entity", david);
   if (!david.error) {
     state.set("david", david);
+  }
+}
+
+async function ensureDavid(db) {
+  const _id = "dave@gmail.com";
+  let response;
+
+  response = await db.get(_id).catch(e => e);
+  if (!response.error) {
+    return response.retrieved ? response : { ...response, retrieved: true };
+  }
+
+  const david = {
+    _id,
+    name: "David",
+    age: 69,
+    ran: `${Math.random()}`,
+  };
+  response = await db.put(david).then(o => ({ _rev: o.rev })).catch(e => e);
+  if (!response.error) {
+    return response.created
+      ? { ...response, ...david }
+      : { ...response, ...david, created: true };
   }
 }
 

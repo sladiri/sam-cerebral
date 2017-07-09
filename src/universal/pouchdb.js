@@ -7,20 +7,13 @@ export function pouchDbFactory(pouchOptions = {}) {
   const db = {};
 
   const getDbPromise = async () => {
-    const { remote, local } = await ensureDbSync(pouchOptions);
+    const { local } = await ensureDbSync(pouchOptions);
 
-    async function foo() {
-      const david = await ensureDavid(local);
-      console.log("david ready", david);
-      console.log(
-        "david put",
-        await local.put({ ...david, age: david.age + 1 }),
-      );
-    }
-
-    db.remote = remote;
-    db.local = local;
-    db.foo = foo;
+    db.local = {
+      get: ::local.get,
+      put: ::local.put,
+      post: ::local.post,
+    };
   };
 
   db.init = getDbPromise();
@@ -86,29 +79,6 @@ async function ensureDbSync({
   }
 
   return { remote, local };
-}
-
-async function ensureDavid(db) {
-  const _id = "dave@gmail.com";
-  let response;
-
-  response = await db.get(_id).catch(e => e);
-  if (!response.error) {
-    return response.retrieved ? response : { ...response, retrieved: true };
-  }
-
-  const david = {
-    _id,
-    name: "David",
-    age: 69,
-    ran: `${Math.random()}`,
-  };
-  response = await db.put(david).then(o => ({ _rev: o.rev })).catch(e => e);
-  if (!response.error) {
-    return response.created
-      ? { ...response, ...david }
-      : { ...response, ...david, created: true };
-  }
 }
 
 function hasServerSideState() {
