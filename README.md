@@ -23,16 +23,25 @@ The SAM pattern maps to the ECB pattern:
 - `boundary --> Cerebral module + storage`
 
 ## ToDo
+- [ ] App features
+  - [ ] Add blog post example (conflict-free example). No replies without parent should be shown because of eventual consistency.
+    - [ ] post posts
+    - [ ] reply to posts
+
+  - [ ] Add Git-like example (with conflict management)? Track concurrent changes and show causal chain for conflict resolution by user.
+
+  - [ ] Use control state for page change (routing) example?
+  - [ ] Add session control state example (log in <-> log out on authenticated route)?
+
 - [ ] Storage layer
   - [x] Add PouchDB provider to Cerebral context
   - [ ] Save model to DB
   - [ ] Specify _Bolt-on Shim Layer_ in TLA+
   - [ ] Implement _Bolt-on Shim Layer_
-- [ ] App features
-  - [ ] Use control state for page change (routing) example?
-  - [ ] Add session control state example (log in <-> log out on authenticated route).
+
 - [x] Allow for next action to not block step until complete (blockStep = true)?
   - [ ] Queue action when received signal while in (NAP?) progress?
+
 - [ ] Add tests.
 - [ ] Create Proxy to hide state API?
 - [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
