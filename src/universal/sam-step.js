@@ -7,12 +7,12 @@ import { getId, getModulePath } from "./util";
 
 export function samFactory({
   prefix = "", // Cannot save undefined to state
-  accept,
-  computeControlState,
-  computeNextAction,
-  controlState,
-  allowedActions,
-  actions,
+  accept = () => {},
+  computeControlState = () => ["default"],
+  computeNextAction = () => [],
+  controlState = "default",
+  allowedActions = [],
+  actions = {},
   preventCompoundState = true,
 }) {
   const prefixedPath = getModulePath(prefix);
@@ -303,7 +303,7 @@ async function getProposal({ action, actionName, props, controller }) {
 function mergeControlStates(states) {
   return states
     .reduce(
-      ([[nameSet, allowedActionsSet]], [name, allowedActions]) => {
+      ([[nameSet, allowedActionsSet]], [name, allowedActions = []]) => {
         nameSet.add(name);
         allowedActions.forEach(::allowedActionsSet.add);
         return [[nameSet, allowedActionsSet]];
