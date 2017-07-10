@@ -401,6 +401,7 @@ export const cancelDisabled = prefix =>
   compute(function cancelDisabled(get) {
     return (
       get(state`${getModulePath(prefix, "_sam.init")}`) ||
+      !get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`) ||
       get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
       (get(state`${getModulePath(prefix, "_sam.napInProgress")}`) &&
         get(state`${getModulePath(prefix, "_sam.syncNap")}`))
