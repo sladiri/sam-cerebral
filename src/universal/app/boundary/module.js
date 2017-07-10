@@ -33,9 +33,7 @@ export default routerWorkAroundNumber => {
   const { module: atmModule, init: atmInitSignal } = atmFactory();
   const { module: blogModule, init: blogInitSignal } = blogFactory();
 
-  const routedSignalFactory = getRoutedFactory({
-    routerWorkAroundNumber,
-  });
+  const routedSignalFactory = getRoutedFactory(routerWorkAroundNumber);
 
   return {
     modules: {
