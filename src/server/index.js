@@ -30,8 +30,8 @@ app.use(async (ctx, next) => {
 
 let routerWorkAroundNumber = 0;
 app.use(async ctx => {
-  const { page: rootPage, module: rootPageModulePrefix } = routeMap["/"];
-  const { page: currentPage, module: pageModulePrefix } =
+  const { page: rootPage, prefix: rootPageModulePrefix } = routeMap["/"];
+  const { page: currentPage, prefix: pageModulePrefix } =
     routeMap[ctx.url] || {};
 
   if (!currentPage) {

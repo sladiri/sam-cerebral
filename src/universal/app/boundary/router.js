@@ -3,19 +3,19 @@ import Router from "@cerebral/router";
 export const routeMap = {
   "/": {
     page: "root",
-    module: "",
+    prefix: "",
   },
   "/napsack": {
     page: "napSack",
-    module: "napSack",
+    prefix: "napSack",
   },
   "/atm": {
     page: "atm",
-    module: "atm",
+    prefix: "atm",
   },
   "/blog": {
     page: "blog",
-    module: "blog",
+    prefix: "blog",
   },
 };
 
