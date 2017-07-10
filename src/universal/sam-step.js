@@ -416,7 +416,7 @@ export const cancelDisabled = prefix =>
  * Filter these with "workaroundNumber".
  * TODO: Is this a bug?
  */
-export const getRoutedFactory = routerWorkAroundNumber => {
+export const getRoutedFactory = (routerWorkAroundNumber = null) => {
   const routedSignalFactory = (
     page,
     initSignal = [() => {}],
