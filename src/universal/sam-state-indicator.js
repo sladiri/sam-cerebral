@@ -3,18 +3,14 @@ import classNames from "classnames";
 import { connect } from "cerebral/react";
 import { state } from "cerebral/tags";
 import { take, last } from "ramda";
-import { getModulePath, addDisplayName } from "./util";
 
-import Color from "color";
+import { getModulePath, addDisplayName } from "./util";
+import defaults, { colours, getStyles } from "./styles";
+
 import { styled } from "react-free-style";
 
-const colors = {
-  warn: Color("brown").lighten(0.3).string(),
-  hilight: Color("magenta").darken(0.5).string(),
-  hilightIdle: Color("magenta").lighten(0.9).string(),
-};
-
 const withStyle = styled({
+  ...defaults,
   samStates: {
     display: "flex",
     fontSize: "0.8rem",
@@ -22,7 +18,7 @@ const withStyle = styled({
   },
 
   stateBlock: {
-    backgroundColor: colors.hilightIdle,
+    backgroundColor: colours.hilightIdle,
     margin: "0.5rem",
     padding: ["0.5rem", "0.3rem"],
     display: "flex",
@@ -32,7 +28,7 @@ const withStyle = styled({
   },
 
   stateActive: {
-    backgroundColor: colors.hilight,
+    backgroundColor: colours.hilight,
     color: "white",
   },
 });
@@ -89,8 +85,7 @@ export default (prefix, name = "StateIndicator") =>
               {
                 key: text.html,
                 className: classNames(
-                  styles.stateBlock,
-                  trigger && styles.stateActive,
+                  getStyles(styles, ["stateBlock", trigger && "stateActive"]),
                 ),
               },
               text,

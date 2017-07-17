@@ -7,19 +7,27 @@ export async function login({ props: { userName } }) {
   return { userName: userName || "" };
 }
 
-export async function post({ props: { creator, message } }) {
-  if ((creator && creator !== "system") || !message) return;
-
-  await wait(500);
+export async function postSystem({ props: { message } }) {
+  await wait(200);
   return {
-    creator,
+    creator: "system",
     created: Date.now(),
     message,
   };
 }
 
-export async function deletePost({ props: { id } }) {
-  return { id, deleted: true };
+export async function post({ props: { message } }) {
+  if (!message) return;
+
+  await wait(2000);
+  return {
+    created: Date.now(),
+    message,
+  };
+}
+
+export async function deletePost({ props: { id: deleteId } }) {
+  return { deleteId };
 }
 
 export async function cancel() {

@@ -1,4 +1,5 @@
 import Color from "color";
+import { pick } from "ramda";
 
 import tachyonsJson from "./tachyons.json";
 
@@ -21,13 +22,13 @@ export const colours = {
   hilightIdle: Color("magenta").lighten(0.9).string(),
 };
 
+export const getStyles = (styles, styleNames) =>
+  Object.values(pick(styleNames, styles));
+
 const { tachyonsStyles } = Object.entries({
   tachyonsStyles: tachyonsJson,
 }).reduce(getCss, {});
 
 export default {
   ...tachyonsStyles,
-  fog: {
-    opacity: 0.3,
-  },
 };

@@ -46,15 +46,15 @@ export async function accept({ state, props }) {
   }
 
   {
-    const { id, deleted } = props;
-    if (id && deleted) {
-      const post = await db.local.get(id);
+    const { deleteId } = props;
+    if (deleteId) {
+      const post = await db.local.get(deleteId);
       const [, creator] = post._id.split("-");
       if (creator === blog.userName) {
-        post.deleted = deleted;
+        post.deleted = !post.deleted;
         await db.local.put(post);
-        const index = blog.posts.findIndex(p => p._id === id);
-        state.set(`posts.${index}.deleted`, deleted);
+        const index = blog.posts.findIndex(p => p._id === deleteId);
+        state.set(`posts.${index}.deleted`, post.deleted);
       }
     }
   }
@@ -64,9 +64,14 @@ export function computeControlState(blog) {
   const states = [];
 
   if (!blog.posts || blog.posts.length === 0) {
-    states.push(["empty", ["post"]]);
+    states.push(["empty", ["postSystem"]]);
+  } else if (blog.userName) {
+    states.push([
+      "loggedIn",
+      ["login", "postSystem", "post", "deletePost", "cancel"],
+    ]);
   } else {
-    states.push(["normal", ["login", "post", "deletePost", "cancel"]]);
+    states.push(["loggedOut", ["login", "postSystem", "cancel"]]);
   }
 
   return states;
@@ -77,7 +82,7 @@ export function computeNextAction(controlState) {
 
   if (controlState === "empty") {
     nextActions.push([
-      "post",
+      "postSystem",
       { creator: "system", message: "Example post ... add more posts!" },
     ]);
   }

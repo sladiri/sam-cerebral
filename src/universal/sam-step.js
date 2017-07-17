@@ -391,7 +391,7 @@ export const addSamState = (_prefix, object) =>
     ? { ...object, state: { _prefix, _sam: {}, ...object.state } }
     : { _prefix, _sam: {}, ...object };
 
-export const actionsDisabled = prefix =>
+const _actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {
     return (
       get(state`${getModulePath(prefix, "_sam.init")}`) ||
@@ -411,6 +411,27 @@ export const cancelDisabled = prefix =>
         get(state`${getModulePath(prefix, "_sam.syncNap")}`))
     );
   });
+
+export const markActionsDisabled = prefix =>
+  compute(
+    _actionsDisabled(prefix),
+    state`${getModulePath(prefix, "_sam.controlState.allowedActions")}`,
+    (actionsDisabled, allowedActions) => {
+      const actionDisabled = actionName =>
+        actionsDisabled || !allowedActions.includes(actionName);
+      return actions =>
+        Object.entries(actions).reduce((acc, [key, val]) => {
+          if (acc.enabled)
+            throw new Error("Action already has enabled property.");
+          val.disabled = (...args) =>
+            val.isDisabled
+              ? actionDisabled(key) || val.isDisabled(...args)
+              : actionDisabled(key);
+          acc[key] = val;
+          return acc;
+        }, {});
+    },
+  );
 
 /**
  * getRouterFactory

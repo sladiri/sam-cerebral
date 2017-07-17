@@ -1,52 +1,56 @@
 import h from "react-hyperscript";
 import React from "react";
+import { styled } from "react-free-style";
 
-import withStyle from "./styles";
+import defaults from "../../../styles";
+
 import samStateIndicatorFactory from "../../../sam-state-indicator";
+
+const withStyle = styled({
+  ...defaults,
+  blogMetaInfo: {
+    fontSize: "70%",
+  },
+  blogDeleted: {
+    textDecoration: "line-through",
+  },
+});
 
 const SamStateIndicator = samStateIndicatorFactory("blog");
 
-export default withStyle(function Blog({
-  styles,
-  model,
-  actions,
-  actionsDisabled,
-  cancelDisabled,
-}) {
+export default withStyle(function Blog({ styles, model, actions }) {
   styles = {
     ...styles,
-    actionFog: actionsDisabled && styles.fog,
-    cancelFog: cancelDisabled && styles.fog,
+    actionFog: (action, ...args) => action.disabled(...args) && styles[".o-40"],
   };
 
-  const posts = model.posts.map(
-    ({ id, creator, created, message, deleted }) => {
-      return h("li", { key: id, className: deleted && styles.blogDeleted }, [
-        h("p", { className: styles.blogMetaInfo }, `${creator} on ${created}:`),
-        h("p", message),
-        deleted || model.userName !== creator
-          ? undefined
-          : h(
-              "button",
-              {
-                onClick: () => {
-                  actions.deletePost({ id });
-                },
-              },
-              "delete",
-            ),
-      ]);
-    },
-  );
+  const posts = model.posts.map(post => {
+    const { id, creator, created, message, deleted } = post;
+    return h("li", { key: id, className: deleted && styles.blogDeleted }, [
+      h("p", { className: styles.blogMetaInfo }, `${creator} on ${created}:`),
+      h("p", message),
+      h(
+        "button",
+        {
+          disabled: actions.deletePost.disabled(post),
+          onClick: () => {
+            actions.deletePost({ id });
+          },
+          className: styles.actionFog(actions.deletePost, post),
+        },
+        post.deleted ? "undelete" : "delete",
+      ),
+    ]);
+  });
 
   const userPanel = model.userName
     ? <p>
         <button
-          disabled={actionsDisabled}
+          disabled={actions.login.disabled()}
           onClick={() => {
             actions.login({});
           }}
-          className={styles.actionFog}
+          className={styles.actionFog(actions.login)}
         >
           Logout
         </button>
@@ -59,10 +63,13 @@ export default withStyle(function Blog({
           });
         }}
       >
-        <input disabled={actionsDisabled} placeholder="Anton" />
+        <input disabled={actions.login.disabled()} placeholder="Anton" />
 
         <br />
-        <button disabled={actionsDisabled} className={styles.actionFog}>
+        <button
+          disabled={actions.login.disabled()}
+          className={styles.actionFog(actions.login)}
+        >
           Login
         </button>
       </form>;
@@ -88,26 +95,26 @@ export default withStyle(function Blog({
         }}
       >
         <input
-          disabled={actionsDisabled || !model.userName}
+          disabled={actions.post.disabled(model)}
           placeholder="My two cents ..."
         />
 
         <br />
         <button
-          disabled={actionsDisabled || !model.userName}
-          className={model.userName ? styles.actionFog : styles.fog}
+          disabled={actions.post.disabled(model)}
+          className={styles.actionFog(actions.post)}
         >
           Post!
         </button>
 
         <br />
         <button
-          disabled={cancelDisabled || !model.userName}
+          disabled={actions.cancel.disabled()}
           type="button"
           onClick={() => {
             actions.cancel();
           }}
-          className={model.userName ? styles.cancelFog : styles.fog}
+          className={styles.actionFog(actions.cancel)}
         >
           Cancel
         </button>

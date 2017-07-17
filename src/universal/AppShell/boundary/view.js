@@ -1,9 +1,19 @@
 import React from "react";
 import { connect } from "cerebral/react";
 import { state } from "cerebral/tags";
+import { styled } from "react-free-style";
+import classNames from "classnames";
 
-import withStyle from "./styles";
+import defaults, { colours, getStyles } from "../../styles";
+
 import { view as Blog } from "../../blog/boundary";
+
+const withStyle = styled({
+  ...defaults,
+  appShell: {
+    backgroundColor: colours.app,
+  },
+});
 
 export default connect(
   {
@@ -24,7 +34,7 @@ export default connect(
     }
 
     return (
-      <section className={styles.appShell}>
+      <section className={classNames(getStyles(styles, ["appShell", ".pa2"]))}>
         {page}
 
         {/* TODO: Use token value in hidden input field in forms. */}
