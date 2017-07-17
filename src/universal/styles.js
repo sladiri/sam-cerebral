@@ -16,10 +16,7 @@ const getCss = (acc, [key, val]) => {
 };
 
 export const colours = {
-  app: Color("green").lighten(2.7).string(),
   warn: Color("brown").lighten(0.3).string(),
-  hilight: Color("magenta").darken(0.5).string(),
-  hilightIdle: Color("magenta").lighten(0.9).string(),
 };
 
 export const getStyles = (styles, styleNames) =>
@@ -31,4 +28,13 @@ const { tachyonsStyles } = Object.entries({
 
 export default {
   ...tachyonsStyles,
+  ".dfl": {
+    display: "flex",
+  },
+  ".fldir-col": {
+    flexDirection: "column",
+  },
+  ".fljustify-ctr": {
+    justifyContent: "center",
+  },
 };

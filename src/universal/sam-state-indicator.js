@@ -11,26 +11,6 @@ import { styled } from "react-free-style";
 
 const withStyle = styled({
   ...defaults,
-  samStates: {
-    display: "flex",
-    fontSize: "0.8rem",
-    fontFamily: "monospace",
-  },
-
-  stateBlock: {
-    backgroundColor: colours.hilightIdle,
-    margin: "0.5rem",
-    padding: ["0.5rem", "0.3rem"],
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    ">p": { margin: 0 },
-  },
-
-  stateActive: {
-    backgroundColor: colours.hilight,
-    color: "white",
-  },
 });
 
 export default (prefix, name = "StateIndicator") =>
@@ -59,21 +39,32 @@ export default (prefix, name = "StateIndicator") =>
           const stateBlocks = [
             [
               proposeInProgress,
-              [h("p", "propose"), h("p", "(cancelable action)")],
+              [
+                h("p", { className: styles[".ma0"] }, "propose"),
+                h("p", { className: styles[".ma0"] }, "(cancelable action)"),
+              ],
             ],
-            [acceptInProgress, [h("p", "accept"), h("p", "(no cancel)")]],
+            [
+              acceptInProgress,
+              [
+                h("p", { className: styles[".ma0"] }, "accept"),
+                h("p", { className: styles[".ma0"] }, "(no cancel)"),
+              ],
+            ],
             [
               napInProgress,
               [
-                h("p", "NAP"),
+                h("p", { className: styles[".ma0"] }, "NAP"),
                 h(
                   "p",
                   {
-                    style: {
-                      textDecoration:
-                        syncNap || !napInProgress ? "none" : "line-through",
-                      opacity: napInProgress ? 1 : 0.5,
-                    },
+                    className: classNames(
+                      getStyles(styles, [
+                        (syncNap || !napInProgress) && ".strike",
+                        !napInProgress && ".o-50",
+                        ".ma0",
+                      ]),
+                    ),
                   },
                   "(no cancel)",
                 ),
@@ -85,19 +76,36 @@ export default (prefix, name = "StateIndicator") =>
               {
                 key: text.html,
                 className: classNames(
-                  getStyles(styles, ["stateBlock", trigger && "stateActive"]),
+                  getStyles(styles, [
+                    trigger ? ".bg-dark-pink" : ".bg-light-pink",
+                    trigger && ".white",
+                    ".dfl",
+                    ".fldir-col",
+                    ".fljustify-ctr",
+                    ".ma1",
+                    ".pv2",
+                    ".ph1",
+                  ]),
                 ),
               },
               text,
             ),
           );
-          return h("section", { className: styles.samStates }, [
-            h("div", [
-              h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
-              ...take(2, stateBlocks),
-            ]),
-            last(stateBlocks),
-          ]);
+          return h(
+            "section",
+            {
+              className: classNames(
+                getStyles(styles, [".f7", ".dfl", "code, .code"]),
+              ),
+            },
+            [
+              h("div", [
+                h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+                ...take(2, stateBlocks),
+              ]),
+              last(stateBlocks),
+            ],
+          );
         },
         `${name}${prefix ? `[${prefix}]` : ""}`,
       ),

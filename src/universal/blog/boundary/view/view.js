@@ -6,12 +6,6 @@ import defaults from "../../../styles";
 
 const withStyle = styled({
   ...defaults,
-  blogMetaInfo: {
-    fontSize: "70%",
-  },
-  blogDeleted: {
-    textDecoration: "line-through",
-  },
 });
 
 export default withStyle(function Blog({
@@ -27,8 +21,8 @@ export default withStyle(function Blog({
 
   const posts = model.posts.map(post => {
     const { id, creator, created, message, deleted } = post;
-    return h("li", { key: id, className: deleted && styles.blogDeleted }, [
-      h("p", { className: styles.blogMetaInfo }, `${creator} on ${created}:`),
+    return h("li", { key: id, className: deleted && styles[".strike"] }, [
+      h("p", { className: styles[".f6"] }, `${creator} on ${created}:`),
       h("p", message),
       h(
         "button",
