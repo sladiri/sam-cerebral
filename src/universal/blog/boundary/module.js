@@ -1,28 +1,14 @@
 import { samFactory } from "../../sam-step";
-import {
-  defaultState,
-  accept,
-  computeControlState,
-  computeNextAction,
-} from "../entity";
-import { init, login, post, deletePost, cancel } from "../control";
+import { accept, computeControlState, computeNextAction } from "../entity";
+import * as actions from "../control";
 
-export default () => {
-  const signals = samFactory({
-    prefix: "blog",
+export default prefix =>
+  samFactory({
+    prefix,
     accept,
     computeControlState,
     computeNextAction,
     controlState: "normal",
     allowedActions: ["init"],
-    actions: { init, login, post, deletePost, cancel },
+    actions,
   });
-
-  return {
-    init: signals.init,
-    module: {
-      state: defaultState,
-      signals,
-    },
-  };
-};

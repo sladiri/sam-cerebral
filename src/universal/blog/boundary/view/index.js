@@ -1,6 +1,6 @@
 import { connect } from "cerebral/react";
-import { props, signal } from "cerebral/tags";
-import { addButtonStyles } from "../../../computed.js";
+import { signal } from "cerebral/tags";
+
 import { actionsDisabled, cancelDisabled } from "../../../sam-step";
 import { model } from "./computed";
 import view from "./view";
@@ -14,11 +14,6 @@ export default connect(
     cancel: signal`blog.cancel`,
     actionsDisabled: actionsDisabled("blog"),
     cancelDisabled: cancelDisabled("blog"),
-    styles: addButtonStyles(
-      props`styles`,
-      actionsDisabled("blog"),
-      cancelDisabled("blog"),
-    ),
   },
   ({ login, post, deletePost, cancel, ...connectedProps }, parentProps) => {
     return {

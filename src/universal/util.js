@@ -1,12 +1,11 @@
 import { curry } from "ramda";
 
-export function wait(ms, value) {
-  return new Promise(resolve => {
+export const wait = (ms, value) =>
+  new Promise(resolve => {
     setTimeout(() => {
       resolve(value);
     }, ms);
   });
-}
 
 export function* getId() {
   const maxBits = Number.MAX_SAFE_INTEGER.toString(2).length;
@@ -25,6 +24,11 @@ export const getModulePath = curry(
     path ? `${`${prefix ? `${prefix}.` : ""}`}${path}` : prefix,
 );
 
-export function addSamState(_prefix, state) {
-  return { ...state, _prefix, _sam: {} };
-}
+export const addSamState = (_prefix, state) => ({
+  ...state,
+  _prefix,
+  _sam: {},
+});
+
+export const addDisplayName = (component, value) =>
+  Object.defineProperty(component, "name", { value });

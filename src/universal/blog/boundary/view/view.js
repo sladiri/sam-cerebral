@@ -1,16 +1,24 @@
 import h from "react-hyperscript";
 import React from "react";
-import samStateIndicator from "../../../sam-state-indicator";
 
-const SamStateIndicator = samStateIndicator("blog");
+import withStyle from "./styles";
+import samStateIndicatorFactory from "../../../sam-state-indicator";
 
-export default function Blog({
+const SamStateIndicator = samStateIndicatorFactory("blog");
+
+export default withStyle(function Blog({
+  styles,
   model,
   actions,
   actionsDisabled,
   cancelDisabled,
-  styles,
 }) {
+  styles = {
+    ...styles,
+    actionFog: actionsDisabled && styles.fog,
+    cancelFog: cancelDisabled && styles.fog,
+  };
+
   const posts = model.posts.map(
     ({ id, creator, created, message, deleted }) => {
       return h("li", { key: id, className: deleted && styles.blogDeleted }, [
@@ -38,7 +46,7 @@ export default function Blog({
           onClick={() => {
             actions.login({});
           }}
-          className={styles.buttonFog}
+          className={styles.actionFog}
         >
           Logout
         </button>
@@ -54,14 +62,14 @@ export default function Blog({
         <input disabled={actionsDisabled} placeholder="Anton" />
 
         <br />
-        <button disabled={actionsDisabled} className={styles.buttonFog}>
+        <button disabled={actionsDisabled} className={styles.actionFog}>
           Login
         </button>
       </form>;
 
   return (
     <section>
-      <SamStateIndicator styles={styles} />
+      <SamStateIndicator />
 
       <p>
         User: {model.userName || "none (log in to post)"}
@@ -87,7 +95,7 @@ export default function Blog({
         <br />
         <button
           disabled={actionsDisabled || !model.userName}
-          className={model.userName ? styles.buttonFog : styles.fog}
+          className={model.userName ? styles.actionFog : styles.fog}
         >
           Post!
         </button>
@@ -99,7 +107,7 @@ export default function Blog({
           onClick={() => {
             actions.cancel();
           }}
-          className={model.userName ? styles.cancelButtonFog : styles.fog}
+          className={model.userName ? styles.cancelFog : styles.fog}
         >
           Cancel
         </button>
@@ -110,4 +118,4 @@ export default function Blog({
       </ul>
     </section>
   );
-}
+});

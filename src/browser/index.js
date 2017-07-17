@@ -5,7 +5,7 @@ import { render } from "react-dom";
 import Devtools from "cerebral/devtools";
 import { Controller } from "cerebral";
 import { Container } from "cerebral/react";
-import { moduleFactory, view } from "../universal/app/boundary";
+import { moduleFactory, view } from "../universal/AppShell/boundary";
 
 const controller = Controller({
   ...moduleFactory(),

@@ -30,8 +30,16 @@ app.use(async (ctx, next) => {
 
 let routerWorkAroundNumber = 0;
 app.use(async ctx => {
-  const { page: rootPage, prefix: rootPageModulePrefix } = routeMap["/"];
-  const { page: currentPage, prefix: pageModulePrefix } =
+  const {
+    page: rootPage,
+    prefix: rootPageModulePrefix,
+    signalName: rootSignal,
+  } = routeMap["/"];
+  const {
+    page: currentPage,
+    prefix: pageModulePrefix,
+    signalName: pageSignal,
+  } =
     routeMap[ctx.url] || {};
 
   if (!currentPage) {
@@ -46,14 +54,14 @@ app.use(async ctx => {
   routerWorkAroundNumber = getNextWorkaroundNumber(routerWorkAroundNumber);
   const pagesToInit = [
     waitForNap(controller, rootPageModulePrefix, [
-      "rootRouted",
+      rootSignal,
       { routerWorkAroundNumber },
     ]),
   ];
   if (currentPage !== rootPage) {
     pagesToInit.push(
       waitForNap(controller, pageModulePrefix, [
-        `${currentPage}Routed`,
+        pageSignal,
         { routerWorkAroundNumber },
       ]),
     );
