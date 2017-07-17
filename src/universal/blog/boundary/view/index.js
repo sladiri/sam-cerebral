@@ -5,6 +5,10 @@ import { markActionsDisabled, cancelDisabled } from "../../../sam-step";
 import { model } from "./computed";
 import view from "./view";
 
+import samStateIndicatorFactory from "../../../sam-state-indicator";
+
+const SamStateIndicator = samStateIndicatorFactory("blog");
+
 export default connect(
   {
     model,
@@ -29,14 +33,14 @@ export default connect(
     parentProps,
   ) => {
     post.isDisabled = () => !model.userName;
-    deletePost.isDisabled = ({ deleted, creator }) =>
-      model.userName !== creator;
+    deletePost.isDisabled = ({ creator }) => model.userName !== creator;
     cancel.disabled = () => cancelDisabled;
     return {
       model,
       ...parentProps,
       ...connectedProps,
       actions: { ...markActionsDisabled({ login, post, deletePost }), cancel },
+      SamStateIndicator,
     };
   },
   view,

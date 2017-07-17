@@ -4,8 +4,6 @@ import { styled } from "react-free-style";
 
 import defaults from "../../../styles";
 
-import samStateIndicatorFactory from "../../../sam-state-indicator";
-
 const withStyle = styled({
   ...defaults,
   blogMetaInfo: {
@@ -16,9 +14,12 @@ const withStyle = styled({
   },
 });
 
-const SamStateIndicator = samStateIndicatorFactory("blog");
-
-export default withStyle(function Blog({ styles, model, actions }) {
+export default withStyle(function Blog({
+  styles,
+  model,
+  actions,
+  SamStateIndicator,
+}) {
   styles = {
     ...styles,
     actionFog: (action, ...args) => action.disabled(...args) && styles[".o-40"],
