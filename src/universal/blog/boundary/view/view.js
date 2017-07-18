@@ -110,23 +110,41 @@ const postsList = ({ model, actions, styles }) =>
   <ul>
     {model.posts.map(post => {
       const { id, creator, created, message, deleted } = post;
-      return h("li", { key: id, className: deleted && styles[".strike"] }, [
-        h("p", { className: styles[".f6"] }, `${creator} on ${created}:`),
-        h("p", message),
-        model.userName
-          ? h(
-              "button",
-              {
-                disabled: actions.deletePost.disabled(post),
-                onClick: () => {
-                  actions.deletePost({ id });
+      return h(
+        "li",
+        {
+          key: id,
+          className: classNames(
+            getStyles(styles, [
+              deleted && ".strike",
+              ".bt",
+              ".bb",
+              ".b--mid-gray",
+            ]),
+          ),
+        },
+        [
+          h(
+            "p",
+            { className: classNames(styles[".f6"], styles[".tr"]) },
+            `${creator} on ${created}:`,
+          ),
+          h("p", message),
+          model.userName
+            ? h(
+                "button",
+                {
+                  disabled: actions.deletePost.disabled(post),
+                  onClick: () => {
+                    actions.deletePost({ id });
+                  },
+                  className: actionFog(styles, actions.deletePost, post),
                 },
-                className: actionFog(styles, actions.deletePost, post),
-              },
-              post.deleted ? "undelete" : "delete",
-            )
-          : undefined,
-      ]);
+                post.deleted ? "undelete" : "delete",
+              )
+            : undefined,
+        ],
+      );
     })}
   </ul>;
 
