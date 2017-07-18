@@ -24,17 +24,19 @@ export default withStyle(function Blog({
     return h("li", { key: id, className: deleted && styles[".strike"] }, [
       h("p", { className: styles[".f6"] }, `${creator} on ${created}:`),
       h("p", message),
-      h(
-        "button",
-        {
-          disabled: actions.deletePost.disabled(post),
-          onClick: () => {
-            actions.deletePost({ id });
-          },
-          className: styles.actionFog(actions.deletePost, post),
-        },
-        post.deleted ? "undelete" : "delete",
-      ),
+      model.userName
+        ? h(
+            "button",
+            {
+              disabled: actions.deletePost.disabled(post),
+              onClick: () => {
+                actions.deletePost({ id });
+              },
+              className: styles.actionFog(actions.deletePost, post),
+            },
+            post.deleted ? "undelete" : "delete",
+          )
+        : undefined,
     ]);
   });
 
