@@ -21,7 +21,7 @@ export default connect(
 
     switch (currentPage) {
       case "blog": {
-        page = <Blog styles={{}} />;
+        page = <Blog />;
         break;
       }
       default: {
@@ -31,13 +31,13 @@ export default connect(
     }
 
     return (
-      <section className={classNames(getStyles(styles, [".pa2", ".f5"]))}>
+      <div className={classNames(getStyles(styles, [".pa2", ".f5"]))}>
         {page}
 
         {/* TODO: Use token value in hidden input field in forms. */}
         <meta name="csrf-param" content="request_forgery_protection_token" />
         <meta name="csrf-token" content="form_authenticity_token" />
-      </section>
+      </div>
     );
   }),
 );

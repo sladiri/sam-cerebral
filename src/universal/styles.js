@@ -28,13 +28,4 @@ const { tachyonsStyles } = Object.entries({
 
 export default {
   ...tachyonsStyles,
-  ".dfl": {
-    display: "flex",
-  },
-  ".fldir-col": {
-    flexDirection: "column",
-  },
-  ".fljustify-ctr": {
-    justifyContent: "center",
-  },
 };

@@ -79,9 +79,9 @@ export default (prefix, name = "StateIndicator") =>
                   getStyles(styles, [
                     trigger ? ".bg-dark-pink" : ".bg-light-pink",
                     trigger && ".white",
-                    ".dfl",
-                    ".fldir-col",
-                    ".fljustify-ctr",
+                    ".flex",
+                    ".flex-column",
+                    ".justify-center",
                     ".ma1",
                     ".pv2",
                     ".ph1",
@@ -95,12 +95,16 @@ export default (prefix, name = "StateIndicator") =>
             "section",
             {
               className: classNames(
-                getStyles(styles, [".f7", ".dfl", "code, .code"]),
+                getStyles(styles, [".f7", ".flex", "code, .code"]),
               ),
             },
             [
               h("div", [
-                h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+                h("p", { className: styles[".tc"] }, [
+                  "SAM-step state",
+                  h("br"),
+                  ` (${prefix || "root"})`,
+                ]),
                 ...take(2, stateBlocks),
               ]),
               last(stateBlocks),
