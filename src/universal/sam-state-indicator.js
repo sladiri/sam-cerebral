@@ -5,11 +5,7 @@ import { state } from "cerebral/tags";
 import { take, last } from "ramda";
 
 import { getModulePath, addDisplayName } from "./util";
-import defaultCSS, { getStyles } from "./styles";
-
-import { styled } from "react-free-style";
-
-const withStyle = styled(defaultCSS);
+import withStyle, { getStyles } from "./styles";
 
 export default (prefix, name = "StateIndicator") =>
   connect(
@@ -33,26 +29,39 @@ export default (prefix, name = "StateIndicator") =>
           napInProgress,
           syncNap,
           styles,
+          className,
         }) => {
           const stateBlocks = [
             [
               proposeInProgress,
               [
-                h("p", { className: styles[".ma0"] }, "propose"),
-                h("p", { className: styles[".ma0"] }, "(cancelable action)"),
+                h("p", { className: classNames(styles[".ma0"]) }, "propose"),
+                h(
+                  "p",
+                  { className: classNames(styles[".ma0"]) },
+                  "(cancelable action)",
+                ),
               ],
             ],
             [
               acceptInProgress,
               [
-                h("p", { className: styles[".ma0"] }, "accept"),
-                h("p", { className: styles[".ma0"] }, "(no cancel)"),
+                h("p", { className: classNames(styles[".ma0"]) }, "accept"),
+                h(
+                  "p",
+                  { className: classNames(styles[".ma0"]) },
+                  "(no cancel)",
+                ),
               ],
             ],
             [
               napInProgress,
               [
-                h("p", { className: styles[".ma0"] }, "NAP"),
+                h(
+                  "p",
+                  { className: classNames(styles[".ma0"], styles[".tc"]) },
+                  "NAP",
+                ),
                 h(
                   "p",
                   {
@@ -83,6 +92,7 @@ export default (prefix, name = "StateIndicator") =>
                     ".ma1",
                     ".pv2",
                     ".ph1",
+                    ".flex-grow",
                   ]),
                 ),
               },
@@ -93,18 +103,23 @@ export default (prefix, name = "StateIndicator") =>
             "section",
             {
               className: classNames(
-                getStyles(styles, [".f7", ".flex", "code, .code"]),
+                getStyles(styles, [".f7", ".flex", "code, .code", ".tc"]),
+                className,
               ),
             },
             [
-              h("div", [
-                h("p", { className: styles[".tc"] }, [
-                  "SAM-step state",
-                  h("br"),
-                  ` (${prefix || "root"})`,
-                ]),
-                ...take(2, stateBlocks),
-              ]),
+              h(
+                "div",
+                {
+                  className: classNames(
+                    getStyles(styles, [".flex", ".flex-column", ".flex-grow"]),
+                  ),
+                },
+                [
+                  h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+                  ...take(2, stateBlocks),
+                ],
+              ),
               last(stateBlocks),
             ],
           );

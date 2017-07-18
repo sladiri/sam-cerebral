@@ -1,3 +1,4 @@
+import { styled } from "react-free-style";
 import Color from "color";
 import { pick } from "ramda";
 
@@ -26,6 +27,10 @@ const { tachyonsStyles } = Object.entries({
   tachyonsStyles: tachyonsJson,
 }).reduce(getCss, {});
 
-const addedStyles = {};
+const addedStyles = {
+  ".flex-grow": {
+    "flex-grow": "1",
+  },
+};
 
-export default Object.assign(tachyonsStyles, addedStyles);
+export default styled(Object.assign(tachyonsStyles, addedStyles));

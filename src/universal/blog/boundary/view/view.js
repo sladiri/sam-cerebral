@@ -1,23 +1,32 @@
 import h from "react-hyperscript";
 import React from "react";
-import { styled } from "react-free-style";
+import classNames from "classnames";
 
-import defaultCSS from "../../../styles";
+import withStyle, { getStyles } from "../../../styles";
 
 const actionFog = (styles, action, ...args) =>
-  action.disabled(...args) && styles[".o-40"];
+  action.disabled(...args) && classNames(styles[".o-50"], styles[".strike"]);
 
-const userForm = ({ model, actions, styles }) =>
-  model.userName
+const userForm = ({ model, actions, styles, className }) => {
+  const formWidthClass = styles[".w-30"];
+  const formClass = classNames(
+    className,
+    getStyles(styles, [".flex", ".flex-column", ".items-center"]),
+  );
+  return model.userName
     ? <form
         onSubmit={event => {
           event.preventDefault();
           actions.logout();
         }}
+        className={formClass}
       >
         <button
           disabled={actions.logout.disabled()}
-          className={actionFog(styles, actions.logout)}
+          className={classNames(
+            actionFog(styles, actions.logout),
+            formWidthClass,
+          )}
         >
           Logout
         </button>
@@ -29,53 +38,73 @@ const userForm = ({ model, actions, styles }) =>
             userName: event.target.getElementsByTagName("input")[0].value,
           });
         }}
+        className={formClass}
       >
-        <input disabled={actions.login.disabled()} placeholder="Anton" />
+        <input
+          disabled={actions.login.disabled()}
+          className={classNames(
+            actionFog(styles, actions.login),
+            formWidthClass,
+            styles[".tc"],
+          )}
+          placeholder="Anton"
+        />
 
         <br />
         <button
           disabled={actions.login.disabled()}
-          className={actionFog(styles, actions.login)}
+          className={classNames(
+            actionFog(styles, actions.login),
+            formWidthClass,
+          )}
         >
           Login
         </button>
       </form>;
+};
 
-const postForm = ({ model, actions, styles }) =>
-  <form
-    onSubmit={event => {
-      event.preventDefault();
-      actions.post({
-        message: event.target.getElementsByTagName("input")[0].value,
-      });
-      event.target.getElementsByTagName("input")[0].value = "";
-    }}
-  >
-    <input
-      disabled={actions.post.disabled(model)}
-      placeholder="My two cents ..."
-    />
-
-    <br />
-    <button
-      disabled={actions.post.disabled(model)}
-      className={actionFog(styles, actions.post)}
-    >
-      Post!
-    </button>
-
-    <br />
-    <button
-      disabled={actions.cancel.disabled()}
-      type="button"
-      onClick={() => {
-        actions.cancel();
+const postForm = ({ model, actions, styles, className }) => {
+  const buttonClass = action =>
+    classNames(actionFog(styles, action), styles[".mt2"]);
+  return (
+    <form
+      onSubmit={event => {
+        event.preventDefault();
+        actions.post({
+          message: event.target.getElementsByTagName("input")[0].value,
+        });
+        event.target.getElementsByTagName("input")[0].value = "";
       }}
-      className={actionFog(styles, actions.cancel)}
+      className={className}
     >
-      Cancel
-    </button>
-  </form>;
+      <input
+        disabled={actions.post.disabled(model)}
+        className={actionFog(styles, actions.post, model)}
+        placeholder="My two cents ..."
+      />
+
+      <br />
+      <button
+        disabled={actions.post.disabled(model)}
+        className={buttonClass(actions.post)}
+      >
+        Post!
+      </button>
+
+      <br />
+      <button
+        disabled={actions.cancel.disabled()}
+        type="button"
+        onClick={() => {
+          actions.cancel();
+        }}
+        className={buttonClass(actions.cancel)}
+      >
+        Cancel
+      </button>
+    </form>
+  );
+};
 
 const postsList = ({ model, actions, styles }) =>
   <ul>
@@ -101,24 +130,30 @@ const postsList = ({ model, actions, styles }) =>
     })}
   </ul>;
 
-const withStyle = styled(defaultCSS);
-
 export default withStyle(function Blog(props) {
-  const { model, SamStateIndicator } = props;
+  const { model, SamStateIndicator, styles, className } = props;
+
+  const formClass = styles[".mv3"];
 
   return (
-    <section>
-      <SamStateIndicator />
+    <section className={className}>
+      <SamStateIndicator
+        className={classNames(styles[".mt2"], styles[".mb4"])}
+      />
 
-      <p>
+      <p className={styles[".tc"]}>
         User: {model.userName || "none (log in to post)"}
       </p>
 
-      {userForm(props)}
+      {userForm({
+        ...props,
+        className: formClass,
+      })}
 
-      <br />
-
-      {postForm(props)}
+      {postForm({
+        ...props,
+        className: formClass,
+      })}
 
       {postsList(props)}
     </section>
