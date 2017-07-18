@@ -17,7 +17,8 @@
     "startup-server-dev-watch": "nodemon --delay 100ms --watch src/server/ --watch src/universal/ server --exec \"babel-node src/server/index.js\"",
     "build-browser-watch": "nodemon --delay 100ms --watch src/browser/ --watch src/universal/ --exec npm run build-browser",
     "start-dev": "parallelshell \"npm run build-browser-watch\" \"npm run startup-server-dev-watch\"",
-    "start": "node dist-server/src/server/index.js"
+    "startup-server": "node dist-server/src/server/index.js",
+    "start": "npm run start-budo"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
