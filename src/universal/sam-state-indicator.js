@@ -5,13 +5,11 @@ import { state } from "cerebral/tags";
 import { take, last } from "ramda";
 
 import { getModulePath, addDisplayName } from "./util";
-import defaults, { colours, getStyles } from "./styles";
+import defaultCSS, { getStyles } from "./styles";
 
 import { styled } from "react-free-style";
 
-const withStyle = styled({
-  ...defaults,
-});
+const withStyle = styled(defaultCSS);
 
 export default (prefix, name = "StateIndicator") =>
   connect(

@@ -28,7 +28,7 @@ export async function accept({ state, props }) {
   {
     const { userName } = props;
     if (userName !== undefined) {
-      state.set("userName", userName);
+      state.set("userName", userName === null ? "" : userName);
     }
   }
 
@@ -64,11 +64,11 @@ export function computeControlState(blog) {
   const states = [];
 
   if (!blog.posts || blog.posts.length === 0) {
-    states.push(["empty", ["postSystem"]]);
+    states.push(["empty", ["login", "postSystem", "cancel"]]);
   } else if (blog.userName) {
     states.push([
       "loggedIn",
-      ["login", "postSystem", "post", "deletePost", "cancel"],
+      ["logout", "postSystem", "post", "deletePost", "cancel"],
     ]);
   } else {
     states.push(["loggedOut", ["login", "postSystem", "cancel"]]);

@@ -4,19 +4,17 @@ import { state } from "cerebral/tags";
 import { styled } from "react-free-style";
 import classNames from "classnames";
 
-import defaults, { getStyles } from "../../styles";
+import defaultCSS, { getStyles } from "../../styles";
 
 import { view as Blog } from "../../blog/boundary";
 
-const withStyle = styled({
-  ...defaults,
-});
+const withStyle = styled(defaultCSS);
 
 export default connect(
   {
     currentPage: state`currentPage`,
   },
-  withStyle(function AppShell({ styles, currentPage }) {
+  withStyle(function AppShell({ currentPage, styles }) {
     let page;
 
     switch (currentPage) {

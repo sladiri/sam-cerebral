@@ -13,6 +13,7 @@ export default connect(
   {
     model,
     login: signal`blog.login`,
+    logout: signal`blog.logout`,
     post: signal`blog.post`,
     deletePost: signal`blog.deletePost`,
     cancel: signal`blog.cancel`,
@@ -23,6 +24,7 @@ export default connect(
     {
       model,
       login,
+      logout,
       post,
       deletePost,
       cancel,
@@ -34,12 +36,15 @@ export default connect(
   ) => {
     post.isDisabled = () => !model.userName;
     deletePost.isDisabled = ({ creator }) => model.userName !== creator;
-    cancel.disabled = () => cancelDisabled;
+    cancel.disabled = () => cancelDisabled; // TODO: specify action in progress.
     return {
       model,
       ...parentProps,
       ...connectedProps,
-      actions: { ...markActionsDisabled({ login, post, deletePost }), cancel },
+      actions: {
+        ...markActionsDisabled({ login, logout, post, deletePost }),
+        cancel,
+      },
       SamStateIndicator,
     };
   },

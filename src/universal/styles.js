@@ -26,6 +26,6 @@ const { tachyonsStyles } = Object.entries({
   tachyonsStyles: tachyonsJson,
 }).reduce(getCss, {});
 
-export default {
-  ...tachyonsStyles,
-};
+const addedStyles = {};
+
+export default Object.assign(tachyonsStyles, addedStyles);
