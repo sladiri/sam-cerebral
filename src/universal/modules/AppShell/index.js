@@ -18,8 +18,8 @@ const routes = Object.entries(
   signal,
 }));
 
-export default routerWorkAroundNumber => {
-  const getRoutedSignal = getRoutedSignalFactory(routerWorkAroundNumber);
+export default (routerOptions = {}) => {
+  const getRoutedSignal = getRoutedSignalFactory(routerOptions);
 
   const blogModule = blogFactory(routeMap["/"].prefix);
 

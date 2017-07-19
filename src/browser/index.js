@@ -9,7 +9,7 @@ import moduleFactory from "../universal/modules/AppShell";
 import view from "../universal/components/AppShell";
 
 const controller = Controller({
-  ...moduleFactory(),
+  ...moduleFactory({ hasServerState: !!window.CEREBRAL_STATE }),
   devtools: Devtools({
     host: "localhost:8585",
     reconnect: false,

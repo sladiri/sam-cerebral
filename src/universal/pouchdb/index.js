@@ -57,9 +57,6 @@ async function ensureDbSync({
     );
   } catch (e) {
     console.log("No remote DB connected.");
-    if (hasServerSideState()) {
-      console.warn("Server side state from DB is not synced.");
-    }
     remote = null;
   }
 
@@ -88,10 +85,4 @@ async function ensureDbSync({
   }
 
   return { remote, local };
-}
-
-function hasServerSideState() {
-  /*eslint-disable no-undef*/
-  return typeof window !== "undefined" && window.stateIsFromServer;
-  /*eslint-enable no-undef*/
 }

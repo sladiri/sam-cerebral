@@ -10,15 +10,17 @@ import { set, when } from "cerebral/operators";
  * Filter these with "workaroundNumber".
  * TODO: Is this a bug?
  */
-export default (routerWorkAroundNumber = null) =>
-  function getRoutedSignal({
-    page,
-    initSignal = [() => {}],
-    rootInitSignal = [() => {}],
-  }) {
+export default ({
+  routerWorkAroundNumber = null,
+  isServerRender = false,
+  hasServerState,
+}) =>
+  function getRoutedSignal({ page, initSignal = [() => {}], rootInitSignal }) {
+    let initialisedPages;
+
     return [
       ({ path, props }) => {
-        if (isServerRender()) {
+        if (isServerRender) {
           if (
             props.routerWorkAroundNumber === undefined ||
             props.routerWorkAroundNumber === routerWorkAroundNumber
@@ -29,20 +31,31 @@ export default (routerWorkAroundNumber = null) =>
           return path.initialisePage({ page });
         }
 
-        const { stateIsFromServer, initialisedPages } = getPageState();
+        const takePageStateFromServer = do {
+          const result = !!initialisedPages && hasServerState;
+          initialisedPages = initialisedPages || new Set();
+          result;
+        };
 
-        const pathKey =
-          stateIsFromServer || initialisedPages.has(page)
-            ? "skipInit"
-            : "initialisePage";
+        const pathKey = do {
+          const result =
+            takePageStateFromServer || initialisedPages.has(page)
+              ? "skipInit"
+              : "initialisePage";
+          initialisedPages.add(page);
+          result;
+        };
 
-        let initialiseRoot;
-        if (page !== "root" && !initialisedPages.has("root")) {
-          initialisedPages.add("root");
-          initialiseRoot = true;
-        }
-
-        initialisedPages.add(page);
+        const initialiseRoot = do {
+          if (
+            rootInitSignal &&
+            page !== "root" &&
+            !initialisedPages.has("root")
+          ) {
+            initialisedPages.add("root");
+            true;
+          }
+        };
 
         return path[pathKey]({ page, initialiseRoot });
       },
@@ -54,36 +67,9 @@ export default (routerWorkAroundNumber = null) =>
           when(props`initialiseRoot`),
           {
             false: [initSignal],
-            true: [parallel([rootInitSignal, initSignal])],
+            true: [parallel([rootInitSignal || [() => {}], initSignal])],
           },
         ],
       },
     ];
   };
-
-function isServerRender() {
-  /*eslint-disable no-undef*/
-  return typeof window === "undefined";
-  /*eslint-enable no-undef*/
-}
-
-function getPageState() {
-  /*eslint-disable no-undef*/
-
-  const stateIsInitialised = window.CEREBRAL_STATE instanceof Set;
-
-  const stateIsFromServer =
-    !stateIsInitialised && window.CEREBRAL_STATE instanceof Object;
-
-  if (stateIsFromServer) {
-    window.stateIsFromServer = true;
-  }
-
-  const initialisedPages = (window.CEREBRAL_STATE = stateIsInitialised
-    ? window.CEREBRAL_STATE
-    : new Set());
-
-  /*eslint-enable no-undef*/
-
-  return { stateIsFromServer, initialisedPages };
-}
