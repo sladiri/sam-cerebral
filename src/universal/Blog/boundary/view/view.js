@@ -2,16 +2,16 @@ import h from "react-hyperscript";
 import React from "react";
 import classNames from "classnames";
 
-import withStyle, { getStyles } from "../../../styles/boundary";
+const actionFog = (action, ...args) =>
+  action.disabled(...args) && classNames("o-50", "strike");
 
-const actionFog = (styles, action, ...args) =>
-  action.disabled(...args) && classNames(styles[".o-50"], styles[".strike"]);
-
-const userForm = ({ model, actions, styles, className }) => {
-  const formWidthClass = styles[".w-30"];
+const userForm = ({ model, actions, className }) => {
+  const formWidthClass = "w-30";
   const formClass = classNames(
     className,
-    getStyles(styles, [".flex", ".flex-column", ".items-center"]),
+    "flex",
+    "flex-column",
+    "items-center",
   );
   return model.userName
     ? <form
@@ -23,10 +23,7 @@ const userForm = ({ model, actions, styles, className }) => {
       >
         <button
           disabled={actions.logout.disabled()}
-          className={classNames(
-            actionFog(styles, actions.logout),
-            formWidthClass,
-          )}
+          className={classNames(actionFog(actions.logout), formWidthClass)}
         >
           Logout
         </button>
@@ -42,30 +39,22 @@ const userForm = ({ model, actions, styles, className }) => {
       >
         <input
           disabled={actions.login.disabled()}
-          className={classNames(
-            actionFog(styles, actions.login),
-            formWidthClass,
-            styles[".tc"],
-          )}
+          className={classNames(actionFog(actions.login), formWidthClass, "tc")}
           placeholder="Anton"
         />
 
         <br />
         <button
           disabled={actions.login.disabled()}
-          className={classNames(
-            actionFog(styles, actions.login),
-            formWidthClass,
-          )}
+          className={classNames(actionFog(actions.login), formWidthClass)}
         >
           Login
         </button>
       </form>;
 };
 
-const postForm = ({ model, actions, styles, className }) => {
-  const buttonClass = action =>
-    classNames(actionFog(styles, action), styles[".mt2"]);
+const postForm = ({ model, actions, className }) => {
+  const buttonClass = action => classNames(actionFog(action), "mt2");
   return (
     <form
       onSubmit={event => {
@@ -79,7 +68,7 @@ const postForm = ({ model, actions, styles, className }) => {
     >
       <input
         disabled={actions.post.disabled(model)}
-        className={actionFog(styles, actions.post, model)}
+        className={actionFog(actions.post, model)}
         placeholder="My two cents ..."
       />
 
@@ -106,7 +95,7 @@ const postForm = ({ model, actions, styles, className }) => {
   );
 };
 
-const postsList = ({ model, actions, styles }) =>
+const postsList = ({ model, actions }) =>
   <ul>
     {model.posts.map(post => {
       const { id, creator, created, message, deleted } = post;
@@ -115,20 +104,18 @@ const postsList = ({ model, actions, styles }) =>
         {
           key: id,
           className: classNames(
-            getStyles(styles, [
-              deleted && ".strike",
-              ".bt",
-              ".b--light-gray",
-              ".bw2",
-              ".mt3",
-              ".pb2",
-            ]),
+            deleted && "strike",
+            "bt",
+            "b--light-gray",
+            "bw2",
+            "mt3",
+            "pb2",
           ),
         },
         [
           h(
             "p",
-            { className: classNames(styles[".f6"], styles[".tr"]) },
+            { className: classNames("f6", "tr") },
             `${creator} on ${created}:`,
           ),
           h("p", message),
@@ -140,7 +127,7 @@ const postsList = ({ model, actions, styles }) =>
                   onClick: () => {
                     actions.deletePost({ id });
                   },
-                  className: actionFog(styles, actions.deletePost, post),
+                  className: actionFog(actions.deletePost, post),
                 },
                 post.deleted ? "undelete" : "delete",
               )
@@ -150,18 +137,16 @@ const postsList = ({ model, actions, styles }) =>
     })}
   </ul>;
 
-export default withStyle(function Blog(props) {
-  const { model, SamStateIndicator, styles, className } = props;
+export default function Blog(props) {
+  const { model, SamStateIndicator, className } = props;
 
-  const formClass = styles[".mv3"];
+  const formClass = "mv3";
 
   return (
     <section className={className}>
-      <SamStateIndicator
-        className={classNames(styles[".mt2"], styles[".mb4"])}
-      />
+      <SamStateIndicator className={classNames("mt2", "mb4")} />
 
-      <p className={styles[".tc"]}>
+      <p className={"tc"}>
         User: {model.userName || "none (log in to post)"}
       </p>
 
@@ -178,4 +163,4 @@ export default withStyle(function Blog(props) {
       {postsList(props)}
     </section>
   );
-});
+}

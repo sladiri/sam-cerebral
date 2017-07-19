@@ -5,7 +5,6 @@ import { state } from "cerebral/tags";
 import { take, last } from "ramda";
 
 import { getModulePath, addDisplayName } from "../util";
-import withStyle, { getStyles } from "../styles/boundary";
 
 export default (prefix, name = "SamStateIndicator") =>
   connect(
@@ -21,110 +20,86 @@ export default (prefix, name = "SamStateIndicator") =>
       napInProgress: state`${getModulePath(prefix, "_sam.napInProgress")}`,
       syncNap: state`${getModulePath(prefix, "_sam.syncNap")}`,
     },
-    withStyle(
-      addDisplayName(
-        ({
-          proposeInProgress,
-          acceptInProgress,
-          napInProgress,
-          syncNap,
-          styles,
-          className,
-        }) => {
-          const stateBlocks = [
+    addDisplayName(
+      ({
+        proposeInProgress,
+        acceptInProgress,
+        napInProgress,
+        syncNap,
+        className,
+      }) => {
+        const stateBlocks = [
+          [
+            proposeInProgress,
             [
-              proposeInProgress,
-              [
-                h("p", { className: classNames(styles[".ma0"]) }, "propose"),
-                h(
-                  "p",
-                  { className: classNames(styles[".ma0"]) },
-                  "(cancelable action)",
-                ),
-              ],
+              h("p", { className: "ma0" }, "propose"),
+              h("p", { className: "ma0" }, "(cancelable action)"),
             ],
+          ],
+          [
+            acceptInProgress,
             [
-              acceptInProgress,
-              [
-                h("p", { className: classNames(styles[".ma0"]) }, "accept"),
-                h(
-                  "p",
-                  { className: classNames(styles[".ma0"]) },
-                  "(no cancel)",
-                ),
-              ],
+              h("p", { className: "ma0" }, "accept"),
+              h("p", { className: "ma0" }, "(no cancel)"),
             ],
+          ],
+          [
+            napInProgress,
             [
-              napInProgress,
-              [
-                h(
-                  "p",
-                  { className: classNames(styles[".ma0"], styles[".tc"]) },
-                  "NAP",
-                ),
-                h(
-                  "p",
-                  {
-                    className: classNames(
-                      getStyles(styles, [
-                        (syncNap || !napInProgress) && ".strike",
-                        !napInProgress && ".o-50",
-                        ".ma0",
-                      ]),
-                    ),
-                  },
-                  "(no cancel)",
-                ),
-              ],
+              h("p", { className: classNames("ma0", "tc") }, "NAP"),
+              h(
+                "p",
+                {
+                  className: classNames(
+                    (syncNap || !napInProgress) && "strike",
+                    !napInProgress && "o-50",
+                    "ma0",
+                  ),
+                },
+                "(no cancel)",
+              ),
             ],
-          ].map(([trigger, text]) =>
+          ],
+        ].map(([trigger, text]) =>
+          h(
+            "div",
+            {
+              key: text.html,
+              className: classNames(
+                trigger ? "bg-dark-pink" : "bg-light-pink",
+                trigger && "white",
+                "flex",
+                "flex-column",
+                "justify-center",
+                "ma1",
+                "pv2",
+                "ph1",
+                "flex-grow",
+              ),
+            },
+            text,
+          ),
+        );
+        return h(
+          "section",
+          {
+            className: classNames("f7", "flex", "code", "tc", className),
+          },
+          [
             h(
               "div",
               {
-                key: text.html,
-                className: classNames(
-                  getStyles(styles, [
-                    trigger ? ".bg-dark-pink" : ".bg-light-pink",
-                    trigger && ".white",
-                    ".flex",
-                    ".flex-column",
-                    ".justify-center",
-                    ".ma1",
-                    ".pv2",
-                    ".ph1",
-                    ".flex-grow",
-                  ]),
-                ),
+                className: classNames("flex", "flex-column", "flex-grow"),
               },
-              text,
+              [
+                h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+                ...take(2, stateBlocks),
+              ],
             ),
-          );
-          return h(
-            "section",
-            {
-              className: classNames(
-                getStyles(styles, [".f7", ".flex", "code, .code", ".tc"]),
-                className,
-              ),
-            },
-            [
-              h(
-                "div",
-                {
-                  className: classNames(
-                    getStyles(styles, [".flex", ".flex-column", ".flex-grow"]),
-                  ),
-                },
-                [
-                  h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
-                  ...take(2, stateBlocks),
-                ],
-              ),
-              last(stateBlocks),
-            ],
-          );
-        },
-        `${name}${prefix ? `[${prefix}]` : ""}`,
-      ),
+            last(stateBlocks),
+          ],
+        );
+      },
+      `${name}${prefix ? `[${prefix}]` : ""}`,
     ),
   );
