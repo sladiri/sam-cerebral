@@ -5,6 +5,7 @@ import { state } from "cerebral/tags";
 import { take, last } from "ramda";
 
 import { getModulePath, addDisplayName } from "../util";
+import { withStyle } from "../styles";
 
 export default (prefix, name = "SamStateIndicator") =>
   connect(
@@ -20,86 +21,99 @@ export default (prefix, name = "SamStateIndicator") =>
       napInProgress: state`${getModulePath(prefix, "_sam.napInProgress")}`,
       syncNap: state`${getModulePath(prefix, "_sam.syncNap")}`,
     },
-    addDisplayName(
-      ({
-        proposeInProgress,
-        acceptInProgress,
-        napInProgress,
-        syncNap,
-        className,
-      }) => {
-        const stateBlocks = [
-          [
-            proposeInProgress,
+    withStyle(
+      addDisplayName(
+        ({
+          proposeInProgress,
+          acceptInProgress,
+          napInProgress,
+          syncNap,
+          className,
+          styles: css,
+        }) => {
+          const stateBlocks = [
             [
-              h("p", { className: "ma0" }, "propose"),
-              h("p", { className: "ma0" }, "(cancelable action)"),
+              proposeInProgress,
+              [
+                h("p", { className: css.ma0 }, "propose"),
+                h("p", { className: css.ma0 }, "(cancelable action)"),
+              ],
             ],
-          ],
-          [
-            acceptInProgress,
             [
-              h("p", { className: "ma0" }, "accept"),
-              h("p", { className: "ma0" }, "(no cancel)"),
+              acceptInProgress,
+              [
+                h("p", { className: css.ma0 }, "accept"),
+                h("p", { className: css.ma0 }, "(no cancel)"),
+              ],
             ],
-          ],
-          [
-            napInProgress,
             [
-              h("p", { className: classNames("ma0", "tc") }, "NAP"),
-              h(
-                "p",
-                {
-                  className: classNames(
-                    (syncNap || !napInProgress) && "strike",
-                    !napInProgress && "o-50",
-                    "ma0",
-                  ),
-                },
-                "(no cancel)",
-              ),
+              napInProgress,
+              [
+                h("p", { className: classNames(css.ma0, css.tc) }, "NAP"),
+                h(
+                  "p",
+                  {
+                    className: classNames(
+                      (syncNap || !napInProgress) && css.strike,
+                      !napInProgress && css["o-50"],
+                      css.ma0,
+                    ),
+                  },
+                  "(no cancel)",
+                ),
+              ],
             ],
-          ],
-        ].map(([trigger, text]) =>
-          h(
-            "div",
-            {
-              key: text.html,
-              className: classNames(
-                trigger ? "bg-dark-pink" : "bg-light-pink",
-                trigger && "white",
-                "flex",
-                "flex-column",
-                "justify-center",
-                "ma1",
-                "pv2",
-                "ph1",
-                "flex-grow",
-              ),
-            },
-            text,
-          ),
-        );
-        return h(
-          "section",
-          {
-            className: classNames("f7", "flex", "code", "tc", className),
-          },
-          [
+          ].map(([trigger, text]) =>
             h(
               "div",
               {
-                className: classNames("flex", "flex-column", "flex-grow"),
+                key: text.html,
+                className: classNames(
+                  trigger ? css["bg-dark-pink"] : css["bg-light-pink"],
+                  trigger && css.white,
+                  css.flex,
+                  css["flex-column"],
+                  css["justify-center"],
+                  css.ma1,
+                  css.pv2,
+                  css.ph1,
+                  css["flex-grow"],
+                ),
               },
-              [
-                h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
-                ...take(2, stateBlocks),
-              ],
+              text,
             ),
-            last(stateBlocks),
-          ],
-        );
-      },
-      `${name}${prefix ? `[${prefix}]` : ""}`,
+          );
+          return h(
+            "section",
+            {
+              className: classNames(
+                css.f7,
+                css.flex,
+                css.code,
+                css.tc,
+                className,
+              ),
+            },
+            [
+              h(
+                "div",
+                {
+                  className: classNames(
+                    css.flex,
+                    css["flex-column"],
+                    css["flex-grow"],
+                  ),
+                },
+                [
+                  h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+                  ...take(2, stateBlocks),
+                ],
+              ),
+              last(stateBlocks),
+            ],
+          );
+        },
+        `${name}${prefix ? `[${prefix}]` : ""}`,
+      ),
     ),
   );

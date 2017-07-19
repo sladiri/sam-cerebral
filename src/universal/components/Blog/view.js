@@ -2,16 +2,18 @@ import h from "react-hyperscript";
 import React from "react";
 import classNames from "classnames";
 
-const actionFog = (action, ...args) =>
-  action.disabled(...args) && classNames("o-50", "strike");
+import { withStyle } from "../../styles";
 
-const userForm = ({ model, actions, className }) => {
-  const formWidthClass = "w-30";
+const actionFog = (css, action, ...args) =>
+  action.disabled(...args) && classNames(css["o-50"], css.strike);
+
+const userForm = ({ model, actions, className, styles: css }) => {
+  const formWidthClass = css["w-30"];
   const formClass = classNames(
     className,
-    "flex",
-    "flex-column",
-    "items-center",
+    css.flex,
+    css["flex-column"],
+    css["items-center"],
   );
   return model.userName
     ? <form
@@ -23,7 +25,7 @@ const userForm = ({ model, actions, className }) => {
       >
         <button
           disabled={actions.logout.disabled()}
-          className={classNames(actionFog(actions.logout), formWidthClass)}
+          className={classNames(actionFog(css, actions.logout), formWidthClass)}
         >
           Logout
         </button>
@@ -39,22 +41,26 @@ const userForm = ({ model, actions, className }) => {
       >
         <input
           disabled={actions.login.disabled()}
-          className={classNames(actionFog(actions.login), formWidthClass, "tc")}
+          className={classNames(
+            actionFog(css, actions.login),
+            formWidthClass,
+            css.tc,
+          )}
           placeholder="Anton"
         />
 
         <br />
         <button
           disabled={actions.login.disabled()}
-          className={classNames(actionFog(actions.login), formWidthClass)}
+          className={classNames(actionFog(css, actions.login), formWidthClass)}
         >
           Login
         </button>
       </form>;
 };
 
-const postForm = ({ model, actions, className }) => {
-  const buttonClass = action => classNames(actionFog(action), "mt2");
+const postForm = ({ model, actions, className, styles: css }) => {
+  const buttonClass = action => classNames(actionFog(css, action), css.mt2);
   return (
     <form
       onSubmit={event => {
@@ -68,7 +74,7 @@ const postForm = ({ model, actions, className }) => {
     >
       <input
         disabled={actions.post.disabled(model)}
-        className={actionFog(actions.post, model)}
+        className={actionFog(css, actions.post, model)}
         placeholder="My two cents ..."
       />
 
@@ -95,7 +101,7 @@ const postForm = ({ model, actions, className }) => {
   );
 };
 
-const postsList = ({ model, actions }) =>
+const postsList = ({ model, actions, styles: css }) =>
   <ul>
     {model.posts.map(post => {
       const { id, creator, created, message, deleted } = post;
@@ -104,18 +110,18 @@ const postsList = ({ model, actions }) =>
         {
           key: id,
           className: classNames(
-            deleted && "strike",
-            "bt",
-            "b--light-gray",
-            "bw2",
-            "mt3",
-            "pb2",
+            deleted && css.strike,
+            css.bt,
+            css["b--light-gray"],
+            css.bw2,
+            css.mt3,
+            css.pb2,
           ),
         },
         [
           h(
             "p",
-            { className: classNames("f6", "tr") },
+            { className: classNames(css.f6, css.tr) },
             `${creator} on ${created}`,
           ),
           h("p", message),
@@ -127,7 +133,7 @@ const postsList = ({ model, actions }) =>
                   onClick: () => {
                     actions.deletePost({ id });
                   },
-                  className: actionFog(actions.deletePost, post),
+                  className: actionFog(css, actions.deletePost, post),
                 },
                 post.deleted ? "undelete" : "delete",
               )
@@ -137,16 +143,16 @@ const postsList = ({ model, actions }) =>
     })}
   </ul>;
 
-export default function Blog(props) {
-  const { model, SamStateIndicator, className } = props;
+export default withStyle(function Blog(props) {
+  const { model, SamStateIndicator, className, styles: css } = props;
 
-  const formClass = "mv3";
+  const formClass = css.mv3;
 
   return (
     <section className={className}>
-      <SamStateIndicator className={classNames("mt2", "mb4")} />
+      <SamStateIndicator className={classNames(css.mt2, css.mb4)} />
 
-      <p className={"tc"}>
+      <p className={css.tc}>
         User: {model.userName || "none (log in to post)"}
       </p>
 
@@ -163,4 +169,4 @@ export default function Blog(props) {
       {postsList(props)}
     </section>
   );
-}
+});

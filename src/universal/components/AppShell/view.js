@@ -1,9 +1,11 @@
 import React from "react";
 import classNames from "classnames";
 
+import { withStyle } from "../../styles";
+
 import Blog from "../Blog";
 
-export default function AppShell({ currentPage }) {
+export default withStyle(function AppShell({ currentPage, styles: css }) {
   let page;
 
   switch (currentPage) {
@@ -18,7 +20,7 @@ export default function AppShell({ currentPage }) {
   }
 
   return (
-    <div className={classNames("pv2", "ph1", "f5")}>
+    <div className={classNames(css.pv2, css.ph1, css.f5)}>
       {page}
 
       {/* TODO: Use token value in hidden input field in forms. */}
@@ -26,4 +28,4 @@ export default function AppShell({ currentPage }) {
       <meta name="csrf-token" content="form_authenticity_token" />
     </div>
   );
-}
+});

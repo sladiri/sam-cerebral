@@ -5,7 +5,7 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
-    "build-tachyons": "cp node_modules/tachyons/css/tachyons.css static/",
+    "build-tachyons": "cssparser src/universal/styles/tachyonsNoIE-hacks.css -o src/universal/styles/tachyonsParsed.json",
     "build-server": "mkdir -p dist-server && babel \"src/{server,universal}/**/*.js\" --out-dir dist-server",
     "build-browser": "mkdir -p static/dist && retry -- browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
@@ -14,11 +14,9 @@
     "prebuild": "npm run lint",
     "build": "npm run build-server && npm run build-browser",
     "clean": "rm -rf static/dist && rm -rf dist-server",
-    "prestart-budo": "npm run build-tachyons",
     "start-budo": "budo src/browser/index.js:static/dist/bundle.js --host localhost --pushstate --live -- -t babelify",
     "startup-server-dev-watch": "nodemon --delay 100ms --watch src/server/ --watch src/universal/ server --exec \"babel-node src/server/index.js\"",
     "build-browser-watch": "nodemon --delay 100ms --watch src/browser/ --watch src/universal/ --exec npm run build-browser",
-    "prestart-dev": "npm run build-tachyons",
     "start-dev": "parallelshell \"npm run build-browser-watch\" \"npm run startup-server-dev-watch\"",
     "startup-server": "node dist-server/src/server/index.js",
     "start": "npm run start-budo"
@@ -38,6 +36,7 @@
     "browserify": "^14.4.0",
     "budo": "^10.0.3",
     "classnames": "^2.2.5",
+    "cssparser": "^0.9.2",
     "dynamics": "^1.0.0",
     "eslint": "^4.1.1",
     "eslint-plugin-react": "^7.0.1",

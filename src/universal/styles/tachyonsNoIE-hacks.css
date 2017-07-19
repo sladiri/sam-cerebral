@@ -746,8 +746,8 @@ img { max-width: 100%; }
      -l  = large
 
 */
-.fl { float: left; _display: inline; }
-.fr { float: right; _display: inline; }
+.fl { float: left; }
+.fr { float: right; }
 .fn { float: none; }
 /*
 
@@ -1829,7 +1829,7 @@ code, .code { font-family: Consolas, monaco, monospace; }
     Text that is hidden but accessible
     Ref: http://snook.ca/archives/html_and_css/hiding-content-for-accessibility
 */
-.clip { position: fixed !important; _position: absolute !important; clip: rect( 1px 1px 1px 1px ); /* IE6, IE7 */ clip: rect( 1px, 1px, 1px, 1px ); }
+.clip { position: fixed !important; clip: rect( 1px 1px 1px 1px ); /* IE6, IE7 */ clip: rect( 1px, 1px, 1px, 1px ); }
 /*
 
    WHITE SPACE
