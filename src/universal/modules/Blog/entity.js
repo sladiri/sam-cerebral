@@ -4,8 +4,8 @@ import { pouchDbFactory } from "../../pouchdb";
 const db = pouchDbFactory({
   inMemory: true,
   remoteDbHost: "http://localhost:5984",
-  remoteDbName: "blogposts",
-  localDbName: "local_blogposts",
+  remoteDbName: "blog",
+  localDbName: "local_blog",
 });
 
 export async function accept({ state, props }) {
