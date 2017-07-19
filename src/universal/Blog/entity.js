@@ -1,4 +1,4 @@
-// import { wait } from "../util";
+import { wait } from "../util";
 import { pouchDbFactory } from "../pouchdb/boundary";
 
 export const defaultState = {};
@@ -29,6 +29,7 @@ export async function accept({ state, props }) {
     const { userName } = props;
     if (userName !== undefined) {
       state.set("userName", userName === null ? "" : userName);
+      await wait(1000);
     }
   }
 
@@ -56,8 +57,11 @@ export async function accept({ state, props }) {
         const index = blog.posts.findIndex(p => p._id === deleteId);
         state.set(`posts.${index}.deleted`, post.deleted);
       }
+      await wait(1000);
     }
   }
+
+  await wait(200);
 }
 
 export function computeControlState(blog) {
