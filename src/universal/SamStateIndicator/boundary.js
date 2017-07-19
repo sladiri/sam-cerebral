@@ -4,10 +4,10 @@ import { connect } from "cerebral/react";
 import { state } from "cerebral/tags";
 import { take, last } from "ramda";
 
-import { getModulePath, addDisplayName } from "./util";
-import withStyle, { getStyles } from "./styles";
+import { getModulePath, addDisplayName } from "../util";
+import withStyle, { getStyles } from "../styles/boundary";
 
-export default (prefix, name = "StateIndicator") =>
+export default (prefix, name = "SamStateIndicator") =>
   connect(
     {
       proposeInProgress: state`${getModulePath(

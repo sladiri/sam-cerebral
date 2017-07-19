@@ -1,5 +1,5 @@
 // import { wait } from "../util";
-import { pouchDbFactory } from "../pouchdb";
+import { pouchDbFactory } from "../pouchdb/boundary";
 
 export const defaultState = {};
 

@@ -2,7 +2,7 @@ import h from "react-hyperscript";
 import React from "react";
 import classNames from "classnames";
 
-import withStyle, { getStyles } from "../../../styles";
+import withStyle, { getStyles } from "../../../styles/boundary";
 
 const actionFog = (styles, action, ...args) =>
   action.disabled(...args) && classNames(styles[".o-50"], styles[".strike"]);

@@ -1,6 +1,7 @@
 import Router from "@cerebral/router";
-import { getRoutedSignalFactory } from "../../sam-step";
-import { moduleFactory as blogFactory } from "../../blog/boundary";
+
+import { getRoutedSignalFactory } from "../../samStep/boundary";
+import { moduleFactory as blogFactory } from "../../Blog/boundary";
 
 export const routeMap = {
   "/": {

@@ -1,11 +1,120 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
-import { compute } from "cerebral";
-import { state, props } from "cerebral/tags";
-import { parallel } from "cerebral";
-import { set, when } from "cerebral/operators";
-import { getId, getModulePath } from "./util";
 
-export function samFactory({
+import { getId, getModulePath } from "../../util";
+
+export const addSamState = (_prefix, object) =>
+  object.signals
+    ? { ...object, state: { _prefix, _sam: {}, ...object.state } }
+    : { _prefix, _sam: {}, ...object };
+
+const parseAction = action => {
+  if (Array.isArray(action)) {
+    const [name, tree] = action;
+    action = { name, tree };
+  }
+
+  if (!action.name) {
+    console.log("action", action);
+    throw new Error(
+      "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
+    );
+  }
+  return [action, action.name];
+};
+
+const getPrefixedStateProxy = prefixedPath =>
+  memoize((state, scoped) =>
+    Object.keys(state).reduce((acc, key) => {
+      acc[key] = (statePath, ...args) => {
+        statePath = prefixedPath(statePath);
+        if (statePath === "") statePath = undefined;
+        let result = state[key](statePath, ...args);
+        if (scoped && result) {
+          result = pickBy((val, key) => {
+            const field = result[key];
+            return !type(field) !== "Object" || field._prefix === undefined;
+          }, result);
+          result = omit(["_sam", "_prefix"], result);
+        }
+        return result;
+      };
+      return acc;
+    }, {}),
+  );
+
+const getProposal = async ({ action, actionName, props, controller }) => {
+  const proposal = await (action.tree
+    ? controller.run(actionName, action.tree, props)
+    : action({ props }));
+
+  return proposal !== undefined && Object.keys(proposal).length > 0
+    ? proposal
+    : { _abortAction: true };
+};
+
+const emitNapDone = prefix => ({ controller }) => {
+  controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+};
+
+const mergeControlStates = states => {
+  return states
+    .reduce(
+      ([[nameSet, allowedActionsSet]], [name, allowedActions = []]) => {
+        nameSet.add(name);
+        allowedActions.forEach(::allowedActionsSet.add);
+        return [[nameSet, allowedActionsSet]];
+      },
+      [[new Set(), new Set()]],
+    )
+    .map(([nameSet, allowedActionsSet]) => [
+      [...nameSet.values()].join(","),
+      [...allowedActionsSet.values()],
+    ]);
+};
+
+const mergeActions = ({ controller, actions, nextActions }) => {
+  return nextActions
+    .reduce(
+      (
+        [[compoundNameSet, proposalPromises]],
+        [signalName, signalInput = {}],
+      ) => {
+        compoundNameSet.add(signalName);
+        const [action, actionName] = parseAction(actions[signalName]);
+        const proposal = getProposal({
+          action,
+          actionName,
+          signalInput,
+          controller,
+        });
+        proposalPromises.push(proposal);
+        return [[compoundNameSet, proposalPromises]];
+      },
+      [[new Set(), []]],
+    )
+    .map(([compoundNameSet, proposalPromises]) => [
+      [...compoundNameSet.values()].join(","),
+      proposalPromises,
+    ]);
+};
+
+const getCompoundSignal = (compoundName, proposalPromises, props) => {
+  return Object.defineProperty(
+    async () => {
+      const proposals = await Promise.all(proposalPromises);
+      return [...proposals, props].reduce(
+        (acc, proposal) => ({ ...acc, ...proposal }),
+        {},
+      );
+    },
+    "name",
+    { value: compoundName },
+  );
+};
+
+const getModuleName = name => (name === "" ? "root" : name);
+
+export default function samFactory({
   prefix = "", // Cannot save undefined to state
   accept = () => {},
   computeControlState = () => ["default"],
@@ -277,244 +386,4 @@ export function samFactory({
       return signalRun;
     }
   }
-}
-
-function parseAction(action) {
-  if (Array.isArray(action)) {
-    const [name, tree] = action;
-    action = { name, tree };
-  }
-
-  if (!action.name) {
-    console.log("action", action);
-    throw new Error(
-      "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
-    );
-  }
-  return [action, action.name];
-}
-
-async function getProposal({ action, actionName, props, controller }) {
-  const proposal = await (action.tree
-    ? controller.run(actionName, action.tree, props)
-    : action({ props }));
-
-  return proposal !== undefined && Object.keys(proposal).length > 0
-    ? proposal
-    : { _abortAction: true };
-}
-
-function mergeControlStates(states) {
-  return states
-    .reduce(
-      ([[nameSet, allowedActionsSet]], [name, allowedActions = []]) => {
-        nameSet.add(name);
-        allowedActions.forEach(::allowedActionsSet.add);
-        return [[nameSet, allowedActionsSet]];
-      },
-      [[new Set(), new Set()]],
-    )
-    .map(([nameSet, allowedActionsSet]) => [
-      [...nameSet.values()].join(","),
-      [...allowedActionsSet.values()],
-    ]);
-}
-
-function mergeActions({ controller, actions, nextActions }) {
-  return nextActions
-    .reduce(
-      (
-        [[compoundNameSet, proposalPromises]],
-        [signalName, signalInput = {}],
-      ) => {
-        compoundNameSet.add(signalName);
-        const [action, actionName] = parseAction(actions[signalName]);
-        const proposal = getProposal({
-          action,
-          actionName,
-          signalInput,
-          controller,
-        });
-        proposalPromises.push(proposal);
-        return [[compoundNameSet, proposalPromises]];
-      },
-      [[new Set(), []]],
-    )
-    .map(([compoundNameSet, proposalPromises]) => [
-      [...compoundNameSet.values()].join(","),
-      proposalPromises,
-    ]);
-}
-
-function getCompoundSignal(compoundName, proposalPromises, props) {
-  return Object.defineProperty(
-    async () => {
-      const proposals = await Promise.all(proposalPromises);
-      return [...proposals, props].reduce(
-        (acc, proposal) => ({ ...acc, ...proposal }),
-        {},
-      );
-    },
-    "name",
-    { value: compoundName },
-  );
-}
-
-export const emitNapDone = prefix => ({ controller }) => {
-  controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
-};
-
-const getPrefixedStateProxy = prefixedPath =>
-  memoize((state, scoped) =>
-    Object.keys(state).reduce((acc, key) => {
-      acc[key] = (statePath, ...args) => {
-        statePath = prefixedPath(statePath);
-        if (statePath === "") statePath = undefined;
-        let result = state[key](statePath, ...args);
-        if (scoped && result) {
-          result = pickBy((val, key) => {
-            const field = result[key];
-            return !type(field) !== "Object" || field._prefix === undefined;
-          }, result);
-          result = omit(["_sam", "_prefix"], result);
-        }
-        return result;
-      };
-      return acc;
-    }, {}),
-  );
-
-const getModuleName = name => (name === "" ? "root" : name);
-
-export const addSamState = (_prefix, object) =>
-  object.signals
-    ? { ...object, state: { _prefix, _sam: {}, ...object.state } }
-    : { _prefix, _sam: {}, ...object };
-
-const _actionsDisabled = prefix =>
-  compute(function actionsDisabled(get) {
-    return (
-      get(state`${getModulePath(prefix, "_sam.init")}`) ||
-      get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`) ||
-      get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
-      get(state`${getModulePath(prefix, "_sam.napInProgress")}`)
-    );
-  });
-
-export const cancelDisabled = prefix =>
-  compute(function cancelDisabled(get) {
-    return (
-      get(state`${getModulePath(prefix, "_sam.init")}`) ||
-      !get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`) ||
-      get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
-      (get(state`${getModulePath(prefix, "_sam.napInProgress")}`) &&
-        get(state`${getModulePath(prefix, "_sam.syncNap")}`))
-    );
-  });
-
-export const markActionsDisabled = prefix =>
-  compute(
-    _actionsDisabled(prefix),
-    state`${getModulePath(prefix, "_sam.controlState.allowedActions")}`,
-    (actionsDisabled, allowedActions) => {
-      const actionDisabled = actionName =>
-        actionsDisabled || !allowedActions.includes(actionName);
-      return actions =>
-        Object.entries(actions).reduce((acc, [key, val]) => {
-          if (acc.enabled)
-            throw new Error("Action already has enabled property.");
-          val.disabled = (...args) =>
-            val.isDisabled
-              ? actionDisabled(key) || val.isDisabled(...args)
-              : actionDisabled(key);
-          acc[key] = val;
-          return acc;
-        }, {});
-    },
-  );
-
-/**
- * getRouterFactory
- * 
- * routerWorkAroundNumber (server-side rendering only)
- * Requests do not match URL in browser, there seem to be a stray requests.
- * Filter these with "workaroundNumber".
- * TODO: Is this a bug?
- */
-export const getRoutedSignalFactory = (routerWorkAroundNumber = null) =>
-  function getRoutedSignal({
-    page,
-    initSignal = [() => {}],
-    rootInitSignal = [() => {}],
-  }) {
-    return [
-      ({ path, props }) => {
-        if (isServerRender()) {
-          if (
-            props.routerWorkAroundNumber === undefined ||
-            props.routerWorkAroundNumber === routerWorkAroundNumber
-          ) {
-            return path.skipAll();
-          }
-
-          return path.initialisePage({ page });
-        }
-
-        const { stateIsFromServer, initialisedPages } = getPageState();
-
-        const pathKey =
-          stateIsFromServer || initialisedPages.has(page)
-            ? "skipInit"
-            : "initialisePage";
-
-        let initialiseRoot;
-        if (page !== "root" && !initialisedPages.has("root")) {
-          initialisedPages.add("root");
-          initialiseRoot = true;
-        }
-
-        initialisedPages.add(page);
-
-        return path[pathKey]({ page, initialiseRoot });
-      },
-      {
-        skipAll: [],
-        skipInit: [set(state`currentPage`, page)],
-        initialisePage: [
-          set(state`currentPage`, props`page`),
-          when(props`initialiseRoot`),
-          {
-            false: [initSignal],
-            true: [parallel([rootInitSignal, initSignal])],
-          },
-        ],
-      },
-    ];
-  };
-
-function isServerRender() {
-  /*eslint-disable no-undef*/
-  return typeof window === "undefined";
-  /*eslint-enable no-undef*/
-}
-
-function getPageState() {
-  /*eslint-disable no-undef*/
-
-  const stateIsInitialised = window.CEREBRAL_STATE instanceof Set;
-
-  const stateIsFromServer =
-    !stateIsInitialised && window.CEREBRAL_STATE instanceof Object;
-
-  if (stateIsFromServer) {
-    window.stateIsFromServer = true;
-  }
-
-  const initialisedPages = (window.CEREBRAL_STATE = stateIsInitialised
-    ? window.CEREBRAL_STATE
-    : new Set());
-
-  /*eslint-enable no-undef*/
-
-  return { stateIsFromServer, initialisedPages };
 }
