@@ -1,8 +1,6 @@
 import { wait } from "../../util";
 import { pouchDbFactory } from "../../pouchdb";
 
-export const defaultState = {};
-
 const db = pouchDbFactory({
   inMemory: true,
   remoteDbHost: "http://localhost:5984",

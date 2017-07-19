@@ -4,8 +4,8 @@ import { getId, getModulePath } from "../util";
 
 export const addSamState = (_prefix, object) =>
   object.signals
-    ? { ...object, state: { _prefix, _sam: {}, ...object.state } }
-    : { _prefix, _sam: {}, ...object };
+    ? { ...object, state: { _prefix, _sam: {} } }
+    : { _prefix, _sam: {} };
 
 const parseAction = action => {
   if (Array.isArray(action)) {
@@ -119,8 +119,6 @@ export default function samFactory({
   accept = () => {},
   computeControlState = () => ["default"],
   computeNextAction = () => [],
-  controlState = "default",
-  allowedActions = [],
   actions = {},
   preventCompoundState = true,
 }) {
@@ -153,7 +151,7 @@ export default function samFactory({
           state.set("_sam", {
             stepId: GetId.next().value,
             init: true,
-            controlState: { name: controlState, allowedActions },
+            controlState: { name: "", allowedActions: [] },
             proposeInProgress: false,
             acceptInProgress: false,
             napInProgress: false,
@@ -234,14 +232,15 @@ export default function samFactory({
     }
 
     function guardDisallowedAction(sam) {
-      const { controlState } = sam;
+      if (sam.init) return true;
+
       const actions = actionName.split(",");
       const commonActionsSet = innerJoin(
         (allowed, actionName) => allowed === actionName,
-        controlState.allowedActions,
+        sam.controlState.allowedActions,
         actions,
       );
-      return !controlState.name || commonActionsSet.length === actions.length;
+      return commonActionsSet.length === actions.length;
     }
 
     function logDisallowedAction(props, sam) {

@@ -8,7 +8,5 @@ export default prefix =>
     accept,
     computeControlState,
     computeNextAction,
-    controlState: "normal",
-    allowedActions: ["init"],
     actions,
   });
