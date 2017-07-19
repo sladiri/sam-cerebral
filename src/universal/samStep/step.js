@@ -1,6 +1,6 @@
 import { innerJoin, memoize, omit, pickBy, type } from "ramda";
 
-import { getId, getModulePath } from "../../util";
+import { getId, getModulePath } from "../util";
 
 export const addSamState = (_prefix, object) =>
   object.signals

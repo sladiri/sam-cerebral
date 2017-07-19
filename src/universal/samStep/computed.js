@@ -1,7 +1,7 @@
 import { compute } from "cerebral";
 import { state } from "cerebral/tags";
 
-import { getModulePath } from "../../util";
+import { getModulePath } from "../util";
 
 const _actionsDisabled = prefix =>
   compute(function actionsDisabled(get) {

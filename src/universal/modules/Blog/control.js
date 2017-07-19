@@ -1,4 +1,4 @@
-import { wait } from "../util";
+import { wait } from "../../util";
 
 export async function init() {}
 

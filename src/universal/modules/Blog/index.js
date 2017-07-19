@@ -1,6 +1,6 @@
-import { samFactory } from "../../samStep/boundary";
-import { accept, computeControlState, computeNextAction } from "../entity";
-import * as actions from "../control";
+import { samFactory } from "../../samStep";
+import { accept, computeControlState, computeNextAction } from "./entity";
+import * as actions from "./control";
 
 export default prefix =>
   samFactory({

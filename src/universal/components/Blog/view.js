@@ -116,7 +116,7 @@ const postsList = ({ model, actions }) =>
           h(
             "p",
             { className: classNames("f6", "tr") },
-            `${creator} on ${created}:`,
+            `${creator} on ${created}`,
           ),
           h("p", message),
           model.userName

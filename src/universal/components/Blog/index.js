@@ -1,11 +1,11 @@
 import { connect } from "cerebral/react";
 import { signal } from "cerebral/tags";
 
-import { markActionsDisabled, cancelDisabled } from "../../../samStep/boundary";
+import { markActionsDisabled, cancelDisabled } from "../../samStep";
 import { model } from "./computed";
 import view from "./view";
 
-import samStateIndicatorFactory from "../../../SamStateIndicator/boundary";
+import samStateIndicatorFactory from "../SamStateIndicator";
 
 const SamStateIndicator = samStateIndicatorFactory("blog");
 
