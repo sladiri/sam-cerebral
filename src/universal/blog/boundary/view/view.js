@@ -118,8 +118,10 @@ const postsList = ({ model, actions, styles }) =>
             getStyles(styles, [
               deleted && ".strike",
               ".bt",
-              ".bb",
-              ".b--mid-gray",
+              ".b--light-gray",
+              ".bw2",
+              ".mt3",
+              ".pb2",
             ]),
           ),
         },
