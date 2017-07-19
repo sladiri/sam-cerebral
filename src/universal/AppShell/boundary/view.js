@@ -25,7 +25,6 @@ export default connect(
 
     return (
       <div className={classNames("pv2", "ph1", "f5")}>
-        <p className={classNames("f3", "f1-m")}>Test</p>
         {page}
 
         {/* TODO: Use token value in hidden input field in forms. */}
