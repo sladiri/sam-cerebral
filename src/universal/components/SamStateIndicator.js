@@ -8,7 +8,6 @@ import { wrap, ReactFreeStyleContext } from "react-free-style";
 import { getModulePath, addDisplayName } from "../util";
 import { getCss } from "../styles";
 
-let css;
 export default (prefix, name = "SamStateIndicator") => {
   const displayName = `${name}${prefix ? `[${prefix}]` : ""}`;
   const view = addDisplayName(
@@ -22,7 +21,7 @@ export default (prefix, name = "SamStateIndicator") => {
       },
       context,
     ) => {
-      css = css || getCss(context);
+      const css = getCss(context);
 
       const stateBlocks = [
         [
