@@ -22,7 +22,7 @@ const AppShell = ({ currentPage }, context) => {
   }
 
   return (
-    <div className={classNames(css.xx, css.pa4, css.f5)}>
+    <div className={classNames(css.pa4, css.f5)}>
       {page}
 
       {/* TODO: Use token value in hidden input field in forms. */}
