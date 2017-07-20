@@ -22,13 +22,13 @@ export const getCss = (function() {
 
   const styles = Object.assign(tachyonsStyles, addedStyles);
 
-  const injectCss = Style => ({
+  const injectCss = ({ registerStyle }) => ({
     get(target, name) {
       name = styles[name] ? name : missingRuleName;
       return name in target
         ? target[name]
         : do {
-            const className = Style.registerStyle(styles[name], name);
+            const className = registerStyle(styles[name], name);
             target[name] = className;
             className;
           };
