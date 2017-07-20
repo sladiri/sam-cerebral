@@ -20,7 +20,7 @@ export default withStyle(function AppShell({ currentPage, styles: css }) {
   }
 
   return (
-    <div className={classNames(css.pv2, css.ph1, css.f5)}>
+    <div className={classNames(css.pa4, css.f5)}>
       {page}
 
       {/* TODO: Use token value in hidden input field in forms. */}
