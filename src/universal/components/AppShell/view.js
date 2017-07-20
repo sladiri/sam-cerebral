@@ -1,11 +1,13 @@
 import React from "react";
 import classNames from "classnames";
+import { wrap, ReactFreeStyleContext } from "react-free-style";
 
-import { withStyle } from "../../styles";
+import { getCss } from "../../styles";
 
 import Blog from "../Blog";
 
-export default withStyle(function AppShell({ currentPage, styles: css }) {
+const AppShell = ({ currentPage }, context) => {
+  const css = getCss(context);
   let page;
 
   switch (currentPage) {
@@ -14,13 +16,13 @@ export default withStyle(function AppShell({ currentPage, styles: css }) {
       break;
     }
     default: {
-      page = <h1>Page Not Found</h1>;
+      page = <h1 className={css.tc}>Page Not Found</h1>;
       break;
     }
   }
 
   return (
-    <div className={classNames(css.pa4, css.f5)}>
+    <div className={classNames(css.xx, css.pa4, css.f5)}>
       {page}
 
       {/* TODO: Use token value in hidden input field in forms. */}
@@ -28,4 +30,7 @@ export default withStyle(function AppShell({ currentPage, styles: css }) {
       <meta name="csrf-token" content="form_authenticity_token" />
     </div>
   );
-});
+};
+AppShell.contextTypes = ReactFreeStyleContext;
+
+export default wrap(AppShell);

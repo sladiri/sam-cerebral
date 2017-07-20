@@ -1,13 +1,14 @@
 import h from "react-hyperscript";
 import React from "react";
 import classNames from "classnames";
+import { wrap, ReactFreeStyleContext } from "react-free-style";
 
-import { withStyle } from "../../styles";
+import { getCss } from "../../styles";
 
 const actionFog = (css, action, ...args) =>
   action.disabled(...args) && classNames(css["o-50"], css.strike);
 
-const userForm = ({ model, actions, className, styles: css }) => {
+const userForm = ({ model, actions, className, css }) => {
   const formWidthClass = css["w-30"];
   const formClass = classNames(
     className,
@@ -59,7 +60,7 @@ const userForm = ({ model, actions, className, styles: css }) => {
       </form>;
 };
 
-const postForm = ({ model, actions, className, styles: css }) => {
+const postForm = ({ model, actions, className, css }) => {
   const buttonClass = action => classNames(actionFog(css, action), css.mt2);
   return (
     <form
@@ -101,7 +102,7 @@ const postForm = ({ model, actions, className, styles: css }) => {
   );
 };
 
-const postsList = ({ model, actions, styles: css }) =>
+const postsList = ({ model, actions, css }) =>
   <ul>
     {model.posts.map(post => {
       const { id, creator, created, message, deleted } = post;
@@ -143,8 +144,9 @@ const postsList = ({ model, actions, styles: css }) =>
     })}
   </ul>;
 
-export default withStyle(function Blog(props) {
-  const { model, SamStateIndicator, className, styles: css } = props;
+const Blog = (props, context) => {
+  const { model, SamStateIndicator, className } = props;
+  const css = getCss(context);
 
   const formClass = css.mv3;
 
@@ -158,15 +160,20 @@ export default withStyle(function Blog(props) {
 
       {userForm({
         ...props,
+        css,
         className: formClass,
       })}
 
       {postForm({
         ...props,
+        css,
         className: formClass,
       })}
 
-      {postsList(props)}
+      {postsList({ ...props, css })}
     </section>
   );
-});
+};
+Blog.contextTypes = ReactFreeStyleContext;
+
+export default wrap(Blog);
