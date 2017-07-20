@@ -285,9 +285,9 @@
             "type": "rule",
             "selectors": [
                 "button",
-                "html [undefined]",
-                "[undefined]",
-                "[undefined]"
+                "html [type = \"button\"]",
+                "[type = \"reset\"]",
+                "[type = \"submit\"]"
             ],
             "declarations": {
                 "-webkit-appearance": "button"
@@ -297,9 +297,9 @@
             "type": "rule",
             "selectors": [
                 "button::-moz-focus-inner",
-                "[undefined]::-moz-focus-inner",
-                "[undefined]::-moz-focus-inner",
-                "[undefined]::-moz-focus-inner"
+                "[type = \"button\"]::-moz-focus-inner",
+                "[type = \"reset\"]::-moz-focus-inner",
+                "[type = \"submit\"]::-moz-focus-inner"
             ],
             "declarations": {
                 "border-style": "none",
@@ -310,9 +310,9 @@
             "type": "rule",
             "selectors": [
                 "button:-moz-focusring",
-                "[undefined]:-moz-focusring",
-                "[undefined]:-moz-focusring",
-                "[undefined]:-moz-focusring"
+                "[type = \"button\"]:-moz-focusring",
+                "[type = \"reset\"]:-moz-focusring",
+                "[type = \"submit\"]:-moz-focusring"
             ],
             "declarations": {
                 "outline": "1px dotted ButtonText"
@@ -363,8 +363,8 @@
         {
             "type": "rule",
             "selectors": [
-                "[undefined]",
-                "[undefined]"
+                "[type = \"checkbox\"]",
+                "[type = \"radio\"]"
             ],
             "declarations": {
                 "box-sizing": "border-box",
@@ -374,8 +374,8 @@
         {
             "type": "rule",
             "selectors": [
-                "[undefined]::-webkit-inner-spin-button",
-                "[undefined]::-webkit-outer-spin-button"
+                "[type = \"number\"]::-webkit-inner-spin-button",
+                "[type = \"number\"]::-webkit-outer-spin-button"
             ],
             "declarations": {
                 "height": "auto"
@@ -384,7 +384,7 @@
         {
             "type": "rule",
             "selectors": [
-                "[undefined]"
+                "[type = \"search\"]"
             ],
             "declarations": {
                 "-webkit-appearance": "textfield",
@@ -394,8 +394,8 @@
         {
             "type": "rule",
             "selectors": [
-                "[undefined]::-webkit-search-cancel-button",
-                "[undefined]::-webkit-search-decoration"
+                "[type = \"search\"]::-webkit-search-cancel-button",
+                "[type = \"search\"]::-webkit-search-decoration"
             ],
             "declarations": {
                 "-webkit-appearance": "none"
@@ -492,12 +492,12 @@
                 "td",
                 "th",
                 "tr",
-                "input[undefined]",
-                "input[undefined]",
-                "input[undefined]",
-                "input[undefined]",
-                "input[undefined]",
-                "input[undefined]",
+                "input[type = \"email\"]",
+                "input[type = \"number\"]",
+                "input[type = \"password\"]",
+                "input[type = \"tel\"]",
+                "input[type = \"text\"]",
+                "input[type = \"url\"]",
                 ".border-box"
             ],
             "declarations": {
@@ -1854,7 +1854,7 @@
                 ".cf"
             ],
             "declarations": {
-                "zoom": 1
+                "*zoom": 1
             }
         },
         {
@@ -2457,7 +2457,8 @@
                 ".fl"
             ],
             "declarations": {
-                "float": "left"
+                "float": "left",
+                "_display": "inline"
             }
         },
         {
@@ -2466,7 +2467,8 @@
                 ".fr"
             ],
             "declarations": {
-                "float": "right"
+                "float": "right",
+                "_display": "inline"
             }
         },
         {
@@ -3352,7 +3354,7 @@
                 ".w-third"
             ],
             "declarations": {
-                "width": "calc(undefined)"
+                "width": "calc(100% / 3)"
             }
         },
         {
@@ -3361,7 +3363,7 @@
                 ".w-two-thirds"
             ],
             "declarations": {
-                "width": "calc(undefined)"
+                "width": "calc(100% / 1.5)"
             }
         },
         {
@@ -8379,6 +8381,7 @@
             ],
             "declarations": {
                 "position": "fixed !important",
+                "_position": "absolute !important",
                 "clip": [
                     "rect(1px 1px 1px 1px)",
                     "rect(1px,1px,1px,1px)"
@@ -10929,7 +10932,7 @@
                         ".w-third-ns"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 3)"
                     }
                 },
                 {
@@ -10938,7 +10941,7 @@
                         ".w-two-thirds-ns"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 1.5)"
                     }
                 },
                 {
@@ -14816,7 +14819,7 @@
                         ".w-third-m"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 3)"
                     }
                 },
                 {
@@ -14825,7 +14828,7 @@
                         ".w-two-thirds-m"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 1.5)"
                     }
                 },
                 {
@@ -18703,7 +18706,7 @@
                         ".w-third-l"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 3)"
                     }
                 },
                 {
@@ -18712,7 +18715,7 @@
                         ".w-two-thirds-l"
                     ],
                     "declarations": {
-                        "width": "calc(undefined)"
+                        "width": "calc(100% / 1.5)"
                     }
                 },
                 {

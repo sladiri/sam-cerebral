@@ -5,7 +5,7 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
-    "build-tachyons": "cssparser src/universal/styles/tachyonsNoIE-hacks.css -o src/universal/styles/tachyonsParsed.json",
+    "build-tachyons": "cssparser node_modules/tachyons/css/tachyons.css -o src/universal/styles/tachyonsParsed.json",
     "build-server": "mkdir -p dist-server && babel \"src/{server,universal}/**/*.js\" --out-dir dist-server",
     "build-browser": "mkdir -p static/dist && retry -- browserify src/browser/index.js -d -o static/dist/bundle.js -t [babelify]",
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
