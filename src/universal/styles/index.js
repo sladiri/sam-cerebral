@@ -7,8 +7,9 @@ export const colours = {
   warn: Color("brown").lighten(0.3).string(),
 };
 
-const missingRuleName = "RULE_NOT_FOUND";
-const styles = (function() {
+export const getCss = (function() {
+  const missingRuleName = "RULE_NOT_FOUND";
+
   const addedStyles = {
     "flex-grow": {
       "flex-grow": "1",
@@ -19,10 +20,8 @@ const styles = (function() {
     },
   };
 
-  return Object.assign(tachyonsStyles, addedStyles);
-})();
+  const styles = Object.assign(tachyonsStyles, addedStyles);
 
-export const getCss = (function() {
   const injectCss = Style => ({
     get(target, name) {
       name = styles[name] ? name : missingRuleName;
