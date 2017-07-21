@@ -1,7 +1,7 @@
 # SAM and Cerebral
 - Example implementation of the **SAM pattern** ([home](http://sam.js.org/)).
 - Uses the **Cerebral** framework ([home](http://cerebraljs.com/)).
-- Cerebral modules folder structure according to the **Control-Entity-Boundary** (ECB) pattern ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
+- Project folder structure follows the **Control-Entity-Boundary** (ECB) pattern ([blog post](http://www.adam-bien.com/roller/abien/entry/bureaucratic_design_with_java_ee)).
 
 ## Quick Start
 - `npm` installs all dependencies.
@@ -18,10 +18,10 @@ Each Cerebral signal is a SAM-step action, and this ensures that the state is up
 - Inside Cerebral's `connect` function we compute the state-representation (view-model).
 
 ## SAM and the Entity Control Boundary pattern
-The SAM pattern maps to the ECB pattern:
-- `entity --> model, compute state, compute next action`
-- `control --> actions + third party APIs`
-- `boundary --> Cerebral module + storage`
+The SAM pattern maps to the ECB pattern too:
+- `boundary --> View component`
+- `control --> Cerebral module, actions, third party APIs`
+- `entity --> model (accept), compute state, compute next action`
 
 ## ToDo
 - [ ] App features

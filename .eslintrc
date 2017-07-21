@@ -6,9 +6,6 @@
   "env": {
     "es6": true
   },
-  "plugins": [
-    "react"
-  ],
   "rules": {
     "eol-last": "error",
     "eqeqeq": "warn",
@@ -32,8 +29,5 @@
     "react/jsx-no-undef": "error",
     "react/jsx-uses-react": "error",
     "react/jsx-uses-vars": "error"
-  },
-  "globals": {
-    "setImmediate": true
   }
 }
