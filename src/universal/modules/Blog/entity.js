@@ -63,31 +63,29 @@ export async function accept({ state, props }) {
 }
 
 export function computeControlState(blog) {
-  const states = [];
-
   if (!blog.posts || blog.posts.length === 0) {
-    states.push(["empty", ["login", "postSystem", "cancel"]]);
-  } else if (blog.userName) {
-    states.push([
-      "loggedIn",
-      ["logout", "postSystem", "post", "deletePost", "cancel"],
-    ]);
-  } else {
-    states.push(["loggedOut", ["login", "postSystem", "cancel"]]);
+    return [["empty", ["postSystem"]]];
   }
 
-  return states;
+  return [
+    [
+      "normal",
+      blog.userName
+        ? ["logout", "postSystem", "post", "deletePost", "cancel"]
+        : ["login", "postSystem", "deletePost"],
+    ],
+  ];
 }
 
 export function computeNextAction(controlState) {
-  const nextActions = [];
-
   if (controlState === "empty") {
-    nextActions.push([
-      "postSystem",
-      { creator: "system", message: "Example post ... add more posts!" },
-    ]);
+    return [
+      [
+        [
+          "postSystem",
+          { creator: "system", message: "Example post ... add more posts!" },
+        ],
+      ],
+    ];
   }
-
-  return [nextActions];
 }

@@ -325,7 +325,7 @@ export default function samFactory({
     function getControlState(state) {
       const states = computeControlState(state) || [];
 
-      if (states.length < 1) {
+      if (!Array.isArray(states) || states.length < 1) {
         throw new Error("Invalid control state.");
       }
 
@@ -346,12 +346,6 @@ export default function samFactory({
       const [nextActions, allowNapInterrupt = false] = computeNextAction(
         controlStateName,
       ) || [[]];
-
-      if (!Array.isArray(nextActions)) {
-        throw new Error(
-          `${getModuleName(prefix)} - Invalid NAP after action [${actionName}]`,
-        );
-      }
 
       return { nextActions, _syncNap: !allowNapInterrupt };
     }
