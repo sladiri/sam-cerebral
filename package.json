@@ -4,6 +4,7 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
+    "build-babel-helpers": "babel-external-helpers > static/babel-helpers.js",
     "build-tachyons-css": "cssparser node_modules/tachyons/css/tachyons.css -o src/styles/control/tachyonsParsed.json",
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "npm run format && eslint \"src/**/*.js\"",
@@ -14,6 +15,7 @@
     "@cerebral/router": "0.0.0-beta.3",
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-syntax-trailing-function-commas": "^6.22.0",
     "babel-plugin-transform-async-generator-functions": "^6.24.1",
     "babel-plugin-transform-do-expressions": "^6.22.0",
