@@ -1,7 +1,7 @@
 import Router from "@cerebral/router";
 
-import { getRoutedSignalFactory } from "../samStep/boundary";
-import { moduleFactory as blogFactory } from "../blog/control";
+import { getRoutedSignalFactory } from "../../samStep/boundary";
+import { moduleFactory as blogFactory } from "../../blog/control";
 
 export const routeMap = {
   "/": {
@@ -18,7 +18,7 @@ const routes = Object.entries(
   signal,
 }));
 
-export const moduleFactory = (routerOptions = {}) => {
+export default (routerOptions = {}) => {
   const getRoutedSignal = getRoutedSignalFactory(routerOptions);
 
   const blogModule = blogFactory(routeMap["/"].prefix);
