@@ -29,7 +29,7 @@ const getPrefixedStateProxy = prefixedPath =>
         statePath = prefixedPath(statePath);
         if (statePath === "") statePath = undefined;
         let result = state[key](statePath, ...args);
-        if (scoped && result) {
+        if (type(result) === "Object" && scoped && result) {
           result = pickBy((val, key) => {
             const field = result[key];
             return !type(field) !== "Object" || field._prefix === undefined;
