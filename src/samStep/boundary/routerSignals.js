@@ -10,7 +10,7 @@ import { set, when } from "cerebral/operators";
  * Filter these with "workaroundNumber".
  * TODO: Is this a bug?
  */
-export default ({
+export const getRoutedSignalFactory = ({
   routerWorkAroundNumber = null,
   isServerRender = false,
   hasServerState,

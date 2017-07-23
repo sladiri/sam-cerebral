@@ -26,7 +26,7 @@ export const markActionsDisabled = prefix =>
   compute(
     actionsDisabled(prefix),
     state`${getModulePath(prefix, "_sam.controlState.allowedActions")}`,
-    (actionsDisabled, allowedActions) => {
+    (actionsDisabled, allowedActions = []) => {
       const actionDisabled = actionName =>
         actionsDisabled || !allowedActions.includes(actionName);
       return actions =>

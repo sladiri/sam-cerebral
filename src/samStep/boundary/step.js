@@ -1,4 +1,4 @@
-import { innerJoin, memoize, omit, pickBy, type } from "ramda";
+import { innerJoin, memoize, omit, pickBy, type, curry } from "ramda";
 
 import { getId, getModulePath } from "../../util/control";
 
@@ -6,6 +6,38 @@ export const addSamState = (_prefix, object) =>
   object.signals
     ? { ...object, state: { _prefix, _sam: {} } }
     : { _prefix, _sam: {} };
+
+export const waitForNap = curry(
+  (controller, prefix, [sequence, payload] = []) => {
+    const napDone = new Promise((resolve, reject) => {
+      try {
+        controller.once(`napDone${prefix ? `-${prefix}` : ""}`, resolve);
+      } catch (error) {
+        reject(error);
+      }
+    });
+
+    if (sequence) {
+      const signalPath = getModulePath(prefix, sequence);
+      const signal = controller.getSignal(signalPath);
+      signal(payload);
+    }
+
+    return napDone;
+  },
+);
+
+export const SamStepProviderFactory = () => {
+  let cachedProvider;
+  return context => {
+    context;
+    if (!cachedProvider) {
+      cachedProvider = waitForNap(context.controller);
+    }
+    context.samStep = cachedProvider;
+    return context;
+  };
+};
 
 const parseAction = action => {
   if (Array.isArray(action)) {
@@ -34,7 +66,7 @@ const getPrefixedStateProxy = prefixedPath =>
             const field = result[key];
             return !type(field) !== "Object" || field._prefix === undefined;
           }, result);
-          result = omit(["_sam", "_prefix"], result);
+          result = omit(["_sam", "_hidden", "_prefix"], result);
         }
         return result;
       };
@@ -42,18 +74,24 @@ const getPrefixedStateProxy = prefixedPath =>
     }, {}),
   );
 
-const getProposal = async ({ action, actionName, props, controller }) => {
+const getProposal = async ({
+  action,
+  actionName,
+  props,
+  controller,
+  ...services
+}) => {
   const proposal = await (action.tree
     ? controller.run(actionName, action.tree, props)
-    : action({ props }));
+    : action({ controller, props, ...services }));
 
   return proposal !== undefined && Object.keys(proposal).length > 0
     ? proposal
     : { _abortAction: true };
 };
 
-const emitNapDone = prefix => ({ controller }) => {
-  controller.emit(`napDone${prefix ? `-${prefix}` : ""}`);
+const emitNapDone = prefix => ({ controller, payload }) => {
+  controller.emit(`napDone${prefix ? `-${prefix}` : ""}`, payload);
 };
 
 const mergeControlStates = states => {
@@ -114,14 +152,14 @@ const getCompoundSignal = (compoundName, proposalPromises, props) => {
 
 const getModuleName = name => (name === "" ? "root" : name);
 
-export default function samFactory({
+export const samFactory = ({
   prefix = "", // Cannot save undefined to state
   accept = () => {},
   computeControlState = () => ["default"],
   computeNextAction = () => [],
   actions = {},
   preventCompoundState = true,
-}) {
+}) => {
   const prefixedPath = getModulePath(prefix);
   const prefixedStateProxy = getPrefixedStateProxy(prefixedPath);
 
@@ -143,9 +181,10 @@ export default function samFactory({
 
     async function samStep(input) {
       try {
-        const { controller, props } = input;
+        const { state: _state, controller, props, ...services } = input;
 
-        const state = prefixedStateProxy(input.state);
+        const state = prefixedStateProxy(_state);
+        const entityState = prefixedStateProxy(input.state, true);
 
         if (state.get("_sam.stepId") === undefined) {
           state.set("_sam", {
@@ -162,6 +201,10 @@ export default function samFactory({
 
         if (!guardDisallowedAction(state.get("_sam"))) {
           logDisallowedAction(props, state.get("_sam"));
+          emitNapDone(prefix)({
+            controller,
+            payload: { ...entityState.get(), disallowed: true },
+          });
           return;
         }
 
@@ -169,6 +212,10 @@ export default function samFactory({
 
         if (!guardSignalInterrupt(props, state.get("_sam"))) {
           logInterruptFailed(props, state.get("_sam"));
+          emitNapDone(prefix)({
+            controller,
+            payload: { ...entityState.get(), interrupted: true },
+          });
           return;
         }
 
@@ -179,12 +226,16 @@ export default function samFactory({
           actionName,
           props,
           controller,
+          ...services,
         });
 
         if (!guardEmptyProposal(_abortAction, state.get("_sam"))) {
           logEmptyProposal(state.get("_sam"));
           state.set("_sam.proposeInProgress", false);
-          emitNapDone(prefix)({ controller });
+          emitNapDone(prefix)({
+            controller,
+            payload: { ...entityState.get(), empty: true },
+          });
           return;
         }
 
@@ -200,20 +251,23 @@ export default function samFactory({
         state.set("_sam.proposeInProgress", false);
         state.set("_sam.acceptInProgress", actionName);
         state.set("_sam.stepId", GetId.next().value);
-        const entityState = prefixedStateProxy(input.state, true);
         await accept({
           state: entityState,
           props: proposal,
+          ...services,
         });
         state.set("_sam.acceptInProgress", false);
         state.set("_sam.controlState", getControlState(entityState.get()));
 
-        const { nextActions, _syncNap } = getNextAction(state.get("_sam"));
+        const { nextActions, _syncNap } = getNextAction(
+          state.get("_sam"),
+          entityState.get(),
+        );
 
         if (nextActions.length < 1) {
           state.set("_sam.napInProgress", false);
-          emitNapDone(prefix)({ controller });
-          return;
+          emitNapDone(prefix)({ controller, payload: entityState.get() });
+          return { prefix, napDone: true };
         }
 
         state.set(
@@ -341,10 +395,11 @@ export default function samFactory({
       return { name, allowedActions };
     }
 
-    function getNextAction(sam) {
+    function getNextAction(sam, model) {
       const controlStateName = sam.controlState.name;
       const [nextActions, allowNapInterrupt = false] = computeNextAction(
         controlStateName,
+        model,
       ) || [[]];
 
       return { nextActions, _syncNap: !allowNapInterrupt };
@@ -379,4 +434,4 @@ export default function samFactory({
       return signalRun;
     }
   }
-}
+};
