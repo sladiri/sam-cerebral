@@ -102,10 +102,53 @@ const postForm = ({ model, actions, className, css }) => {
   );
 };
 
+const replyForm = ({ replyId, model, actions, className, css }) => {
+  const buttonClass = action => classNames(actionFog(css, action), css.mt2);
+  return (
+    <form
+      onSubmit={event => {
+        event.preventDefault();
+        actions.post({
+          message: event.target.getElementsByTagName("input")[0].value,
+          replyId,
+        });
+        event.target.getElementsByTagName("input")[0].value = "";
+      }}
+      className={className}
+    >
+      <input
+        disabled={actions.post.disabled(model)}
+        className={actionFog(css, actions.post, model)}
+        placeholder="Reply here ..."
+      />
+
+      <br />
+      <button
+        disabled={actions.post.disabled(model)}
+        className={buttonClass(actions.post)}
+      >
+        Reply!
+      </button>
+
+      <br />
+      <button
+        disabled={actions.cancel.disabled()}
+        type="button"
+        onClick={() => {
+          actions.cancel();
+        }}
+        className={buttonClass(actions.cancel)}
+      >
+        Cancel
+      </button>
+    </form>
+  );
+};
+
 const postsList = ({ model, actions, css }) =>
   <ul>
     {model.posts.map(post => {
-      const { id, creator, created, message, deleted } = post;
+      const { id, creator, created, message, deleted, replyTo } = post;
       return h(
         "li",
         {
@@ -125,20 +168,28 @@ const postsList = ({ model, actions, css }) =>
             { className: classNames(css.f6, css.tr) },
             `${creator} on ${created}`,
           ),
+          replyTo &&
+            h(
+              "p",
+              { className: classNames(css.f6, css.i, css.tr) },
+              `(reply to "${replyTo} ...")`,
+            ),
           h("p", message),
-          model.userName
-            ? h(
-                "button",
-                {
-                  disabled: actions.deletePost.disabled(post),
-                  onClick: () => {
-                    actions.deletePost({ id });
-                  },
-                  className: actionFog(css, actions.deletePost, post),
+          model.userName &&
+            h(
+              "button",
+              {
+                disabled: actions.deletePost.disabled(post),
+                onClick: () => {
+                  actions.deletePost({ id });
                 },
-                post.deleted ? "undelete" : "delete",
-              )
-            : undefined,
+                className: actionFog(css, actions.deletePost, post),
+              },
+              post.deleted ? "undelete" : "delete",
+            ),
+          model.userName &&
+            !post.deleted &&
+            replyForm({ replyId: id, model, actions, className: "", css }),
         ],
       );
     })}

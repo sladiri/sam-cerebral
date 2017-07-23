@@ -23,6 +23,8 @@ export default db => {
       if (data.happenedAfter) {
         const previous = await db.local.get(data.happenedAfter);
         data.happenedAfter = pickAll(["updated", "_rev", "_id"], previous);
+      } else {
+        data.happenedAfter = undefined;
       }
       const payload = {
         updated: Date.now(),

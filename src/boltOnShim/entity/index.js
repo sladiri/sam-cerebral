@@ -8,7 +8,6 @@ export default db => {
         }
       }
 
-      // state.unset("docs");
       state.unset("doc");
       state.unset("ok");
       state.unset("id");
