@@ -5,17 +5,14 @@
 
 ## Quick Start
 - `npm` installs all dependencies.
-- `npm run start-budo` starts the **Budo** development-webserver and serves the directory (watch + rebuild + autoreload).
-- **Currently these requires a forked version of Cerebral** ([pull request](https://github.com/cerebral/cerebral/pull/981))
-  - `npm run build` formats the code with **Prettier**, lints it with **Eslint**, then writes transpiled `bundle.js` and server files.
-  - `npm start` starts a **Koa** webserver which serves bundle.js (server-side-rendering).
-  - `npm run start-dev` starts the webserver in babel-node (watch + rebuild).
+- `npm start` starts the development-webserver and serves the directory (watch + rebuild + autoreload).
 
 ## SAM pattern and Cerebral
 - A Cerebral module may be implemented as a SAM container.
 Each Cerebral signal is a SAM-step action, and this ensures that the state is updated in a precisely defined step (as in TLA+).
-- Only the `propose` function inside the model has write access to `state` and persists data.
-- Inside Cerebral's `connect` function we compute the state-representation (view-model).
+- Only the `accept` function inside the model has write access to the model.
+- The state-representation (view-model) is the Cerebral state tree, and `accept` may hide internal state (the "real model").
+- Helper functions allow communication between SAM-step-containers.
 
 ## SAM and the Entity Control Boundary pattern
 The SAM pattern maps to the ECB pattern too:
@@ -26,8 +23,8 @@ The SAM pattern maps to the ECB pattern too:
 ## ToDo
 - [ ] App features
   - [ ] Add blog post example (conflict-free example). No replies without parent should be shown because of eventual consistency.
-    - [ ] post posts
-    - [ ] reply to posts
+    - [x] post posts
+    - [x] reply to posts
 
   - [ ] Add Git-like example (with conflict management)? Track concurrent changes and show causal chain for conflict resolution by user.
 
@@ -36,9 +33,10 @@ The SAM pattern maps to the ECB pattern too:
 
 - [ ] Storage layer
   - [x] Add PouchDB provider to Cerebral context
-  - [ ] Save model to DB
+  - [x] Save model to DB
   - [ ] Specify _Bolt-on Shim Layer_ in TLA+
   - [ ] Implement _Bolt-on Shim Layer_
+  - [ ] Refactor shim module to be sub-module?
 
 - [x] Allow for next action to not block step until complete (blockStep = true)?
   - [ ] Queue action when received signal while in (NAP?) progress?
@@ -48,7 +46,7 @@ The SAM pattern maps to the ECB pattern too:
 - [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
 - [x] Check allowed action in step.
 
-## Wont Fix For Now
+## Consider
 - Prevent or at least warn about concurrent mutations while a step is in progress?
 
 ## Notes
