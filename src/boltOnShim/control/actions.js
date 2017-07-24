@@ -2,6 +2,13 @@ import { pickAll } from "ramda";
 
 export default db => {
   const shim = {
+    /**
+     * A "getter" for (parent) modules.
+     */
+    noop() {
+      return { noop: true };
+    },
+
     async init() {
       await db.init;
       return { _hidden: {} };
