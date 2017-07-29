@@ -5,9 +5,12 @@
   "license": "MIT",
   "scripts": {
     "build-babel-helpers": "babel-external-helpers > static/vendor/babel-helpers.js",
-    "build-tachyons-css": "cssparser node_modules/tachyons/css/tachyons.css -o src/styles/control/tachyonsParsed.json",
-    "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
-    "lint": "npm run format && eslint \"src/**/*.js\"",
+    "build-tachyons-css:tojson": "cssparser node_modules/tachyons/css/tachyons.css -o src/styles/boundary/tachyonsParsed.json",
+    "build-tachyons-css:copycss": "copyfiles -u 3 \"node_modules/tachyons/src/{_box-sizing,_images,_normalize}.css\" static/vendor/tachyons",
+    "build-tachyons-css": "npm run build-tachyons-css:tojson && npm run build-tachyons-css:copycss",
+    "build": "npm run build-tachyons-css && npm run build-babel-helpers",
+    "lint:format": "prettier --write --trailing-comma all \"src/**/*.js\"",
+    "lint": "npm run lint:format && eslint \"src/**/*.js\"",
     "start-budo": "node budo.js src/browserEntryPoint/boundary.js:static/dist/bundle.js --host localhost --pushstate --live -- -t babelify",
     "start": "npm run start-budo"
   },
@@ -29,6 +32,7 @@
     "classnames": "^2.2.5",
     "color": "^2.0.0",
     "compression": "^1.7.0",
+    "copyfiles": "^1.2.0",
     "cssparser": "^0.9.3",
     "dynamics": "^1.0.0",
     "eslint": "^4.2.0",

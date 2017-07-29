@@ -5,6 +5,8 @@
 
 ## Quick Start
 - `npm` installs all dependencies.
+- `npm run build` sets up static dependencies for the website.
+- `npm run lint` formats the code with **Prettier** and checks few **Eslint** rules.
 - `npm start` starts the development-webserver and serves the directory (watch + rebuild + autoreload).
 
 ## SAM pattern and Cerebral
