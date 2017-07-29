@@ -6,8 +6,8 @@
 ## Quick Start
 - `npm` installs all dependencies.
 - `npm run build` sets up static dependencies for the website.
-- `npm run lint` formats the code with **Prettier** and checks few **Eslint** rules.
-- `npm start` starts the development-webserver and serves the directory (watch + rebuild + autoreload).
+- `npm run lint` formats the code with __Prettier__ and checks few __Eslint__ rules.
+- `npm start` starts the __Budo__ development-webserver and serves the directory (watch + rebuild + autoreload).
 
 ## SAM pattern and Cerebral
 - A Cerebral module may be implemented as a SAM container.
