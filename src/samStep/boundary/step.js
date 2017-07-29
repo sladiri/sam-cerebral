@@ -27,10 +27,9 @@ export const waitForNap = curry(
   },
 );
 
-export const SamStepProviderFactory = () => {
+export const samStepProviderFactory = () => {
   let cachedProvider;
   return context => {
-    context;
     if (!cachedProvider) {
       cachedProvider = waitForNap(context.controller);
     }

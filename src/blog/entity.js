@@ -1,13 +1,13 @@
 import { wait } from "../util/control";
 
-export const accept = async ({ samStep, state, props }) => {
+export const accept = async ({ db, state, props }) => {
   const blog = state.get();
 
   {
     if (!blog.posts) {
       state.set("userName", "");
 
-      const { docs } = await samStep("shim", ["allDocs"]);
+      const { docs } = await db.allDocs();
       const posts = docs.rows.map(r => r.doc).filter(d => d.type === "post");
       state.set("posts", posts);
     }
@@ -38,7 +38,7 @@ export const accept = async ({ samStep, state, props }) => {
         message,
         happenedAfter: replyId,
       };
-      await samStep("shim", ["post", { data: newPost }]);
+      await db.post({ data: newPost });
       state.push("posts", newPost);
     }
   }
@@ -46,11 +46,11 @@ export const accept = async ({ samStep, state, props }) => {
   {
     const { deleteId } = props;
     if (deleteId) {
-      const { doc: post } = await samStep("shim", ["get", { id: deleteId }]);
+      const { doc: post } = await db.get({ id: deleteId });
       const [, creator] = post._id.split("-");
       if (creator === blog.userName) {
         const deleted = !post.deleted;
-        await samStep("shim", ["put", { data: { ...post, deleted } }]);
+        await db.put({ data: { ...post, deleted } });
         const index = blog.posts.findIndex(p => p._id === deleteId);
         state.set(`posts.${index}.deleted`, deleted);
       }

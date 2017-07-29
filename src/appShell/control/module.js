@@ -2,10 +2,11 @@ import Router from "@cerebral/router";
 
 import {
   getRoutedSignalFactory,
-  SamStepProviderFactory,
+  samStepProviderFactory,
 } from "../../samStep/boundary";
 import { moduleFactory as blogFactory } from "../../blog/control";
 import { moduleFactory as shimFactory } from "../../boltOnShim/control";
+import { shimProviderFactory } from "../../boltOnShim/control";
 
 export const routeMap = {
   "/": {
@@ -41,6 +42,6 @@ export default (routerOptions = {}) => {
         initSignal: [shimModule.signals.init, blogModule.signals.init],
       }),
     },
-    providers: [SamStepProviderFactory()],
+    providers: [samStepProviderFactory(), shimProviderFactory()],
   };
 };
