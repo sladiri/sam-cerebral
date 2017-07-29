@@ -44,6 +44,7 @@
     "react-free-style": "^4.3.2",
     "react-hyperscript": "^3.0.0",
     "rxjs": "^5.4.2",
+    "setimmediate": "^1.0.5",
     "snabbt.js": "^0.6.4",
     "tachyons": "^4.7.4",
     "trine": "^0.1.1"
