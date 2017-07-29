@@ -1,5 +1,3 @@
-import "setimmediate";
-
 import h from "react-hyperscript";
 import { render } from "react-dom";
 import Devtools from "cerebral/devtools";

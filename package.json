@@ -4,7 +4,7 @@
   "author": "Slađan Ristić",
   "license": "MIT",
   "scripts": {
-    "build-babel-helpers": "babel-external-helpers > static/babel-helpers.js",
+    "build-babel-helpers": "babel-external-helpers > static/vendor/babel-helpers.js",
     "build-tachyons-css": "cssparser node_modules/tachyons/css/tachyons.css -o src/styles/control/tachyonsParsed.json",
     "format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "npm run format && eslint \"src/**/*.js\"",
@@ -44,7 +44,6 @@
     "react-free-style": "^4.3.2",
     "react-hyperscript": "^3.0.0",
     "rxjs": "^5.4.2",
-    "setimmediate": "^1.0.5",
     "snabbt.js": "^0.6.4",
     "tachyons": "^4.7.4",
     "trine": "^0.1.1"
