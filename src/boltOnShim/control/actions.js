@@ -1,9 +1,8 @@
-import { pickAll } from "ramda";
-
 export default db => {
   const shim = {
     /**
      * A "getter" for (parent) modules.
+     * An action must pass some value, noop is a dummy value.
      */
     noop() {
       return { noop: true };
@@ -15,21 +14,30 @@ export default db => {
     },
 
     async allDocs() {
+      const defaultOptions = {
+        include_docs: true,
+        conflicts: true,
+      };
       return {
-        docs: await db.local.allDocs({ include_docs: true }),
+        docs: await db.local.allDocs(defaultOptions),
       };
     },
 
     async get({ props: { id } }) {
+      const defaultOptions = {
+        revs: true,
+        revs_info: true,
+        conflicts: true,
+      };
       return {
-        doc: await db.local.get(id),
+        doc: await db.local.get(id, defaultOptions),
       };
     },
 
     async put({ props: { data } }) {
       if (data.happenedAfter) {
         const previous = await db.local.get(data.happenedAfter);
-        data.happenedAfter = pickAll(["updated", "_rev", "_id"], previous);
+        data.happenedAfter = previous;
       } else {
         data.happenedAfter = undefined;
       }
@@ -40,6 +48,7 @@ export default db => {
       return {
         ...(await db.local.put(payload)),
         ...(await shim.allDocs()),
+        ...(await shim.get({ props: { id: payload._id } })),
       };
     },
   };
