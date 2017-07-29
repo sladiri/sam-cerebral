@@ -267,7 +267,7 @@ export const samFactory = ({
         if (nextActions.length < 1) {
           state.set("_sam.napInProgress", false);
           emitNapDone(prefix)({ controller, payload: entityState.get() });
-          return { prefix, napDone: true };
+          return;
         }
 
         state.set(

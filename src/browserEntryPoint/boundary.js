@@ -12,6 +12,7 @@ const controller = Controller({
   devtools: Devtools({
     host: "localhost:8585",
     reconnect: false,
+    preventExternalMutations: false, // prevent bug in current Cerebral
   }),
 });
 
