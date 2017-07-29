@@ -10,9 +10,6 @@ export default () => {
         get(options) {
           return samStep("shim", ["get", options]);
         },
-        post(options) {
-          return samStep("shim", ["post", options]);
-        },
         put(options) {
           return samStep("shim", ["put", options]);
         },

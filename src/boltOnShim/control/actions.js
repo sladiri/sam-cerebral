@@ -26,24 +26,13 @@ export default db => {
       };
     },
 
-    async post({ props: { data } }) {
+    async put({ props: { data } }) {
       if (data.happenedAfter) {
         const previous = await db.local.get(data.happenedAfter);
         data.happenedAfter = pickAll(["updated", "_rev", "_id"], previous);
       } else {
         data.happenedAfter = undefined;
       }
-      const payload = {
-        updated: Date.now(),
-        ...data,
-      };
-      return {
-        ...(await db.local.post(payload)),
-        ...(await shim.allDocs()),
-      };
-    },
-
-    async put({ props: { data } }) {
       const payload = {
         updated: Date.now(),
         ...data,

@@ -38,7 +38,7 @@ export const accept = async ({ db, state, props }) => {
         message,
         happenedAfter: replyId,
       };
-      await db.post({ data: newPost });
+      await db.put({ data: newPost });
       state.push("posts", newPost);
     }
   }
