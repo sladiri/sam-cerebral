@@ -58,6 +58,16 @@ export const accept = async ({ db, state, props }) => {
     }
   }
 
+  {
+    const { clearDb } = props;
+    if (clearDb) {
+      await db.deleteAll();
+      const { docs } = await db.allDocs();
+      const posts = docs.rows.map(r => r.doc).filter(d => d.type === "post");
+      state.set("posts", posts);
+    }
+  }
+
   await wait(200);
 };
 
@@ -73,7 +83,13 @@ export const computeControlState = blog => {
   return [
     [
       "normal",
-      [blog.userName ? "logout" : "login", "post", "deletePost", "cancel"],
+      [
+        blog.userName ? "logout" : "login",
+        "post",
+        "deletePost",
+        "clearDb",
+        "cancel",
+      ],
     ],
   ];
 };

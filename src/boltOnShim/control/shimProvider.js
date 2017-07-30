@@ -13,6 +13,9 @@ export default () => {
         put(options) {
           return samStep("shim", ["put", options]);
         },
+        deleteAll() {
+          return samStep("shim", ["deleteAll"]);
+        },
       };
     }
     context.db = cachedProvider;

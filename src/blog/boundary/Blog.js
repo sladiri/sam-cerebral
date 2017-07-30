@@ -8,6 +8,27 @@ import { getCss } from "../../styles/boundary";
 const actionFog = (css, action, ...args) =>
   action.disabled(...args) && classNames(css["o-50"], css.strike);
 
+const clearPostsForm = ({ actions, className, css }) => {
+  const formWidthClass = css["w-50"];
+  const formClass = classNames(
+    className,
+    css.flex,
+    css["flex-column"],
+    css["items-center"],
+  );
+  return (
+    <form
+      onSubmit={event => {
+        event.preventDefault();
+        actions.clearDb({});
+      }}
+      className={formClass}
+    >
+      <button className={formWidthClass}>clear posts DB</button>
+    </form>
+  );
+};
+
 const userForm = ({ model, actions, className, css }) => {
   const formWidthClass = css["w-30"];
   const formClass = classNames(
@@ -204,6 +225,12 @@ const Blog = (props, context) => {
   return (
     <section className={className}>
       <SamStatus className={classNames(css.mt2, css.mb4)} />
+
+      {clearPostsForm({
+        ...props,
+        css,
+        className: formClass,
+      })}
 
       <p className={css.tc}>
         User: {model.userName || "none (log in to post)"}

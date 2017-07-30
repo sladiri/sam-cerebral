@@ -1,4 +1,4 @@
-export default db => {
+export default dbPromise => {
   const actions = {
     async accept({ state, props }) {
       {
@@ -58,7 +58,7 @@ export default db => {
       //   return [["low", ["foo"]]];
       // }
 
-      return [["normal", ["allDocs", "get", "post", "put"]]];
+      return [["normal", ["allDocs", "get", "post", "put", "deleteAll"]]];
     },
 
     computeNextAction(controlState) {

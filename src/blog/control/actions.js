@@ -33,3 +33,7 @@ export async function deletePost({ props: { id: deleteId } }) {
   await wait(1500);
   return { deleteId };
 }
+
+export async function clearDb() {
+  return { clearDb: true };
+}

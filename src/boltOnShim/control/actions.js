@@ -1,4 +1,5 @@
-export default db => {
+export default dbPromise => {
+  let db;
   const shim = {
     /**
      * A "getter" for (parent) modules.
@@ -9,7 +10,7 @@ export default db => {
     },
 
     async init() {
-      await db.init;
+      db = await dbPromise;
       return { _hidden: {} };
     },
 
@@ -19,7 +20,7 @@ export default db => {
         conflicts: true,
       };
       return {
-        docs: await db.local.allDocs(defaultOptions),
+        docs: await db.allDocs(defaultOptions),
       };
     },
 
@@ -30,13 +31,13 @@ export default db => {
         conflicts: true,
       };
       return {
-        doc: await db.local.get(id, defaultOptions),
+        doc: await db.get(id, defaultOptions),
       };
     },
 
     async put({ props: { data } }) {
       if (data.happenedAfter) {
-        const previous = await db.local.get(data.happenedAfter);
+        const previous = await db.get(data.happenedAfter);
         data.happenedAfter = previous;
       } else {
         data.happenedAfter = undefined;
@@ -46,9 +47,17 @@ export default db => {
         ...data,
       };
       return {
-        ...(await db.local.put(payload)),
+        ...(await db.put(payload)),
         ...(await shim.allDocs()),
         ...(await shim.get({ props: { id: payload._id } })),
+      };
+    },
+
+    async deleteAll() {
+      const docs = await db.allDocs();
+      await Promise.all(docs.rows.map(row => db.remove(row.id, row.value.rev)));
+      return {
+        ...(await shim.allDocs()),
       };
     },
   };

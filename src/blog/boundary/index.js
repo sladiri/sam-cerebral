@@ -16,6 +16,7 @@ export const view = connect(
     logout: signal`blog.logout`,
     post: signal`blog.post`,
     deletePost: signal`blog.deletePost`,
+    clearDb: signal`blog.clearDb`,
     cancel: signal`blog.cancel`,
     markActionsDisabled: markActionsDisabled("blog"),
     cancelDisabled: cancelDisabled("blog"),
@@ -27,6 +28,7 @@ export const view = connect(
       logout,
       post,
       deletePost,
+      clearDb,
       cancel,
       markActionsDisabled,
       cancelDisabled,
@@ -35,14 +37,15 @@ export const view = connect(
     parentProps,
   ) => {
     post.isDisabled = () => !model.userName;
-    deletePost.isDisabled = ({ creator }) => model.userName !== creator;
+    deletePost.isDisabled = ({ creator }) =>
+      model.userName !== "system" || model.userName !== creator;
     cancel.disabled = () => cancelDisabled; // TODO: specify action in progress.
     return {
       model,
       ...parentProps,
       ...connectedProps,
       actions: {
-        ...markActionsDisabled({ login, logout, post, deletePost }),
+        ...markActionsDisabled({ login, logout, post, deletePost, clearDb }),
         cancel,
       },
       SamStatus,
