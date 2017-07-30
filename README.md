@@ -40,13 +40,15 @@ The SAM pattern maps to the ECB pattern too:
   - [ ] Implement _Bolt-on Shim Layer_
   - [ ] Refactor shim module to be sub-module?
 
-- [x] Allow for next action to not block step until complete (blockStep = true)?
-  - [ ] Queue action when received signal while in (NAP?) progress?
+- [ ] SAM container
+  - [ ] Compute: Mark action specific cancel buttons as disabled.
+  - [x] Allow for next action to not block step until complete (blockStep = true)?
+    - [ ] Queue action when received signal while in (NAP?) progress?
 
+- [x] Check allowed action in step.
 - [ ] Add tests.
 - [ ] Create Proxy to hide state API?
 - [ ] Defer updating the view until end of SAM step? (State updates may trigger rerending immediately currently.)
-- [x] Check allowed action in step.
 
 ## Consider
 - Prevent or at least warn about concurrent mutations while a step is in progress?
