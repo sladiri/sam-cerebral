@@ -68,7 +68,7 @@ const userForm = ({ model, actions, className, css }) => {
             formWidthClass,
             css.tc,
           )}
-          placeholder="Anton"
+          placeholder="Alfons"
         />
 
         <br />
@@ -81,7 +81,7 @@ const userForm = ({ model, actions, className, css }) => {
       </form>;
 };
 
-const postForm = ({ model, actions, className, css }) => {
+const postForm = ({ actions, className, css }) => {
   const buttonClass = action => classNames(actionFog(css, action), css.mt2);
   return (
     <form
@@ -95,14 +95,14 @@ const postForm = ({ model, actions, className, css }) => {
       className={className}
     >
       <input
-        disabled={actions.post.disabled(model)}
-        className={actionFog(css, actions.post, model)}
+        disabled={actions.post.disabled()}
+        className={actionFog(css, actions.post)}
         placeholder="My two cents ..."
       />
 
       <br />
       <button
-        disabled={actions.post.disabled(model)}
+        disabled={actions.post.disabled()}
         className={buttonClass(actions.post)}
       >
         Post!
@@ -123,7 +123,7 @@ const postForm = ({ model, actions, className, css }) => {
   );
 };
 
-const replyForm = ({ replyId, model, actions, className, css }) => {
+const replyForm = ({ replyId, actions, className, css }) => {
   const buttonClass = action => classNames(actionFog(css, action), css.mt2);
   return (
     <form
@@ -138,14 +138,14 @@ const replyForm = ({ replyId, model, actions, className, css }) => {
       className={className}
     >
       <input
-        disabled={actions.post.disabled(model)}
-        className={actionFog(css, actions.post, model)}
+        disabled={actions.post.disabled()}
+        className={actionFog(css, actions.post)}
         placeholder="Reply here ..."
       />
 
       <br />
       <button
-        disabled={actions.post.disabled(model)}
+        disabled={actions.post.disabled()}
         className={buttonClass(actions.post)}
       >
         Reply!
@@ -210,7 +210,7 @@ const postsList = ({ model, actions, css }) =>
             ),
           model.userName &&
             !post.deleted &&
-            replyForm({ replyId: id, model, actions, className: "", css }),
+            replyForm({ replyId: id, actions, className: "", css }),
         ],
       );
     })}

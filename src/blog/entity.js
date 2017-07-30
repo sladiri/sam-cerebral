@@ -48,7 +48,7 @@ export const accept = async ({ db, state, props }) => {
     if (deleteId) {
       const { doc: post } = await db.get({ id: deleteId });
       const [, creator] = post._id.split("-");
-      if (creator === blog.userName) {
+      if (blog.userName === "system" || creator === blog.userName) {
         const deleted = !post.deleted;
         await db.put({ data: { ...post, deleted } });
         const index = blog.posts.findIndex(p => p._id === deleteId);

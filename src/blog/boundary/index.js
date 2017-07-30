@@ -38,7 +38,7 @@ export const view = connect(
   ) => {
     post.isDisabled = () => !model.userName;
     deletePost.isDisabled = ({ creator }) =>
-      model.userName !== "system" || model.userName !== creator;
+      model.userName !== "system" && model.userName !== creator;
     cancel.disabled = () => cancelDisabled; // TODO: specify action in progress.
     return {
       model,

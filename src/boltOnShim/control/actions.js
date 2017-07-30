@@ -36,8 +36,13 @@ export default dbPromise => {
     },
 
     async put({ props: { data } }) {
-      if (data.happenedAfter) {
-        const previous = await db.get(data.happenedAfter);
+      const { happenedAfter } = data;
+      if (happenedAfter) {
+        const id =
+          typeof happenedAfter === "string" ? happenedAfter : happenedAfter._id;
+        const { doc: previous } = await shim.get({
+          props: { id },
+        });
         data.happenedAfter = previous;
       } else {
         data.happenedAfter = undefined;
