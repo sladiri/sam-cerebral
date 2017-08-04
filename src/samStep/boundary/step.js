@@ -89,6 +89,13 @@ const getProposal = async ({
     : { _abortAction: true };
 };
 
+/**
+ * Emit NAP done
+ * @param {string} prefix
+ * @param {object} options
+ * @param {object} options.controller
+ * @param {object} options.payload - For inter-SAM-container communication pass e.g. state
+ */
 const emitNapDone = prefix => ({ controller, payload }) => {
   controller.emit(`napDone${prefix ? `-${prefix}` : ""}`, payload);
 };
