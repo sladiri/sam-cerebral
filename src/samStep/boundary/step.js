@@ -165,6 +165,7 @@ export const samFactory = ({
   computeNextAction = () => [],
   actions = {},
   preventCompoundState = true,
+  queueConcurrentActions = false,
 }) => {
   const prefixedPath = getModulePath(prefix);
   const prefixedStateProxy = getPrefixedStateProxy(prefixedPath);
@@ -176,12 +177,15 @@ export const samFactory = ({
     return acc;
   }, {});
 
+  let lastStepId;
+
   return {
     signals,
   };
 
   function samStepFactory(_action, GetId = _GetId) {
     const [action, actionName] = parseAction(_action);
+    const actionQueue = queueConcurrentActions && [];
 
     return samStep;
 
@@ -202,8 +206,10 @@ export const samFactory = ({
             napInProgress: false,
             syncNap: true,
             prefix,
+            queueConcurrentActions,
           });
         }
+        lastStepId = state.get("_sam.stepId");
 
         if (!guardDisallowedAction(state.get("_sam"))) {
           logDisallowedAction(props, state.get("_sam"));
@@ -270,6 +276,16 @@ export const samFactory = ({
           entityState.get(),
         );
 
+        if (
+          queueConcurrentActions &&
+          nextActions.length < 1 &&
+          actionQueue.length
+        ) {
+          debugger;
+          const { name, props } = actionQueue.pop();
+          nextActions.push([[[name, props]]]);
+        }
+
         if (nextActions.length < 1) {
           state.set("_sam.napInProgress", false);
           emitNapDone(prefix)({ controller, payload: entityState.get() });
@@ -334,7 +350,14 @@ export const samFactory = ({
 
     function guardSignalInterrupt(props, sam) {
       const { acceptInProgress, napInProgress, syncNap } = sam;
-      return props._isNap || !(acceptInProgress || (napInProgress && syncNap));
+      const allowAction =
+        props._isNap || !(acceptInProgress || (napInProgress && syncNap));
+
+      if (queueConcurrentActions && !allowAction) {
+        actionQueue.push({ name: actionName, props });
+      }
+
+      return allowAction;
     }
 
     function logInterruptFailed(props, sam) {
@@ -368,7 +391,11 @@ export const samFactory = ({
 
     function guardStaleProposal(actionStepId, sam) {
       const { init, stepId } = sam;
-      return init || stepId === actionStepId;
+      return (
+        init ||
+        stepId === actionStepId ||
+        (queueConcurrentActions && lastStepId === actionStepId)
+      );
     }
 
     function logStaleProposal(props, sam) {

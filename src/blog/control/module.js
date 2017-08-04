@@ -9,4 +9,5 @@ export default prefix =>
     computeControlState,
     computeNextAction,
     actions,
+    queueConcurrentActions: true,
   });

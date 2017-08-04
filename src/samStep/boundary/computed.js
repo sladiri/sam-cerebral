@@ -7,9 +7,10 @@ const actionsDisabled = prefix =>
   compute(
     get =>
       get(state`${getModulePath(prefix, "_sam.init")}`) ||
-      get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`) ||
-      get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
-      get(state`${getModulePath(prefix, "_sam.napInProgress")}`),
+      ((!get(state`${getModulePath(prefix, "_sam.queueConcurrentActions")}`) &&
+        get(state`${getModulePath(prefix, "_sam.proposeInProgress")}`)) ||
+        get(state`${getModulePath(prefix, "_sam.acceptInProgress")}`) ||
+        get(state`${getModulePath(prefix, "_sam.napInProgress")}`)),
   );
 
 const addDisabledMethod = actionDisabled => (acc, [key, val]) => {
