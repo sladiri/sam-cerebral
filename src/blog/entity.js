@@ -88,6 +88,7 @@ export const computeControlState = blog => {
         "post",
         "deletePost",
         "clearDb",
+        "refresh",
         "cancel",
       ],
     ],

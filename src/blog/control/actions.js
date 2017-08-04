@@ -37,3 +37,7 @@ export async function deletePost({ props: { id: deleteId } }) {
 export async function clearDb() {
   return { clearDb: true };
 }
+
+export function refresh() {
+  return { refreshDummy: true };
+}

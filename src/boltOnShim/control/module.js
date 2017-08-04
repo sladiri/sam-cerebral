@@ -4,8 +4,8 @@ import actionFactory from "./actions";
 import { pouchDbFactory } from "../../pouchdb/boundary";
 
 const db = pouchDbFactory({
-  // remoteDbHost: "http://localhost:5984",
-  // remoteDbName: "remote_blog",
+  remoteDbHost: "http://localhost:5984",
+  remoteDbName: "remote_blog",
   cacheDbName: "cached_blog",
   inMemoryDbName: "inMemory_blog",
 });

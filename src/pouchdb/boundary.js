@@ -14,11 +14,13 @@ export const pouchDbFactory = (pouchOptions = {}) => {
 
 const getDocsLog = async db => {
   const docs = await db.allDocs();
-  return docs.rows.map(r => `id=[${r.id}];rev=[${r.value.rev}]`);
+  return docs.rows.map(
+    r => `id=[${r.id.substr(0, 10)}...];rev=[${r.value.rev.substr(0, 10)}...]`,
+  );
 };
 
 const logDbReady = async (db, dbName) => {
-  console.log(`[${dbName}] connected`, db, "\n", await getDocsLog(db));
+  console.log(`[${dbName}] connected`, "\n", await getDocsLog(db));
 };
 
 const getRemote = async (remoteDbHost, dbName) => {
@@ -58,19 +60,24 @@ const getInMemory = async dbName => {
   return inMemory;
 };
 
-const doReplicate = async (from, fromName, to, toName) => {
-  const handler = await to.replicate.from(from);
-  console.log(
-    `[${fromName}] replicated to [${toName}]`,
-    handler,
-    "\n",
-    await getDocsLog(to),
-  );
-
-  // handler.on("complete", function(info) {
-  //   // replication was canceled!
-  // });
-  // handler.cancel(); // <-- this cancels it
+const doReplicate = async (source, sourceName, target, targetName) => {
+  return new Promise((resolve, reject) => {
+    source.replicate.to(target).on("complete", resolve).on("error", reject);
+  })
+    .then(() => {
+      return Promise.all([getDocsLog(source), getDocsLog(target)]);
+    })
+    .then(([sourceLog, targetLog]) => {
+      console.log(
+        `[${sourceName}] replicated to [${targetName}]`,
+        "\n",
+        `[${sourceName}]: `,
+        sourceLog,
+        "\n",
+        `[${targetName}]: `,
+        targetLog,
+      );
+    });
 };
 
 const doSync = async (
@@ -89,7 +96,7 @@ const doSync = async (
       console.log(`Ch-Ch-Changes! [${firstName}] <-> [${secondName}]`, change);
     });
   console.log(
-    `[${firstName}] syncing with [${secondName}]`,
+    `Syncing [${firstName}] <-> [${secondName}]`,
     handler,
     "\n",
     `[${firstName}]: `,
@@ -98,11 +105,7 @@ const doSync = async (
     `[${secondName}]: `,
     await getDocsLog(second),
   );
-
-  // handler.on("complete", function(info) {
-  //   // replication was canceled!
-  // });
-  // handler.cancel(); // <-- this cancels it
+  return { handler }; // Prevent bug because handler has Promise-like API.
 };
 
 const ensureDbSync = async ({
@@ -112,12 +115,79 @@ const ensureDbSync = async ({
   inMemoryDbName,
 }) => {
   const remote = await getRemote(remoteDbHost, remoteDbName);
+  if (remote) {
+    // For debugging
+    const cache = await getCache(cacheDbName);
+    console.log("Remote DB connected, destroying local cache DB.");
+    await cache.destroy();
+  }
   const cache = await getCache(cacheDbName);
   const inMemory = await getInMemory(inMemoryDbName);
 
   if (remote) {
+    window.sync = {}; // Dev helper
+    const replyOpts = {
+      live: true,
+      retry: true,
+      filter(doc) {
+        return !!doc.happenedAfter;
+      },
+    };
+    const addCancel = (id, handler) => {
+      handler.on("complete", function(info) {
+        console.warn(
+          `Syncing canceled: [${cacheDbName}] <-> [${remoteDbName}]`,
+          info,
+        );
+        window.sync[`cancel${id}`] = null;
+      });
+      window.sync[`cancel${id}`] = handler.cancel.bind(handler);
+    };
     await doReplicate(remote, remoteDbName, cache, cacheDbName);
-    await doSync(cache, cacheDbName, remote, remoteDbName);
+    {
+      //   const { handler } = await doSync(
+      //   cache,
+      //   cacheDbName,
+      //   remote,
+      //   remoteDbName,
+      //   replyOpts,
+      // );
+      // addCancel("Replies", handler);
+    }
+    {
+      const { handler } = await doSync(
+        cache,
+        cacheDbName,
+        remote,
+        remoteDbName,
+      );
+      addCancel("All", handler);
+    }
+    window.sync.syncAll = async () => {
+      if (window.sync.cancelAll) {
+        return;
+      }
+      const { handler } = await doSync(
+        cache,
+        cacheDbName,
+        remote,
+        remoteDbName,
+      );
+      addCancel("All", handler);
+    };
+    window.sync.syncReplies = async () => {
+      if (window.sync.cancelReplies) {
+        return;
+      }
+      const { handler } = await doSync(
+        cache,
+        cacheDbName,
+        remote,
+        remoteDbName,
+        replyOpts,
+      );
+      addCancel("Replies", handler);
+    };
   }
 
   await doReplicate(cache, cacheDbName, inMemory, inMemoryDbName);

@@ -2,10 +2,6 @@ export default dbPromise => {
   const actions = {
     async accept({ state, props }) {
       {
-        if (props.noop) return;
-      }
-
-      {
         const { _hidden } = props;
         if (_hidden) {
           state.set("_hidden", _hidden);

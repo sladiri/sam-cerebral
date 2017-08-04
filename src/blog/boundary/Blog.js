@@ -17,15 +17,25 @@ const clearPostsForm = ({ actions, className, css }) => {
     css["items-center"],
   );
   return (
-    <form
-      onSubmit={event => {
-        event.preventDefault();
-        actions.clearDb({});
-      }}
-      className={formClass}
-    >
-      <button className={formWidthClass}>clear posts DB</button>
-    </form>
+    <div className={formClass}>
+      <button
+        className={formWidthClass}
+        onClick={() => {
+          actions.clearDb({});
+        }}
+      >
+        clear posts DB
+      </button>
+      <br />
+      <button
+        className={formWidthClass}
+        onClick={() => {
+          actions.refresh({});
+        }}
+      >
+        refresh
+      </button>
+    </div>
   );
 };
 
