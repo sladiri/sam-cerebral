@@ -1,7 +1,7 @@
 import Color from "color";
 import { pick, curry } from "ramda";
 
-import tachyonsStyles from "./parseCssJson";
+import tachyonsStyles from "./tachyonsStyles.json";
 
 export const colours = {
   warn: Color("brown").lighten(0.3).string(),

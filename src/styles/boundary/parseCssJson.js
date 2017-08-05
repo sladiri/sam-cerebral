@@ -1,4 +1,9 @@
-import tachyonsParsedJson from "./tachyonsParsed.json";
+/* eslint-env node */
+
+import jsonfile from "jsonfile";
+import path from "path";
+
+import tachyonsCssJson from "./tachyonsCss.json";
 
 const splitRulePerSelector = ({ selectors, declarations }, preventTagRules) => {
   const rules = {};
@@ -47,4 +52,8 @@ const parseJson = (acc, value) => {
   return acc;
 };
 
-export default tachyonsParsedJson.value.reduce(parseJson, {});
+jsonfile.writeFileSync(
+  path.join(__dirname, "tachyonsStyles.json"),
+  tachyonsCssJson.value.reduce(parseJson, {}),
+  { spaces: 2 },
+);
