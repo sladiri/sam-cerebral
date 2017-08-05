@@ -3,5 +3,5 @@
 
 /node_modules/
 
-/static/dist/
-/dist-server/
+/static/vendor/
+/src/styles/boundary/*.json
