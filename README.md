@@ -13,7 +13,7 @@
 - A Cerebral module may be implemented as a SAM container.
 Each Cerebral signal is a SAM-step action, and this ensures that the state is updated in a precisely defined step (as in TLA+).
 - Only the _accept_ function inside the model has write access to the model.
-- The _state-representation_ (view-model) is the Cerebral state tree, and _accept_ may hide internal state (the "real model"). **The _state-representation_ should technically be tha place to set the view-model, but this requires more code and this example shows a "simpler" implementation.**
+- The _state-representation_ (view-model) is the Cerebral state tree, and _accept_ may hide internal state (the "real model"). **The _state-representation_ should technically be the place to create the view-model, but this requires more code and this example shows a "simpler" implementation.**
 - Helper functions allow communication between SAM-step-containers.
 
 ## SAM and the Entity Control Boundary pattern
