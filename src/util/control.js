@@ -24,11 +24,5 @@ export const getModulePath = curry(
     path ? `${`${prefix ? `${prefix}.` : ""}`}${path}` : prefix,
 );
 
-export const addSamState = (_prefix, state) => ({
-  ...state,
-  _prefix,
-  _sam: {},
-});
-
 export const addDisplayName = (component, value) =>
   Object.defineProperty(component, "name", { value });

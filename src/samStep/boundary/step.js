@@ -2,11 +2,6 @@ import { innerJoin, memoize, omit, pickBy, type, curry } from "ramda";
 
 import { getId, getModulePath } from "../../util/control";
 
-export const addSamState = (_prefix, object) =>
-  object.signals
-    ? { ...object, state: { _prefix, _sam: {} } }
-    : { _prefix, _sam: {} };
-
 export const waitForNap = curry(
   (controller, prefix, [sequence, payload] = []) => {
     const napDone = new Promise((resolve, reject) => {
