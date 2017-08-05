@@ -15,7 +15,7 @@ export const pouchDbFactory = (pouchOptions = {}) => {
 const getDocsLog = async db => {
   const docs = await db.allDocs();
   return docs.rows.map(
-    r => `id=[${r.id.substr(0, 10)}...];rev=[${r.value.rev.substr(0, 10)}...]`,
+    r => `id=[${r.id.substr(0, 5)}...];rev=[${r.value.rev.substr(0, 7)}...]`,
   );
 };
 
