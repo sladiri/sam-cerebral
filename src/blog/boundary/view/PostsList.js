@@ -51,6 +51,8 @@ export default connect(
                 css.mt2,
                 css.mb2,
                 css.list,
+                css.pt2,
+                css.pb1,
               ),
             },
             [
@@ -65,7 +67,25 @@ export default connect(
                     css.code,
                   ),
                 },
-                `${creator} on ${created}`,
+                [
+                  model.userName &&
+                    h(
+                      "button",
+                      {
+                        disabled: actions.deletePost.disabled(post),
+                        onClick: () => {
+                          actions.deletePost({ id });
+                        },
+                        className: classNames(
+                          actionFog(css, actions.deletePost, post),
+                          css.fl,
+                        ),
+                      },
+                      post.deleted ? "undelete" : "delete",
+                    ),
+                  h("span", { className: css.fr }, `${creator} on ${created}`),
+                  h("div", { style: { clear: "both" } }),
+                ],
               ),
               replyTo &&
                 h(
@@ -73,25 +93,14 @@ export default connect(
                   { className: classNames(css.f6, css.i, css.tr, css.mv1) },
                   `(reply to "${replyTo} ...")`,
                 ),
-              h("p", { className: classNames(css.mt2, css.mb3) }, message),
-              model.userName &&
-                h(
-                  "button",
-                  {
-                    disabled: actions.deletePost.disabled(post),
-                    onClick: () => {
-                      actions.deletePost({ id });
-                    },
-                    className: classNames(
-                      actionFog(css, actions.deletePost, post),
-                      css.mb2,
-                    ),
-                  },
-                  post.deleted ? "undelete" : "delete",
-                ),
+              h("p", { className: classNames(css.mv2) }, message),
               model.userName &&
                 !post.deleted &&
-                <ReplyForm css={css} replyId={id} />,
+                <ReplyForm
+                  css={css}
+                  replyId={id}
+                  className={classNames(css.mb2, css.mt1)}
+                />,
             ],
           );
         })}

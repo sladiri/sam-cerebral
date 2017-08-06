@@ -45,7 +45,7 @@ export default connect(
     },
   }),
   function PostForm({ actions, className, css }) {
-    const buttonClass = action => classNames(actionFog(css, action), css.mt2);
+    const buttonClass = action => classNames(actionFog(css, action));
     return (
       <form
         onSubmit={event => {
@@ -55,15 +55,18 @@ export default connect(
           });
           event.target.getElementsByTagName("input")[0].value = "";
         }}
-        className={className}
+        className={classNames(className, css.flex)}
       >
         <input
           disabled={actions.post.disabled()}
-          className={actionFog(css, actions.post)}
+          className={classNames(
+            actionFog(css, actions.post),
+            css["w-10"],
+            css["flex-grow"],
+          )}
           placeholder="My two cents ..."
         />
 
-        <br />
         <button
           disabled={actions.post.disabled()}
           className={buttonClass(actions.post)}
@@ -71,7 +74,6 @@ export default connect(
           Post!
         </button>
 
-        <br />
         <button
           disabled={actions.cancel.disabled()}
           type="button"
