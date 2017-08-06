@@ -86,7 +86,7 @@ export default connect(
                       post.deleted ? "undelete" : "delete",
                     ),
                   h("span", { className: css.fr }, `${creator} on ${created}`),
-                  h("div", { style: { clear: "both" } }),
+                  h("span", { style: { display: "block", clear: "both" } }),
                 ],
               ),
               replyTo &&
