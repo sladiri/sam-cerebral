@@ -34,9 +34,9 @@ export default connect(
       }),
     },
   }),
-  function PostsList({ model, actions }) {
+  function PostsList({ model, actions, className }) {
     return (
-      <ul className="pl0">
+      <ul className={classNames("pl0", className)}>
         {model.posts.map(post => {
           const { id, creator, created, message, deleted, replyTo } = post;
           return h(
@@ -48,8 +48,6 @@ export default connect(
                 "bt",
                 "b--light-gray",
                 "bw1",
-                "mt2",
-                "mb2",
                 "list",
                 "pt2",
                 "pb1",
@@ -58,40 +56,34 @@ export default connect(
               ),
             },
             [
-              h(
-                "p",
-                {
-                  className: classNames("f6", "tr", "mt2", "mb1", "code", "cf"),
-                },
-                [
-                  model.userName &&
-                    h(
-                      "button",
-                      {
-                        disabled: actions.deletePost.disabled(post),
-                        onClick: () => {
-                          actions.deletePost({ id });
-                        },
-                        className: classNames(
-                          actionFog(actions.deletePost, post),
-                          "fl",
-                        ),
+              h("p", { className: "f6 tr mt2 mb1 code cf" }, [
+                model.userName &&
+                  h(
+                    "button",
+                    {
+                      disabled: actions.deletePost.disabled(post),
+                      onClick: () => {
+                        actions.deletePost({ id });
                       },
-                      post.deleted ? "undelete" : "delete",
-                    ),
-                  h("span", { className: "fr" }, `${creator} on ${created}`),
-                ],
-              ),
+                      className: classNames(
+                        actionFog(actions.deletePost, post),
+                        "fl",
+                      ),
+                    },
+                    post.deleted ? "undelete" : "delete",
+                  ),
+                h("span", { className: "fr f7" }, `${creator} on ${created}`),
+              ]),
               replyTo &&
-                h(
-                  "p",
-                  { className: classNames("f6", "i", "tr", "mv1") },
-                  `(reply to "${replyTo} ...")`,
-                ),
-              h("p", { className: "mv2" }, message),
+                h("p", { className: "f6 tr mv1" }, [
+                  "(reply to ",
+                  h("span", { className: "i" }, `"${replyTo} ..."`),
+                  ")",
+                ]),
+              h("p", { className: "mv3" }, message),
               model.userName &&
                 !post.deleted &&
-                <ReplyForm replyId={id} className={classNames("mb2", "mt1")} />,
+                <ReplyForm replyId={id} className="mb2 mt1" />,
             ],
           );
         })}

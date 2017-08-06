@@ -28,10 +28,10 @@ export default connect(
   }),
   function UserForm({ model, actions, className }) {
     const formClass = classNames(
-      className,
       "flex",
       "items-center",
       "justify-center",
+      className,
     );
     return model.userName
       ? <form

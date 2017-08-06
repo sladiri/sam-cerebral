@@ -1,7 +1,6 @@
 import { connect } from "cerebral/react";
 
 import React from "react";
-import classNames from "classnames";
 
 import { model } from "../computed";
 
@@ -37,4 +36,4 @@ export const viewFactory = SamStatus => {
 };
 
 export const actionFog = (action, ...args) =>
-  action.disabled(...args) && classNames("o-50", "strike");
+  action.disabled(...args) && "o-50 strike";

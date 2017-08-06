@@ -28,7 +28,7 @@ export default prefix => {
       [
         napInProgress,
         [
-          h("p", { className: classNames("ma0", "tc") }, "NAP"),
+          h("p", { className: "ma0 tc" }, "NAP"),
           h(
             "p",
             {
@@ -71,7 +71,7 @@ export default prefix => {
         h(
           "div",
           {
-            className: classNames("flex", "flex-column"),
+            className: "flex flex-column",
             style: { flexGrow: 1 },
           },
           [

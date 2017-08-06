@@ -2,7 +2,6 @@ import { connect } from "cerebral/react";
 import { state } from "cerebral/tags";
 
 import React from "react";
-import classNames from "classnames";
 
 import { view as Blog } from "../../blog/boundary";
 
@@ -14,12 +13,6 @@ const pageMap = {
 const AppShell = ({ currentPage }) => {
   return (
     <div className="pa4">
-      <a
-        href="#"
-        className={classNames("link", "underline", "blue", "hover-orange")}
-      >
-        link text
-      </a>
       {pageMap[currentPage]}
     </div>
   );

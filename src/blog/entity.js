@@ -101,7 +101,7 @@ export const computeNextAction = (controlState, blog) => {
       [
         [
           "post",
-          { creator: "system", message: "Example post ... add more posts!" },
+          { creator: "system", message: "Example post, add more posts!" },
         ],
       ],
     ];

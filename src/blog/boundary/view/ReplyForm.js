@@ -45,7 +45,7 @@ export default connect(
     },
   }),
   ({ replyId, actions, className }) => {
-    const buttonClass = action => classNames(actionFog(action));
+    const buttonClass = action => actionFog(action);
     return (
       <form
         onSubmit={event => {
@@ -56,7 +56,7 @@ export default connect(
           });
           event.target.getElementsByTagName("input")[0].value = "";
         }}
-        className={classNames(className, "flex")}
+        className={classNames("flex", className)}
       >
         <input
           disabled={actions.post.disabled()}
