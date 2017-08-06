@@ -15,7 +15,9 @@ export const model = compute(
           created: new Date(Number.parseInt(created)).toLocaleString(),
           message,
           deleted,
-          replyTo: parent && parent.message.substr(0, 20),
+          replyTo: parent
+            ? `${parent.message.substr(0, 20)}...`
+            : parentId && "NOT_FOUND",
         };
       },
     );

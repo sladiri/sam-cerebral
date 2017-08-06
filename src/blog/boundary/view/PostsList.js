@@ -76,9 +76,9 @@ export default connect(
               ]),
               replyTo &&
                 h("p", { className: "f6 tr mv1" }, [
-                  "(reply to ",
-                  h("span", { className: "i" }, `"${replyTo} ..."`),
-                  ")",
+                  '(reply to "',
+                  h("span", { className: "i" }, replyTo),
+                  '")',
                 ]),
               h("p", { className: "mv3" }, message),
               model.userName &&
