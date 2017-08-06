@@ -33,6 +33,7 @@ The SAM pattern maps to the ECB pattern too:
   - [ ] Use control state for page change (routing) example?
   - [ ] Add session control state example (log in <-> log out on authenticated route)?
   - [ ] Use security token.
+  - [ ] Add notification service when remote changes arrive.
 
 - [ ] Storage layer
   - [x] Add PouchDB provider to Cerebral context

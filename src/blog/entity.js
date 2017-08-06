@@ -1,15 +1,24 @@
 import { wait } from "../util/control";
 
+const getPosts = async db => {
+  const { docs } = await db.allDocs();
+  return docs.rows.map(r => r.doc).filter(d => d.type === "post");
+};
+
 export const accept = async ({ db, state, props }) => {
   const blog = state.get();
 
   {
     if (!blog.posts) {
       state.set("userName", "");
+      state.set("posts", await getPosts(db));
+    }
+  }
 
-      const { docs } = await db.allDocs();
-      const posts = docs.rows.map(r => r.doc).filter(d => d.type === "post");
-      state.set("posts", posts);
+  {
+    const { refresh } = props;
+    if (refresh) {
+      state.set("posts", await getPosts(db));
     }
   }
 

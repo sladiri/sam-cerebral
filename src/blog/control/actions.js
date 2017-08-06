@@ -39,5 +39,5 @@ export async function clearDb() {
 }
 
 export function refresh() {
-  return { refreshDummy: true };
+  return { refresh: true };
 }
