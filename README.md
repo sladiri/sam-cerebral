@@ -41,6 +41,7 @@ The SAM pattern maps to the ECB pattern too:
   - [ ] Specify _Bolt-on Shim Layer_ in TLA+
   - [ ] Implement _Bolt-on Shim Layer_
   - [x] Refactor shim module to be sub-module?
+  - [ ] Prevent automatic example post by more than one user?
 
 - [ ] SAM container
   - [ ] Compute: Mark action specific cancel buttons as disabled.
