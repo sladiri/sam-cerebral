@@ -1,11 +1,15 @@
 export default dbPromise => {
-  const actions = {
+  let db;
+  return {
     async accept({ state, props }) {
-      {
-        const { _hidden } = props;
-        if (_hidden) {
-          state.set("_hidden", _hidden);
-        }
+      const shim = state.get();
+
+      if (!db) {
+        db = await dbPromise;
+      }
+
+      if (!shim._hidden) {
+        state.set("_hidden", {});
       }
 
       state.unset("doc");
@@ -16,6 +20,7 @@ export default dbPromise => {
       {
         const { docs } = props;
         if (docs) {
+          // TODO: filter causal cut
           state.set("docs", docs);
         }
       }
@@ -23,6 +28,7 @@ export default dbPromise => {
       {
         const { doc } = props;
         if (doc) {
+          // TODO: filter causal cut
           state.set("doc", doc);
         }
       }
@@ -63,5 +69,4 @@ export default dbPromise => {
       // }
     },
   };
-  return actions;
 };
