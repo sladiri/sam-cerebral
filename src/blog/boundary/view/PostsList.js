@@ -36,7 +36,7 @@ export default connect(
   }),
   function PostsList({ model, actions, css }) {
     return (
-      <ul>
+      <ul className={classNames(css.pa3, css.pl4)}>
         {model.posts.map(post => {
           const { id, creator, created, message, deleted, replyTo } = post;
           return h(
@@ -48,23 +48,32 @@ export default connect(
                 css.bt,
                 css["b--light-gray"],
                 css.bw2,
-                css.mt3,
-                css.pb2,
+                css.mt2,
+                css.mb2,
+                css.list,
               ),
             },
             [
               h(
                 "p",
-                { className: classNames(css.f6, css.tr) },
+                {
+                  className: classNames(
+                    css.f6,
+                    css.tr,
+                    css.mt2,
+                    css.mb1,
+                    css.code,
+                  ),
+                },
                 `${creator} on ${created}`,
               ),
               replyTo &&
                 h(
                   "p",
-                  { className: classNames(css.f6, css.i, css.tr) },
+                  { className: classNames(css.f6, css.i, css.tr, css.mv1) },
                   `(reply to "${replyTo} ...")`,
                 ),
-              h("p", message),
+              h("p", { className: classNames(css.mt2, css.mb3) }, message),
               model.userName &&
                 h(
                   "button",
@@ -73,7 +82,10 @@ export default connect(
                     onClick: () => {
                       actions.deletePost({ id });
                     },
-                    className: actionFog(css, actions.deletePost, post),
+                    className: classNames(
+                      actionFog(css, actions.deletePost, post),
+                      css.mb2,
+                    ),
                   },
                   post.deleted ? "undelete" : "delete",
                 ),

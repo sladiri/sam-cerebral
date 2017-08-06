@@ -16,7 +16,7 @@ export const viewFactory = SamStatus => {
 
     return (
       <section className={className}>
-        <SamStatus className={classNames(css.mt2, css.mb4)} />
+        <SamStatus className={classNames(css.mb2)} />
 
         <ClearPostsForm className={formClass} css={css} />
 

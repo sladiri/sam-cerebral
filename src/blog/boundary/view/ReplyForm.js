@@ -64,7 +64,6 @@ export default connect(
           placeholder="Reply here ..."
         />
 
-        <br />
         <button
           disabled={actions.post.disabled()}
           className={buttonClass(actions.post)}
@@ -72,7 +71,6 @@ export default connect(
           Reply!
         </button>
 
-        <br />
         <button
           disabled={actions.cancel.disabled()}
           type="button"

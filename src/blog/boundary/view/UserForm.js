@@ -59,21 +59,12 @@ export default connect(
         >
           <input
             disabled={actions.login.disabled()}
-            className={classNames(
-              actionFog(css, actions.login),
-              css["w-40"],
-              css.tc,
-              css.mh2,
-            )}
+            className={classNames(actionFog(css, actions.login), css["w-40"])}
             placeholder="Alfons"
           />
           <button
             disabled={actions.login.disabled()}
-            className={classNames(
-              actionFog(css, actions.login),
-              css["w-20"],
-              css.mh2,
-            )}
+            className={classNames(actionFog(css, actions.login), css["w-20"])}
           >
             Login
           </button>

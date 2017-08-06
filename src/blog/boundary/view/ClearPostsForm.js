@@ -23,34 +23,21 @@ export default connect(
     actions: { ...markActionsDisabled({ clearDb, refresh }) },
   }),
   function ClearPostsForm({ actions, className, css }) {
-    const formWidthClass = css["w-50"];
-    const formClass = classNames(
-      className,
-      css.flex,
-      css["flex-column"],
-      css["items-center"],
-    );
+    const formClass = classNames(className, css.flex, css["justify-center"]);
     return (
       <div className={formClass}>
         <button
           disabled={actions.clearDb.disabled()}
-          className={classNames(
-            actionFog(css, actions.clearDb),
-            formWidthClass,
-          )}
+          className={classNames(actionFog(css, actions.clearDb), css["w-50"])}
           onClick={() => {
             actions.clearDb({});
           }}
         >
           clear posts DB
         </button>
-        <br />
         <button
           disabled={actions.refresh.disabled()}
-          className={classNames(
-            actionFog(css, actions.refresh),
-            formWidthClass,
-          )}
+          className={classNames(actionFog(css, actions.refresh), css["w-30"])}
           onClick={() => {
             actions.refresh({});
           }}

@@ -79,7 +79,7 @@ export default prefix => {
             ),
           },
           [
-            h("p", ["SAM-step state", h("br"), ` (${prefix || "root"})`]),
+            h("p", ["SAM-step state", ` (${prefix || "root"})`]),
             ...take(2, stateBlocks),
           ],
         ),
