@@ -5,10 +5,11 @@ export default dbPromise => {
     db = await dbPromise;
   };
 
-  const allDocs = async () => {
+  const allDocs = async ({ props: { options = {} } }) => {
     const defaultOptions = {
       include_docs: true,
       conflicts: true,
+      ...options,
     };
     return {
       docs: await db.allDocs(defaultOptions),
@@ -23,6 +24,12 @@ export default dbPromise => {
     };
     return {
       doc: await db.get(id, defaultOptions),
+    };
+  };
+
+  const getMany = async ({ props: { ids } }) => {
+    return {
+      docMany: await db.allDocs({ keys: ids }),
     };
   };
 
@@ -57,5 +64,5 @@ export default dbPromise => {
     };
   };
 
-  return { init, allDocs, get, put, deleteAll };
+  return { init, allDocs, get, getMany, put, deleteAll };
 };

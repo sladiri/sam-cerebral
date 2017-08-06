@@ -1,4 +1,4 @@
-import { partition } from "ramda";
+import { partition, intersection } from "ramda";
 
 export default dbPromise => {
   let db;
@@ -10,19 +10,19 @@ export default dbPromise => {
       db = await dbPromise;
     }
 
-    if (!shim._hidden) {
+    if (!shim._) {
       state.set("_", {});
     }
 
-    state.unset("doc");
-    state.unset("ok");
-    state.unset("id");
-    state.unset("rev");
+    state.unset("_.doc");
+    state.unset("_.docMany");
+    state.unset("_.ok");
+    state.unset("_.id");
+    state.unset("_.rev");
 
     {
       const { docs } = props;
       if (docs) {
-        // TODO: filter causal cut
         state.set("_.docs", docs);
         const [available, missing] = partition(
           d =>
@@ -38,52 +38,67 @@ export default dbPromise => {
     {
       const { doc } = props;
       if (doc) {
-        // TODO: filter causal cut
-        state.set("doc", doc);
+        state.set("_.doc", doc);
+      }
+    }
+
+    {
+      const { docMany } = props;
+      if (docMany) {
+        state.set("_.docMany", docMany);
       }
     }
 
     {
       const { ok } = props;
       if (ok !== undefined) {
-        state.set("ok", ok);
+        state.set("_.ok", ok);
       }
     }
 
     {
       const { id } = props;
       if (id) {
-        state.set("id", id);
+        state.set("_.id", id);
       }
     }
 
     {
       const { rev } = props;
       if (rev) {
-        state.set("rev", rev);
+        state.set("_.rev", rev);
       }
     }
   };
 
   const computeStateRepresentation = state => {
-    {
-      const { _: { docs, available } } = state.get();
-      if (docs) {
-        state.set("docs", { rows: available });
-      }
-    }
+    const {
+      _: { docMany = { rows: [] }, available = [], missing = [] },
+    } = state.get();
 
-    // if (m.x < 5) {
-    //   return [["low", ["foo"]]];
-    // }
+    state.set("docs", { rows: available });
+
+    const missingIds = missing.map(row => row.doc.happenedAfter._id);
+    const notFoundIds = docMany.rows
+      .filter(row => !!row.error)
+      .map(row => row.key);
+    const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
+    if (missing.length && !missingAndNotFound.length) {
+      return [["missing", ["getMany"]]];
+    }
+    if (missingAndNotFound.length) {
+      console.warn("Could not find missing docs", missingAndNotFound);
+    }
 
     return [["normal", ["allDocs", "get", "post", "put", "deleteAll"]]];
   };
 
-  const computeNextAction = controlState => {
-    // if (controlState === "low") {
-    //   return [[["foo"]]];
-    // }
+  const computeNextAction = (controlState, model) => {
+    if (controlState === "missing") {
+      const { _: { missing } } = model;
+      const ids = missing.map(row => row.doc.happenedAfter._id);
+      return [[["getMany", { ids }]]];
+    }
   };
   return { accept, computeStateRepresentation, computeNextAction };
 };
