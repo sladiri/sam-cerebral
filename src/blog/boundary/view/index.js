@@ -11,24 +11,24 @@ import PostForm from "./PostForm";
 import PostsList from "./PostsList";
 
 export const viewFactory = SamStatus => {
-  const Blog = ({ css, model, className }) => {
-    const formClass = css.mv3;
+  const Blog = ({ model, className }) => {
+    const formClass = "mv3";
 
     return (
       <section className={className}>
-        <SamStatus className={classNames(css.mb2)} />
+        <SamStatus className="mb2" />
 
-        <ClearPostsForm className={formClass} css={css} />
+        <ClearPostsForm className={formClass} />
 
-        <p className={css.tc}>
+        <p className="tc">
           User: {model.userName || "none (log in to post)"}
         </p>
 
-        <UserForm className={formClass} css={css} />
+        <UserForm className={formClass} />
 
-        <PostForm className={formClass} css={css} />
+        <PostForm className={formClass} />
 
-        <PostsList css={css} />
+        <PostsList />
       </section>
     );
   };
@@ -36,5 +36,5 @@ export const viewFactory = SamStatus => {
   return connect({ model }, Blog);
 };
 
-export const actionFog = (css, action, ...args) =>
-  action.disabled(...args) && classNames(css["o-50"], css.strike);
+export const actionFog = (action, ...args) =>
+  action.disabled(...args) && classNames("o-50", "strike");

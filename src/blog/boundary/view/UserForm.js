@@ -26,12 +26,12 @@ export default connect(
     ...connectedProps,
     actions: { ...markActionsDisabled({ login, logout }) },
   }),
-  function UserForm({ model, actions, className, css }) {
+  function UserForm({ model, actions, className }) {
     const formClass = classNames(
       className,
-      css.flex,
-      css["items-center"],
-      css["justify-center"],
+      "flex",
+      "items-center",
+      "justify-center",
     );
     return model.userName
       ? <form
@@ -43,7 +43,7 @@ export default connect(
         >
           <button
             disabled={actions.logout.disabled()}
-            className={classNames(actionFog(css, actions.logout), css["w-40"])}
+            className={classNames(actionFog(actions.logout), "w-40")}
           >
             Logout
           </button>
@@ -59,12 +59,12 @@ export default connect(
         >
           <input
             disabled={actions.login.disabled()}
-            className={classNames(actionFog(css, actions.login), css["w-40"])}
+            className={classNames(actionFog(actions.login), "w-40")}
             placeholder="Alfons"
           />
           <button
             disabled={actions.login.disabled()}
-            className={classNames(actionFog(css, actions.login), css["w-20"])}
+            className={classNames(actionFog(actions.login), "w-20")}
           >
             Login
           </button>

@@ -2,41 +2,40 @@ import h from "react-hyperscript";
 import classNames from "classnames";
 import { take, last } from "ramda";
 
-import { getCss } from "../../styles/boundary";
-
 export default prefix => {
-  const view = (
-    { proposeInProgress, acceptInProgress, napInProgress, syncNap, className },
-    context,
-  ) => {
-    const css = getCss(context);
-
+  const view = ({
+    proposeInProgress,
+    acceptInProgress,
+    napInProgress,
+    syncNap,
+    className,
+  }) => {
     const stateBlocks = [
       [
         proposeInProgress,
         [
-          h("p", { className: css.ma0 }, "propose"),
-          h("p", { className: css.ma0 }, "(cancelable action)"),
+          h("p", { className: "ma0" }, "propose"),
+          h("p", { className: "ma0" }, "(cancelable action)"),
         ],
       ],
       [
         acceptInProgress,
         [
-          h("p", { className: css.ma0 }, "accept"),
-          h("p", { className: css.ma0 }, "(no cancel)"),
+          h("p", { className: "ma0" }, "accept"),
+          h("p", { className: "ma0" }, "(no cancel)"),
         ],
       ],
       [
         napInProgress,
         [
-          h("p", { className: classNames(css.ma0, css.tc) }, "NAP"),
+          h("p", { className: classNames("ma0", "tc") }, "NAP"),
           h(
             "p",
             {
               className: classNames(
-                (syncNap || !napInProgress) && css.strike,
-                !napInProgress && css["o-50"],
-                css.ma0,
+                (syncNap || !napInProgress) && "strike",
+                !napInProgress && "o-50",
+                "ma0",
               ),
             },
             "(no cancel)",
@@ -49,16 +48,16 @@ export default prefix => {
         {
           key: text.html,
           className: classNames(
-            trigger ? css["bg-dark-pink"] : css["bg-light-pink"],
-            trigger && css.white,
-            css.flex,
-            css["flex-column"],
-            css["justify-center"],
-            css.ma1,
-            css.pv2,
-            css.ph1,
-            css["flex-grow"],
+            trigger ? "bg-dark-pink" : "bg-light-pink",
+            trigger && "white",
+            "flex",
+            "flex-column",
+            "justify-center",
+            "ma1",
+            "pv2",
+            "ph1",
           ),
+          style: { flexGrow: 1 },
         },
         text,
       ),
@@ -66,17 +65,14 @@ export default prefix => {
     return h(
       "section",
       {
-        className: classNames(css.f7, css.flex, css.code, css.tc, className),
+        className: classNames("f7", "flex", "code", "tc", className),
       },
       [
         h(
           "div",
           {
-            className: classNames(
-              css.flex,
-              css["flex-column"],
-              css["flex-grow"],
-            ),
+            className: classNames("flex", "flex-column"),
+            style: { flexGrow: 1 },
           },
           [
             h("p", ["SAM-step state", ` (${prefix || "root"})`]),

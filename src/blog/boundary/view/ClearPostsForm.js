@@ -22,13 +22,13 @@ export default connect(
     ...connectedProps,
     actions: { ...markActionsDisabled({ clearDb, refresh }) },
   }),
-  function ClearPostsForm({ actions, className, css }) {
-    const formClass = classNames(className, css.flex, css["justify-center"]);
+  function ClearPostsForm({ actions, className }) {
+    const formClass = classNames("flex", "justify-center", className);
     return (
       <div className={formClass}>
         <button
           disabled={actions.clearDb.disabled()}
-          className={classNames(actionFog(css, actions.clearDb), css["w-50"])}
+          className={classNames(actionFog(actions.clearDb), "w-50")}
           onClick={() => {
             actions.clearDb({});
           }}
@@ -37,7 +37,7 @@ export default connect(
         </button>
         <button
           disabled={actions.refresh.disabled()}
-          className={classNames(actionFog(css, actions.refresh), css["w-30"])}
+          className={classNames(actionFog(actions.refresh), "w-30")}
           onClick={() => {
             actions.refresh({});
           }}

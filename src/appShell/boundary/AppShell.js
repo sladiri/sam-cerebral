@@ -3,30 +3,29 @@ import { state } from "cerebral/tags";
 
 import React from "react";
 import classNames from "classnames";
-import { wrap, ReactFreeStyleContext } from "react-free-style";
-
-import { getCss } from "../../styles/boundary";
 
 import { view as Blog } from "../../blog/boundary";
 
-const getPageMap = css => ({
-  blog: <Blog css={css} />,
-  undefined: <h1 className={css.tc}>Page Not Found</h1>,
-});
+const pageMap = {
+  blog: <Blog />,
+  undefined: <h1 className="tc">Page Not Found</h1>,
+};
 
-const AppShell = ({ currentPage }, context) => {
-  const css = getCss(context);
-  const pageMap = getPageMap(css);
-
+const AppShell = ({ currentPage }) => {
   return (
-    <div className={classNames(css.pa4, css.f5)}>
+    <div className="pa4">
+      <a
+        href="#"
+        className={classNames("link", "underline", "blue", "hover-orange")}
+      >
+        link text
+      </a>
       {pageMap[currentPage]}
     </div>
   );
 };
-AppShell.contextTypes = ReactFreeStyleContext;
 
-export default connect({ currentPage: state`currentPage` }, wrap(AppShell));
+export default connect({ currentPage: state`currentPage` }, AppShell);
 
 /*
   TODO: Use token value in hidden input field in forms.

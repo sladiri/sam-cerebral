@@ -44,8 +44,8 @@ export default connect(
       },
     },
   }),
-  ({ replyId, actions, className, css }) => {
-    const buttonClass = action => classNames(actionFog(css, action));
+  ({ replyId, actions, className }) => {
+    const buttonClass = action => classNames(actionFog(action));
     return (
       <form
         onSubmit={event => {
@@ -56,15 +56,12 @@ export default connect(
           });
           event.target.getElementsByTagName("input")[0].value = "";
         }}
-        className={classNames(className, css.flex)}
+        className={classNames(className, "flex")}
       >
         <input
           disabled={actions.post.disabled()}
-          className={classNames(
-            actionFog(css, actions.post),
-            css["w-10"],
-            css["flex-grow"],
-          )}
+          className={classNames(actionFog(actions.post), "w-10")}
+          style={{ flexGrow: 1 }}
           placeholder="Reply here ..."
         />
 
