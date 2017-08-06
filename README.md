@@ -6,15 +6,18 @@
 ## Quick Start
 - `npm` installs all dependencies.
 - `npm run build` sets up static dependencies for the website.
-- `npm run lint` formats the code with __Prettier__ and checks few __Eslint__ rules.
 - `npm start` starts the __Budo__ development-webserver and serves the directory (watch + rebuild + autoreload).
+- `npm run lint` formats the code with __Prettier__ and checks few __Eslint__ rules.
 
 ## SAM pattern and Cerebral
 - A Cerebral module may be implemented as a SAM container.
-Each Cerebral signal is a SAM-step action, and this ensures that the state is updated in a precisely defined step (as in TLA+).
-- Only the _accept_ function inside the model has write access to the model.
-- The _state-representation_ (view-model) is the Cerebral state tree, and _accept_ may hide internal state (the "real model"). **The _state-representation_ should technically be the place to create the view-model, but this requires more code and this example shows a "simpler" implementation.**
-- Helper functions allow communication between SAM-step-containers.
+Each Cerebral signal is a SAM-step action, and this ensures that the model is updated in a precisely defined step (as in TLA+).
+- Triggering an action may execute a step, if there is a proposal.
+- A proposal in turn may trigger an indeterminate (see _Actor Model_) amount of automatic next-actions via the _next-action-predicate_ function.
+- Only the _accept_ function has write access to the model.
+- The _computeStateRepresentation_ function derives the _state-representation_ (view-model). It also gives a hint in form of a list of allowed actions, so that buttons, etc. can be disabled in the UI.
+- **Although technically wrong, in this implementation, the model is saved in the Cerebral state-tree as well, just to be visible in Cerebral's debugger. This also allows the model or parts of it to be used as view-model, which requires less code for this exercise.**
+- Helper functions allow communication between SAM-step-containers. If one container calls an action of another, it should wait for the other to compute its _state-representation_, which is the (asynchronous) return value of the action-call.
 
 ## SAM and the Entity Control Boundary pattern
 The SAM pattern maps to the ECB pattern too:
