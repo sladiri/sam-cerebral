@@ -36,7 +36,7 @@ export default connect(
   }),
   function PostsList({ model, actions, css }) {
     return (
-      <ul className={classNames(css.pa3, css.pl4)}>
+      <ul className={classNames(css.pl0)}>
         {model.posts.map(post => {
           const { id, creator, created, message, deleted, replyTo } = post;
           return h(
@@ -47,12 +47,14 @@ export default connect(
                 deleted && css.strike,
                 css.bt,
                 css["b--light-gray"],
-                css.bw2,
+                css.bw1,
                 css.mt2,
                 css.mb2,
                 css.list,
                 css.pt2,
                 css.pb1,
+                css.pl4,
+                css.pr2,
               ),
             },
             [
