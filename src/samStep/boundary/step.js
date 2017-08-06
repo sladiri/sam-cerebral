@@ -156,7 +156,7 @@ const getModuleName = name => (name === "" ? "root" : name);
 export const samFactory = ({
   prefix = "", // Cannot save undefined to state
   accept = () => {},
-  computeControlState = () => ["default"],
+  computeStateRepresentation = () => ["default"],
   computeNextAction = () => [],
   actions = {},
   preventCompoundState = true,
@@ -258,7 +258,7 @@ export const samFactory = ({
           ...services,
         });
         state.set("_sam.acceptInProgress", false);
-        state.set("_sam.controlState", getControlState(entityState.get()));
+        state.set("_sam.controlState", getControlState(entityState));
 
         const { nextActions, _syncNap } = getNextAction(
           state.get("_sam"),
@@ -378,7 +378,7 @@ export const samFactory = ({
     }
 
     function getControlState(state) {
-      const states = computeControlState(state) || [];
+      const states = computeStateRepresentation(state) || [];
 
       if (!Array.isArray(states) || states.length < 1) {
         throw new Error("Invalid control state.");

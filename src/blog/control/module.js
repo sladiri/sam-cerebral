@@ -1,5 +1,9 @@
 import { samFactory } from "../../samStep/boundary";
-import { accept, computeControlState, computeNextAction } from "../entity";
+import {
+  accept,
+  computeStateRepresentation,
+  computeNextAction,
+} from "../entity";
 import * as actions from "./actions";
 
 import { moduleFactory as shimFactory } from "../../boltOnShim/control";
@@ -16,7 +20,7 @@ export default prefix => {
     ...samFactory({
       prefix,
       accept,
-      computeControlState,
+      computeStateRepresentation,
       computeNextAction,
       actions,
     }),

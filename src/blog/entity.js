@@ -80,7 +80,9 @@ export const accept = async ({ db, state, props }) => {
   await wait(200);
 };
 
-export const computeControlState = blog => {
+export const computeStateRepresentation = state => {
+  const blog = state.get();
+
   if (blog.posts.length === 0) {
     return [["emptyExample", ["post"]]];
   }

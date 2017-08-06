@@ -10,13 +10,15 @@ const db = pouchDbFactory({
   inMemoryDbName: "inMemory_blog",
 });
 
-const { accept, computeControlState, computeNextAction } = entityFactory(db);
+const { accept, computeStateRepresentation, computeNextAction } = entityFactory(
+  db,
+);
 
 export default prefix =>
   samFactory({
     prefix,
     accept,
-    computeControlState,
+    computeStateRepresentation,
     computeNextAction,
     actions: actionFactory(db),
   });
