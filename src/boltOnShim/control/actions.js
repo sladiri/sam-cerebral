@@ -5,7 +5,8 @@ export default dbPromise => {
     db = await dbPromise;
   };
 
-  const allDocs = async ({ props: { options = {} } }) => {
+  const allDocs = async ({ props } = {}) => {
+    const options = (props && props.options) || {};
     const defaultOptions = {
       include_docs: true,
       conflicts: true,
