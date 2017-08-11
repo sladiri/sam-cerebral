@@ -1,7 +1,7 @@
 import { wait } from "../util/control";
 
 const getPosts = async db => {
-  const { docs } = await db.allDocs();
+  const docs = await db.allDocs();
   return docs.rows.map(r => r.doc).filter(d => d.type === "post");
 };
 
@@ -42,9 +42,8 @@ export const accept = async ({ db, state, props }) => {
     if (creator && created && message && replyId !== undefined) {
       let parentMessage;
       if (replyId) {
-        const { docs } = await db.get({ id: replyId });
-        const parent = docs.rows.find(d => d.id === replyId);
-        parentMessage = parent && `${parent.doc.message.substr(0, 20)}...`;
+        const parent = await db.get({ id: replyId });
+        parentMessage = parent && `${parent.message.substr(0, 20)}...`;
       }
       const newPost = {
         _id: `${created}-${creator}`,
@@ -62,7 +61,7 @@ export const accept = async ({ db, state, props }) => {
   {
     const { deleteId } = props;
     if (deleteId) {
-      const { doc: post } = await db.get({ id: deleteId });
+      const post = await db.get({ id: deleteId });
       const [, creator] = post._id.split("-");
       if (blog.userName === "system" || creator === blog.userName) {
         const deleted = !post.deleted;
@@ -78,9 +77,7 @@ export const accept = async ({ db, state, props }) => {
     const { clearDb } = props;
     if (clearDb) {
       await db.deleteAll();
-      const { docs } = await db.allDocs();
-      const posts = docs.rows.map(r => r.doc).filter(d => d.type === "post");
-      state.set("posts", posts);
+      state.set("posts", await getPosts(db));
     }
   }
 
