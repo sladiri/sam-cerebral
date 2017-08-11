@@ -30,6 +30,7 @@ The SAM pattern maps to the ECB pattern too:
   - [ ] Add blog post example (conflict-free example). No replies without parent should be shown because of eventual consistency.
     - [x] post posts
     - [x] reply to posts
+    - [ ] like posts and show counter per user (publicly visible)
 
   - [ ] Add Git-like example (with conflict management)? Track concurrent changes and show causal chain for conflict resolution by user.
 
