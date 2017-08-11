@@ -40,12 +40,19 @@ export const accept = async ({ db, state, props }) => {
   {
     const { creator = blog.userName, created, message, replyId } = props;
     if (creator && created && message && replyId !== undefined) {
+      let parentMessage;
+      if (replyId) {
+        const { docs } = await db.get({ id: replyId });
+        const parent = docs.rows.find(d => d.id === replyId);
+        parentMessage = parent && `${parent.doc.message.substr(0, 20)}...`;
+      }
       const newPost = {
         _id: `${created}-${creator}`,
         type: "post",
         creator,
         message,
-        happenedAfter: replyId,
+        parentMessage,
+        inResponseTo: replyId !== null ? [replyId] : [],
       };
       await db.put({ data: newPost });
       state.push("posts", newPost);

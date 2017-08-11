@@ -38,7 +38,14 @@ export default connect(
     return (
       <ul className={classNames("pl0", className)}>
         {model.posts.map(post => {
-          const { id, creator, created, message, deleted, replyTo } = post;
+          const {
+            id,
+            creator,
+            created,
+            message,
+            deleted,
+            parentMessage,
+          } = post;
           return h(
             "li",
             {
@@ -74,10 +81,10 @@ export default connect(
                   ),
                 h("span", { className: "fr f7" }, `${creator} on ${created}`),
               ]),
-              replyTo &&
+              parentMessage &&
                 h("p", { className: "f6 tr mv1" }, [
                   '(reply to "',
-                  h("span", { className: "i" }, replyTo),
+                  h("span", { className: "i" }, parentMessage),
                   '")',
                 ]),
               h("p", { className: "mv3" }, message),

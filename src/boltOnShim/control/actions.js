@@ -1,3 +1,5 @@
+import { uniqBy } from "ramda";
+
 export default dbPromise => {
   let db;
 
@@ -35,16 +37,17 @@ export default dbPromise => {
   };
 
   const put = async ({ props: { data } }) => {
-    const { happenedAfter } = data;
-    if (happenedAfter) {
-      const id =
-        typeof happenedAfter === "string" ? happenedAfter : happenedAfter._id;
-      const { doc: previous } = await get({
-        props: { id },
-      });
-      data.happenedAfter = previous;
-    } else {
-      data.happenedAfter = undefined;
+    const { inResponseTo } = data;
+    let previous;
+    if (inResponseTo.length === 1) {
+      const [previousId] = inResponseTo;
+      const { doc } = await get({ props: { id: previousId } });
+      previous = previousId;
+      console.log("previous", previous);
+    }
+    if (previous) {
+      data.inResponseTo.push(previous);
+      data.inResponseTo = uniqBy(x => x, data.inResponseTo);
     }
     const payload = {
       updated: Date.now(),

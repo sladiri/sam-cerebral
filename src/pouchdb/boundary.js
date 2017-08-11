@@ -130,7 +130,7 @@ const ensureDbSync = async ({
       live: true,
       retry: true,
       filter(doc) {
-        return !!doc.happenedAfter;
+        return !!doc.inResponseTo.length;
       },
     };
     const addCancel = (id, handler) => {

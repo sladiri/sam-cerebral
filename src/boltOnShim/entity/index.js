@@ -1,4 +1,4 @@
-import { partition, intersection } from "ramda";
+import { partition, intersection, flatten } from "ramda";
 
 export default dbPromise => {
   let db;
@@ -11,7 +11,7 @@ export default dbPromise => {
     }
 
     if (!shim._) {
-      state.set("_", {});
+      state.set("_", { available: [], missing: [], missingIds: [] });
     }
 
     state.unset("_.doc");
@@ -25,13 +25,18 @@ export default dbPromise => {
       if (docs) {
         state.set("_.docs", docs);
         const [available, missing] = partition(
-          d =>
-            !d.doc.happenedAfter ||
-            docs.rows.find(dd => dd.id === d.doc.happenedAfter._id),
+          ({ doc }) =>
+            !doc.inResponseTo.length ||
+            doc.inResponseTo.length ===
+              intersection(doc.inResponseTo, docs.rows.map(d => d.id)).length,
           docs.rows,
         );
+
         state.set("_.available", available);
         state.set("_.missing", missing);
+
+        const missingIds = flatten(missing.map(row => row.doc.inResponseTo));
+        state.set("_.missingIds", missingIds);
       }
     }
 
@@ -73,21 +78,25 @@ export default dbPromise => {
 
   const computeStateRepresentation = state => {
     const {
-      _: { docMany = { rows: [] }, available = [], missing = [] },
+      _: { docMany = { rows: [] }, available = [], missingIds = [], doc },
     } = state.get();
 
     state.set("docs", { rows: available });
-
-    const missingIds = missing.map(row => row.doc.happenedAfter._id);
-    const notFoundIds = docMany.rows
-      .filter(row => !!row.error)
-      .map(row => row.key);
-    const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
-    if (missing.length && !missingAndNotFound.length) {
-      return [["missing", ["getMany"]]];
+    if (doc) {
+      state.set("doc", doc);
     }
-    if (missingAndNotFound.length) {
-      console.warn("Could not find missing docs", missingAndNotFound);
+
+    if (missingIds.length) {
+      const notFoundIds = docMany.rows
+        .filter(row => !!row.error)
+        .map(row => row.key);
+      const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
+      if (!missingAndNotFound.length) {
+        return [["missing", ["getMany"]]];
+      }
+      if (missingAndNotFound.length) {
+        console.warn("Could not find missing docs", missingAndNotFound);
+      }
     }
 
     return [["normal", ["allDocs", "get", "post", "put", "deleteAll"]]];
@@ -95,9 +104,8 @@ export default dbPromise => {
 
   const computeNextAction = (controlState, model) => {
     if (controlState === "missing") {
-      const { _: { missing } } = model;
-      const ids = missing.map(row => row.doc.happenedAfter._id);
-      return [[["getMany", { ids }]]];
+      const { _: { missingIds } } = model;
+      return [[["getMany", { ids: missingIds }]]];
     }
   };
   return { accept, computeStateRepresentation, computeNextAction };
