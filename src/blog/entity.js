@@ -2,7 +2,9 @@ import { wait } from "../util/control";
 
 const getPosts = async db => {
   const docs = await db.allDocs();
-  return docs.rows.map(r => r.doc).filter(d => d.type === "post");
+  return docs.rows
+    .filter(row => row.doc && row.doc.type === "post")
+    .map(row => row.doc);
 };
 
 export const accept = async ({ db, state, props }) => {
@@ -38,11 +40,12 @@ export const accept = async ({ db, state, props }) => {
   }
 
   {
-    const { creator = blog.userName, created, message, replyId } = props;
-    if (creator && created && message && replyId !== undefined) {
+    const { creator = blog.userName, created, message, parentId } = props;
+    if (creator && created && message && parentId !== undefined) {
       let parentMessage;
-      if (replyId) {
-        const parent = await db.get({ id: replyId });
+      if (parentId) {
+        const posts = await getPosts(db);
+        const parent = posts.find(post => post._id === parentId);
         parentMessage = parent && `${parent.message.substr(0, 20)}...`;
       }
       const newPost = {
@@ -51,23 +54,27 @@ export const accept = async ({ db, state, props }) => {
         creator,
         message,
         parentMessage,
-        inResponseTo: replyId !== null ? [replyId] : [],
+        inResponseTo: parentId !== null ? [parentId] : [],
       };
       await db.put({ data: newPost });
-      state.push("posts", newPost);
+      const posts = await getPosts(db);
+      const index = posts.findIndex(post => post._id === newPost._id);
+      state.set(`posts.${index}`, posts[index]);
     }
   }
 
   {
     const { deleteId } = props;
     if (deleteId) {
-      const post = await db.get({ id: deleteId });
+      const posts = await getPosts(db);
+      const post = posts.find(p => p._id === deleteId);
       const [, creator] = post._id.split("-");
       if (blog.userName === "system" || creator === blog.userName) {
         const deleted = !post.deleted;
         await db.put({ data: { ...post, deleted } });
-        const index = blog.posts.findIndex(p => p._id === deleteId);
-        state.set(`posts.${index}.deleted`, deleted);
+        const posts = await getPosts(db);
+        const index = posts.findIndex(post => post._id === deleteId);
+        state.set(`posts.${index}.deleted`, posts[index].deleted);
       }
       await wait(1000);
     }
@@ -128,7 +135,7 @@ export const computeNextAction = (controlState, blog) => {
         [
           "post",
           {
-            replyId: blog.posts[0]._id,
+            parentId: blog.posts[0]._id,
             creator: "system",
             message: "Example reply!",
           },

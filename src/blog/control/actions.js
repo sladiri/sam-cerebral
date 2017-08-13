@@ -17,13 +17,13 @@ export async function logout() {
   return login({ props: { userName: null } });
 }
 
-export async function post({ props: { message, creator, replyId = null } }) {
+export async function post({ props: { message, creator, parentId = null } }) {
   if (!message) return;
 
   await wait(1500);
   return {
     creator,
-    replyId,
+    parentId,
     created: Date.now(),
     message,
   };

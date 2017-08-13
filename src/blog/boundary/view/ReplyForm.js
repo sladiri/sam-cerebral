@@ -44,7 +44,7 @@ export default connect(
       },
     },
   }),
-  ({ replyId, actions, className }) => {
+  ({ parentId, actions, className }) => {
     const buttonClass = action => actionFog(action);
     return (
       <form
@@ -52,7 +52,7 @@ export default connect(
           event.preventDefault();
           actions.post({
             message: event.target.getElementsByTagName("input")[0].value,
-            replyId,
+            parentId,
           });
           event.target.getElementsByTagName("input")[0].value = "";
         }}

@@ -1,5 +1,10 @@
 import { partition, intersection, flatten } from "ramda";
 
+/**
+ * Bolt-on Shim Layer
+ * 
+ * The state holds the local store in form of a list of docs, and a single modified doc.
+ */
 export default dbPromise => {
   let db;
 
@@ -14,8 +19,7 @@ export default dbPromise => {
       state.set("_", { available: [], missing: [], missingIds: [] });
     }
 
-    state.unset("_.doc");
-    state.unset("_.docMany");
+    state.unset("_.docsMany");
     state.unset("_.ok");
     state.unset("_.id");
     state.unset("_.rev");
@@ -41,16 +45,9 @@ export default dbPromise => {
     }
 
     {
-      const { doc } = props;
-      if (doc) {
-        state.set("_.doc", doc);
-      }
-    }
-
-    {
-      const { docMany } = props;
-      if (docMany) {
-        state.set("_.docMany", docMany);
+      const { docsMany } = props;
+      if (docsMany) {
+        state.set("_.docsMany", docsMany);
       }
     }
 
@@ -78,34 +75,31 @@ export default dbPromise => {
 
   const computeStateRepresentation = state => {
     const {
-      _: { docMany = { rows: [] }, available = [], missingIds = [], doc },
+      _: { docsMany = { rows: [] }, available = [], missingIds = [], doc },
     } = state.get();
 
     state.set("docs", { rows: available });
-    if (doc) {
-      state.set("doc", doc);
-    }
 
     if (missingIds.length) {
-      const notFoundIds = docMany.rows
+      const notFoundIds = docsMany.rows
         .filter(row => !!row.error)
         .map(row => row.key);
       const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
       if (!missingAndNotFound.length) {
-        return [["missing", ["getMany"]]];
+        return [["missing", ["allDocs"]]];
       }
       if (missingAndNotFound.length) {
         console.warn("Could not find missing docs", missingAndNotFound);
       }
     }
 
-    return [["normal", ["allDocs", "get", "post", "put", "deleteAll"]]];
+    return [["normal", ["allDocs", "get", "put", "deleteAll"]]];
   };
 
   const computeNextAction = (controlState, model) => {
     if (controlState === "missing") {
       const { _: { missingIds } } = model;
-      return [[["getMany", { ids: missingIds }]]];
+      return [[["allDocs", { ids: missingIds }]]];
     }
   };
   return { accept, computeStateRepresentation, computeNextAction };

@@ -8,19 +8,13 @@ export default prefix => {
           const { docs } = await samStep(prefix, ["allDocs", options]);
           return docs;
         },
-        async get(options) {
-          const { doc } = await samStep(prefix, ["get", options]);
+        async put(options) {
+          const { doc } = await samStep(prefix, ["put", options]);
           return doc;
         },
-        async getMany(options) {
-          const { docsMany } = await samStep(prefix, ["getMany", options]);
-          return docsMany;
-        },
-        put(options) {
-          return samStep(prefix, ["put", options]);
-        },
-        deleteAll() {
-          return samStep(prefix, ["deleteAll"]);
+        async deleteAll() {
+          const { docs } = await samStep(prefix, ["deleteAll"]);
+          return docs;
         },
       };
     }

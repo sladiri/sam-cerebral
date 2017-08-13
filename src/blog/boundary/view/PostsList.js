@@ -90,7 +90,7 @@ export default connect(
               h("p", { className: "mv3" }, message),
               model.userName &&
                 !post.deleted &&
-                <ReplyForm replyId={id} className="mb2 mt1" />,
+                <ReplyForm parentId={id} className="mb2 mt1" />,
             ],
           );
         })}

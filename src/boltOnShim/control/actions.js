@@ -5,18 +5,23 @@ export default dbPromise => {
 
   const init = async () => {
     db = await dbPromise;
+    return await allDocs({}, true);
   };
 
-  const allDocs = async ({ props } = {}) => {
-    const options = (props && props.options) || {};
-    const defaultOptions = {
+  const allDocs = async ({ props: { ids } = {} }, doFetch) => {
+    if (!doFetch) {
+      // Dummy payload, return current state to consumers.
+      // Real fetching should be internal according to Bolt-on protocol.
+      return { refresh: true };
+    }
+
+    const options = {
       include_docs: true,
       conflicts: true,
-      ...options,
     };
-    return {
-      docs: await db.allDocs(defaultOptions),
-    };
+    if (ids) options.keys = ids;
+    const docs = await db.allDocs(options);
+    return { docs };
   };
 
   const get = async ({ props: { id } }) => {
@@ -25,25 +30,15 @@ export default dbPromise => {
       revs_info: true,
       conflicts: true,
     };
-    return {
-      doc: await db.get(id, defaultOptions),
-    };
-  };
-
-  const getMany = async ({ props: { ids } }) => {
-    return {
-      docMany: await db.allDocs({ keys: ids }),
-    };
+    const doc = await db.get(id, defaultOptions);
+    return { doc };
   };
 
   const put = async ({ props: { data } }) => {
     const { inResponseTo } = data;
     let previous;
     if (inResponseTo.length === 1) {
-      const [previousId] = inResponseTo;
-      const { doc } = await get({ props: { id: previousId } });
-      previous = previousId;
-      console.log("previous", previous);
+      previous = inResponseTo[0];
     }
     if (previous) {
       data.inResponseTo.push(previous);
@@ -55,18 +50,15 @@ export default dbPromise => {
     };
     return {
       ...(await db.put(payload)),
-      ...(await allDocs()),
-      ...(await get({ props: { id: payload._id } })),
+      ...(await allDocs({}, true)),
     };
   };
 
   const deleteAll = async () => {
-    const docs = await db.allDocs();
+    const { docs } = await allDocs({}, true);
     await Promise.all(docs.rows.map(row => db.remove(row.id, row.value.rev)));
-    return {
-      ...(await allDocs()),
-    };
+    return await allDocs({}, true);
   };
 
-  return { init, allDocs, get, getMany, put, deleteAll };
+  return { init, allDocs, get, put, deleteAll };
 };
