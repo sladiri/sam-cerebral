@@ -44,7 +44,7 @@ export default connect(
       },
     },
   }),
-  ({ parentId, actions, className }) => {
+  function ReplyForm({ parentId, actions, className }) {
     const buttonClass = action => actionFog(action);
     return (
       <form
