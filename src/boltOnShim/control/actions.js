@@ -21,6 +21,11 @@ export default dbPromise => {
     };
     if (ids) options.keys = ids;
     const docs = await db.allDocs(options);
+    const withConflichts = docs.rows.filter(d => !!d.doc._conflicts);
+    if (withConflichts.length) {
+      console.warn("conflicts in documents", withConflichts);
+      debugger;
+    }
     return { docs };
   };
 
@@ -56,7 +61,11 @@ export default dbPromise => {
 
   const deleteAll = async () => {
     const { docs } = await allDocs({}, true);
-    await Promise.all(docs.rows.map(row => db.remove(row.id, row.value.rev)));
+    await Promise.all(
+      docs.rows.map(row => {
+        db.remove(row.id, row.value.rev);
+      }),
+    );
     return await allDocs({}, true);
   };
 
