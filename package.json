@@ -9,7 +9,7 @@
     "build": "npm run build-tachyons && npm run build-babel-helpers",
     "lint:format": "prettier --write --trailing-comma all \"src/**/*.js\"",
     "lint": "npm run lint:format && eslint \"src/**/*.js\"",
-    "start-budo": "node budo.js src/browserEntryPoint/boundary.js:static/dist/bundle.js --host localhost --pushstate --live -- -t babelify",
+    "start-budo": "budo src/browserEntryPoint/boundary.js:static/dist/bundle.js --host localhost --pushstate --live -- -t babelify",
     "start": "npm run start-budo"
   },
   "devDependencies": {
@@ -29,7 +29,6 @@
     "cerebral": "^2.0.0",
     "classnames": "^2.2.5",
     "color": "^2.0.0",
-    "compression": "^1.7.0",
     "dynamics": "^1.0.0",
     "eslint": "^4.4.0",
     "eslint-plugin-react": "^7.0.1",
