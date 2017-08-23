@@ -8,6 +8,7 @@ export async function cancel() {
 
 export async function login({ props: { userName } }) {
   if (!userName && userName !== null) return;
+
   await wait(500);
   return { userName };
 }
