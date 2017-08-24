@@ -9,20 +9,16 @@ export default dbPromise => {
   let db;
 
   const accept = async ({ state, props }) => {
-    const shim = state.get();
-
     if (!db) {
       db = await dbPromise;
     }
 
-    if (!shim._) {
-      state.set("_", { available: [], missing: [], missingIds: [] });
+    {
+      const { _ } = state.get();
+      if (!_) {
+        state.set("_", { available: [], missing: [], missingIds: [] });
+      }
     }
-
-    state.unset("_.docsMany");
-    state.unset("_.ok");
-    state.unset("_.id");
-    state.unset("_.rev");
 
     {
       const { docs } = props;
@@ -43,57 +39,27 @@ export default dbPromise => {
         state.set("_.missingIds", missingIds);
       }
     }
-
-    {
-      const { docsMany } = props;
-      if (docsMany) {
-        state.set("_.docsMany", docsMany);
-      }
-    }
-
-    {
-      const { ok } = props;
-      if (ok !== undefined) {
-        state.set("_.ok", ok);
-      }
-    }
-
-    {
-      const { id } = props;
-      if (id) {
-        state.set("_.id", id);
-      }
-    }
-
-    {
-      const { rev } = props;
-      if (rev) {
-        state.set("_.rev", rev);
-      }
-    }
   };
 
   const computeStateRepresentation = state => {
-    const {
-      _: { docsMany = { rows: [] }, available = [], missingIds = [], doc },
-    } = state.get();
+    const { _: { available = [], missingIds = [] } } = state.get();
 
     state.set("docs", { rows: available });
 
-    if (missingIds.length) {
-      const notFoundIds = docsMany.rows
-        .filter(row => !!row.error)
-        .map(row => row.key);
-      const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
-      if (!missingAndNotFound.length) {
-        return [["missing", ["allDocs"]]];
-      }
-      if (missingAndNotFound.length) {
-        console.warn("Could not find missing docs", missingAndNotFound);
-      }
-    }
+    // if (missingIds.length) {
+    //   const notFoundIds = docsMany.rows
+    //     .filter(row => !!row.error)
+    //     .map(row => row.key);
+    //   const missingAndNotFound = intersection(missingIds, notFoundIds); // Avoid loop in development.
+    //   if (!missingAndNotFound.length) {
+    //     return [["missing", ["allDocs"]]];
+    //   }
+    //   if (missingAndNotFound.length) {
+    //     console.warn("Could not find missing docs", missingAndNotFound);
+    //   }
+    // }
 
-    return [["normal", ["allDocs", "get", "put", "deleteAll"]]];
+    return [["normal", ["put", "getAll", "removeAll"]]];
   };
 
   const computeNextAction = (controlState, model) => {

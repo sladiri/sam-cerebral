@@ -21,4 +21,5 @@ export default prefix =>
     computeStateRepresentation,
     computeNextAction,
     actions: actionFactory(db),
+    queueActions: true,
   });

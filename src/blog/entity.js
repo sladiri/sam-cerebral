@@ -1,17 +1,16 @@
 import { wait } from "../util/control";
 
 const getPosts = async db => {
-  const docs = await db.allDocs();
+  const docs = await db.getAll();
   return docs.rows
     .filter(row => row.doc && row.doc.type === "post")
     .map(row => row.doc);
 };
 
 export const accept = async ({ db, state, props }) => {
-  const blog = state.get();
-
   {
-    if (!blog.posts) {
+    const { posts } = state.get();
+    if (!Array.isArray(posts)) {
       state.set("userName", "");
       state.set("posts", await getPosts(db));
     }
@@ -40,11 +39,12 @@ export const accept = async ({ db, state, props }) => {
   }
 
   {
-    const { creator = blog.userName, created, message, parentId } = props;
+    const { userName } = state.get();
+    const { creator = userName, created, message, parentId } = props;
     if (creator && created && message && parentId !== undefined) {
       let parentMessage;
       if (parentId) {
-        const posts = await getPosts(db);
+        const { posts } = state.get();
         const parent = posts.find(post => post._id === parentId);
         parentMessage = parent && `${parent.message.substr(0, 20)}...`;
       }
@@ -57,24 +57,25 @@ export const accept = async ({ db, state, props }) => {
         inResponseTo: parentId !== null ? [parentId] : [],
       };
       await db.put({ data: newPost });
-      const posts = await getPosts(db);
-      const index = posts.findIndex(post => post._id === newPost._id);
-      state.set(`posts.${index}`, posts[index]);
+      const updatedPosts = await getPosts(db);
+      const index = updatedPosts.findIndex(post => post._id === newPost._id);
+      state.set(`posts.${index}`, updatedPosts[index]);
     }
   }
 
   {
     const { deleteId } = props;
     if (deleteId) {
-      const posts = await getPosts(db);
+      const { posts } = state.get();
       const post = posts.find(p => p._id === deleteId);
       const [, creator] = post._id.split("-");
-      if (blog.userName === "system" || creator === blog.userName) {
+      const { userName } = state.get();
+      if (userName === "system" || creator === userName) {
         const deleted = !post.deleted;
         await db.put({ data: { ...post, deleted } });
-        const posts = await getPosts(db);
-        const index = posts.findIndex(post => post._id === deleteId);
-        state.set(`posts.${index}.deleted`, posts[index].deleted);
+        const updatedPosts = await getPosts(db);
+        const index = updatedPosts.findIndex(post => post._id === deleteId);
+        state.set(`posts.${index}.deleted`, updatedPosts[index].deleted);
       }
       await wait(1000);
     }
@@ -83,7 +84,7 @@ export const accept = async ({ db, state, props }) => {
   {
     const { clearDb } = props;
     if (clearDb) {
-      await db.deleteAll();
+      await db.removeAll();
       state.set("posts", await getPosts(db));
     }
   }
@@ -95,11 +96,11 @@ export const computeStateRepresentation = state => {
   const blog = state.get();
 
   if (blog.posts.length === 0) {
-    return [["emptyExample", ["post"]]];
+    return [["emptyExample", ["post", "refresh"]]];
   }
 
   if (blog.posts.length === 1 && blog.posts[0].creator === "system") {
-    return [["replyExample", ["post"]]];
+    return [["replyExample", ["post", "refresh"]]];
   }
 
   return [

@@ -38,19 +38,21 @@ The SAM pattern maps to the ECB pattern too:
   - [ ] Add session control state example (log in <-> log out on authenticated route)?
   - [ ] Use security token.
   - [ ] Add notification service when remote changes arrive.
+  - [ ] Prevent automatic example post by more than one user?
 
 - [ ] Storage layer
   - [x] Add PouchDB provider to Cerebral context
   - [x] Save model to DB
   - [ ] Specify _Bolt-on Shim Layer_ in TLA+
   - [ ] Implement _Bolt-on Shim Layer_
+    - [ ] As external service?
+    - [ ] Remove SAM container semantics?
   - [x] Refactor shim module to be sub-module?
-  - [ ] Prevent automatic example post by more than one user?
 
 - [ ] SAM container
+  - [x] Allow for next action to not block step until complete (blockStep = true)? -> No
+  - [x] Queue action to NAP when in progress (optionally)
   - [ ] Compute: Mark action specific cancel buttons as disabled.
-  - [x] Allow for next action to not block step until complete (blockStep = true)?
-    - [ ] Queue action when received signal while in (NAP?) progress?
 
 - [x] Check allowed action in step.
 - [ ] Add tests.

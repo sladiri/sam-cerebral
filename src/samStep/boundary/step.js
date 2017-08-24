@@ -160,6 +160,7 @@ export const samFactory = ({
   computeNextAction = () => [],
   actions = {},
   preventCompoundState = true,
+  queueActions = false,
 }) => {
   const prefixedPath = getModulePath(prefix);
   const prefixedStateProxy = getPrefixedStateProxy(prefixedPath);
@@ -171,9 +172,9 @@ export const samFactory = ({
     return acc;
   }, {});
 
-  return {
-    signals,
-  };
+  const actionQueue = [];
+
+  return { signals };
 
   function samStepFactory(_action, GetId = _GetId) {
     const [action, actionName] = parseAction(_action);
@@ -185,18 +186,18 @@ export const samFactory = ({
         const { state: _state, controller, props, ...services } = input;
 
         const state = prefixedStateProxy(_state);
-        const entityState = prefixedStateProxy(input.state, true);
+        const entityState = prefixedStateProxy(_state, true);
 
         if (state.get("_sam.stepId") === undefined) {
           state.set("_sam", {
+            prefix,
             stepId: GetId.next().value,
             init: true,
             controlState: { name: "", allowedActions: [] },
             proposeInProgress: false,
             acceptInProgress: false,
             napInProgress: false,
-            syncNap: true,
-            prefix,
+            queueActions,
           });
         }
 
@@ -212,11 +213,16 @@ export const samFactory = ({
         logPossibleInterrupt(props, state.get("_sam"));
 
         if (!guardSignalInterrupt(props, state.get("_sam"))) {
-          logInterruptFailed(props, state.get("_sam"));
-          emitNapDone(prefix)({
-            controller,
-            payload: { ...entityState.get(), interrupted: true },
-          });
+          if (queueActions) {
+            logActionQueued(actionName, props, state.get("_sam"));
+            actionQueue.push([actionName, props]);
+          } else {
+            logInterruptFailed(props, state.get("_sam"));
+            emitNapDone(prefix)({
+              controller,
+              payload: { ...entityState.get(), interrupted: true },
+            });
+          }
           return;
         }
 
@@ -260,22 +266,23 @@ export const samFactory = ({
         state.set("_sam.acceptInProgress", false);
         state.set("_sam.controlState", getControlState(entityState));
 
-        const { nextActions, _syncNap } = getNextAction(
-          state.get("_sam"),
-          entityState.get(),
-        );
+        const nextActions = getNextAction(state.get("_sam"), entityState.get());
 
-        if (nextActions.length < 1) {
-          state.set("_sam.napInProgress", false);
-          emitNapDone(prefix)({ controller, payload: entityState.get() });
-          return;
+        if (!nextActions.length) {
+          if (!actionQueue.length) {
+            state.set("_sam.napInProgress", false);
+            emitNapDone(prefix)({ controller, payload: entityState.get() });
+            return;
+          } else {
+            const [actionName, props] = actionQueue.pop();
+            nextActions.push([actionName, props]);
+          }
         }
 
         state.set(
           "_sam.napInProgress",
           nextActions.map(([name]) => name).join(","),
         );
-        state.set("_sam.syncNap", _syncNap);
 
         await runNextAction({ controller, nextActions });
       } catch (error) {
@@ -309,11 +316,8 @@ export const samFactory = ({
     }
 
     function logPossibleInterrupt(props, sam) {
-      const { proposeInProgress, napInProgress, syncNap, stepId } = sam;
-      if (
-        proposeInProgress ||
-        (proposeInProgress && napInProgress && !syncNap)
-      ) {
+      const { proposeInProgress, napInProgress, stepId } = sam;
+      if (!props._isNap && (proposeInProgress || napInProgress)) {
         console.info(
           `${getModuleName(
             prefix,
@@ -328,8 +332,18 @@ export const samFactory = ({
     }
 
     function guardSignalInterrupt(props, sam) {
-      const { acceptInProgress, napInProgress, syncNap } = sam;
-      return props._isNap || !(acceptInProgress || (napInProgress && syncNap));
+      const { acceptInProgress, napInProgress } = sam;
+      return props._isNap || (!acceptInProgress && !napInProgress);
+    }
+
+    function logActionQueued(actionName, props, sam) {
+      const { stepId } = sam;
+      console.info(
+        `${getModuleName(prefix)} - Queued action [${prefixedPath(
+          actionName,
+        )}] in step-ID [${stepId}]. Props:`,
+        props,
+      );
     }
 
     function logInterruptFailed(props, sam) {
@@ -398,12 +412,10 @@ export const samFactory = ({
 
     function getNextAction(sam, model) {
       const controlStateName = sam.controlState.name;
-      const [nextActions, allowNapInterrupt = false] = computeNextAction(
-        controlStateName,
-        model,
-      ) || [[]];
+      // TODO: Remove redundant array (and use object if needed instead)
+      const [nextActions] = computeNextAction(controlStateName, model) || [[]];
 
-      return { nextActions, _syncNap: !allowNapInterrupt };
+      return nextActions;
     }
 
     function runNextAction({ controller, nextActions }) {

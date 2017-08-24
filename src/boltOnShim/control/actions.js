@@ -1,20 +1,30 @@
 import { uniqBy } from "ramda";
 
+// const get = async ({ props: { id } }) => {
+//   const defaultOptions = {
+//     revs: true,
+//     revs_info: true,
+//     conflicts: true,
+//   };
+//   const doc = await db.get(id, defaultOptions);
+//   return { doc };
+// };
+
+// const remove = async ({ props: { id, rev } }) => {
+//   const response = await db.remove(id, rev);
+//   console.log("remove response", response);
+//   return await _allDocs();
+// };
+
 export default dbPromise => {
   let db;
 
   const init = async () => {
     db = await dbPromise;
-    return await allDocs({}, true);
+    return await _allDocs();
   };
 
-  const allDocs = async ({ props: { ids } = {} }, doFetch) => {
-    if (!doFetch) {
-      // Dummy payload, return current state to consumers.
-      // Real fetching should be internal according to Bolt-on protocol.
-      return { refresh: true };
-    }
-
+  const _allDocs = async ids => {
     const options = {
       include_docs: true,
       conflicts: true,
@@ -27,16 +37,6 @@ export default dbPromise => {
       debugger;
     }
     return { docs };
-  };
-
-  const get = async ({ props: { id } }) => {
-    const defaultOptions = {
-      revs: true,
-      revs_info: true,
-      conflicts: true,
-    };
-    const doc = await db.get(id, defaultOptions);
-    return { doc };
   };
 
   const put = async ({ props: { data } }) => {
@@ -53,21 +53,32 @@ export default dbPromise => {
       updated: Date.now(),
       ...data,
     };
-    return {
-      ...(await db.put(payload)),
-      ...(await allDocs({}, true)),
-    };
+    const response = await db.put(payload);
+    if (!response.ok) {
+      console.warn("put response not ok", response);
+      debugger;
+    }
+    return await _allDocs();
   };
 
-  const deleteAll = async () => {
-    const { docs } = await allDocs({}, true);
-    await Promise.all(
-      docs.rows.map(row => {
-        db.remove(row.id, row.value.rev);
-      }),
+  const getAll = async () => {
+    // Dummy payload, return current state to consumers.
+    // Real fetching should be internal according to Bolt-on protocol.
+    return { refresh: true };
+  };
+
+  const removeAll = async () => {
+    const { docs } = await _allDocs();
+    const responses = await Promise.all(
+      docs.rows.map(row => db.remove(row.id, row.value.rev)),
     );
-    return await allDocs({}, true);
+    const notOk = responses.filter(r => !r.ok);
+    if (notOk.length) {
+      console.warn("removeAll responses not ok", responses);
+      debugger;
+    }
+    return await _allDocs();
   };
 
-  return { init, allDocs, get, put, deleteAll };
+  return { init, put, getAll, removeAll };
 };

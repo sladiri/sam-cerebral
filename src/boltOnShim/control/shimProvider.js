@@ -4,16 +4,18 @@ export default prefix => {
     if (!cachedProvider) {
       const { samStep } = context;
       cachedProvider = {
-        async allDocs(options) {
-          const { docs } = await samStep(prefix, ["allDocs", options]);
-          return docs;
-        },
         async put(options) {
-          const { doc } = await samStep(prefix, ["put", options]);
-          return doc;
+          const { docs } = await samStep(prefix, ["put", options]);
+          return { rows: docs.rows.filter(r => r.id === options.data._id) };
         },
-        async deleteAll() {
-          const { docs } = await samStep(prefix, ["deleteAll"]);
+        async getAll(ids) {
+          const { docs } = await samStep(prefix, ["getAll"]);
+          return Array.isArray(ids)
+            ? { rows: docs.rows.filter(r => ids.includes(r.id)) }
+            : docs;
+        },
+        async removeAll() {
+          const { docs } = await samStep(prefix, ["removeAll"]);
           return docs;
         },
       };
