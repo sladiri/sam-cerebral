@@ -41,26 +41,21 @@ const getRemote = async (remoteDbHost, dbName) => {
   return remote;
 };
 
-const getCache = async dbName => {
+const getLocalDb = async (dbName, options) => {
   if (!dbName) {
     throw new Error("Must provide name for cache DB.");
   }
-  const cache = new PouchDB(dbName);
+  const cache = new PouchDB(dbName, options);
   await logDbReady(cache, dbName);
   return cache;
 };
 
-const getInMemory = async dbName => {
-  if (!dbName) {
-    throw new Error("Must provide name for in-memory DB.");
-  }
-  const dbOptions = { adapter: "memory" };
-  const inMemory = new PouchDB(dbName, dbOptions);
-  await logDbReady(inMemory, dbName);
-  return inMemory;
-};
-
-const doReplicate = async (source, sourceName, target, targetName) => {
+export const doReplicate = async (
+  source,
+  target,
+  sourceName = "source-DB",
+  targetName = "target-DB",
+) => {
   return new Promise((resolve, reject) => {
     source.replicate.to(target).on("complete", resolve).on("error", reject);
   })
@@ -117,12 +112,12 @@ const ensureDbSync = async ({
   const remote = await getRemote(remoteDbHost, remoteDbName);
   if (remote) {
     // For debugging
-    const cache = await getCache(cacheDbName);
+    const cache = await getLocalDb(cacheDbName);
     console.log("Remote DB connected, destroying local cache DB.");
     await cache.destroy();
   }
-  const cache = await getCache(cacheDbName);
-  const inMemory = await getInMemory(inMemoryDbName);
+  const cache = await getLocalDb(cacheDbName);
+  const inMemory = await getLocalDb(inMemoryDbName, { adapter: "memory" });
 
   if (remote) {
     window.sync = {}; // Dev helper
@@ -143,7 +138,7 @@ const ensureDbSync = async ({
       });
       window.sync[`cancel${id}`] = handler.cancel.bind(handler);
     };
-    await doReplicate(remote, remoteDbName, cache, cacheDbName);
+    await doReplicate(remote, cache, remoteDbName, cacheDbName);
     {
       //   const { handler } = await doSync(
       //   cache,
@@ -190,7 +185,7 @@ const ensureDbSync = async ({
     };
   }
 
-  await doReplicate(cache, cacheDbName, inMemory, inMemoryDbName);
+  await doReplicate(cache, inMemory, cacheDbName, inMemoryDbName);
   await doSync(inMemory, inMemoryDbName, cache, cacheDbName);
 
   return { remote, cache, inMemory };
