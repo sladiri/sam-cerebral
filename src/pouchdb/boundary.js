@@ -4,14 +4,6 @@ import pouchMemory from "pouchdb-adapter-memory";
 PouchDB.plugin(pouchMemory);
 // PouchDB.debug.enable("*");
 
-export const pouchDbFactory = (pouchOptions = {}) => {
-  const getDbPromise = async () => {
-    const { inMemory } = await ensureDbSync(pouchOptions);
-    return inMemory;
-  };
-  return getDbPromise();
-};
-
 const getDocsLog = async db => {
   const docs = await db.allDocs();
   return docs.rows.map(
@@ -50,56 +42,77 @@ const getLocalDb = async (dbName, options) => {
   return cache;
 };
 
-export const doReplicate = async (
+export const replicate = async (
   source,
   target,
   sourceName = "source-DB",
   targetName = "target-DB",
 ) => {
-  return new Promise((resolve, reject) => {
+  const result = await new Promise((resolve, reject) => {
     source.replicate.to(target).on("complete", resolve).on("error", reject);
-  })
-    .then(() => {
-      return Promise.all([getDocsLog(source), getDocsLog(target)]);
-    })
-    .then(([sourceLog, targetLog]) => {
-      console.log(
-        `[${sourceName}] replicated to [${targetName}]`,
-        "\n",
-        `[${sourceName}]: `,
-        sourceLog,
-        "\n",
-        `[${targetName}]: `,
-        targetLog,
-      );
-    });
+  });
+  console.log(
+    `[${sourceName}] replicated to [${targetName}]`,
+    "\n",
+    result,
+    "\n",
+    `[${sourceName}]: `,
+    await getDocsLog(source),
+    "\n",
+    `[${targetName}]: `,
+    await getDocsLog(target),
+  );
 };
 
-const doSync = async (
+export const sync = async (
   first,
-  firstName,
   second,
-  secondName,
-  syncOptions = { live: true, retry: true },
+  syncOptions,
+  firstName = "first-DB",
+  secondName = "second-DB",
 ) => {
-  const handler = first
-    .sync(second, syncOptions)
-    .on("error", error => {
-      console.error(`Ch-Ch-Changes! [${firstName}] <-> [${secondName}]`, error);
-    })
-    .on("change", change => {
-      console.log(`Ch-Ch-Changes! [${firstName}] <-> [${secondName}]`, change);
+  let handler;
+  if (syncOptions.live) {
+    handler = first
+      .sync(second, syncOptions)
+      .on("error", error => {
+        console.error(`Sync error [${firstName}] <-> [${secondName}]`, error);
+      })
+      .on("complete", result => {
+        console.log(`Sync complete [${firstName}] <-> [${secondName}]`, result);
+      })
+      .on("change", change => {
+        console.log(
+          `Synced changes [${firstName}] <-> [${secondName}]`,
+          change,
+        );
+      });
+    console.log(`[${firstName}] syncing with [${secondName}]`);
+  } else {
+    const result = await new Promise((resolve, reject) => {
+      first
+        .sync(second, syncOptions)
+        .on("error", reject)
+        .on("complete", resolve)
+        .on("change", change => {
+          console.log(
+            `Synced changes [${firstName}] <-> [${secondName}]`,
+            change,
+          );
+        });
     });
-  console.log(
-    `Syncing [${firstName}] <-> [${secondName}]`,
-    handler,
-    "\n",
-    `[${firstName}]: `,
-    await getDocsLog(first),
-    "\n",
-    `[${secondName}]: `,
-    await getDocsLog(second),
-  );
+    console.log(
+      `[${firstName}] synced with [${secondName}]`,
+      "\n",
+      result,
+      "\n",
+      `[${firstName}]: `,
+      await getDocsLog(first),
+      "\n",
+      `[${secondName}]: `,
+      await getDocsLog(second),
+    );
+  }
   return { handler }; // Prevent bug because handler has Promise-like API.
 };
 
@@ -111,82 +124,27 @@ const ensureDbSync = async ({
 }) => {
   const remote = await getRemote(remoteDbHost, remoteDbName);
   if (remote) {
-    // For debugging
     const cache = await getLocalDb(cacheDbName);
-    console.log("Remote DB connected, destroying local cache DB.");
+    console.log("Remote DB connected, destroying local DB.");
     await cache.destroy();
   }
   const cache = await getLocalDb(cacheDbName);
   const inMemory = await getLocalDb(inMemoryDbName, { adapter: "memory" });
 
   if (remote) {
-    window.sync = {}; // Dev helper
-    const replyOpts = {
-      live: true,
-      retry: true,
-      filter(doc) {
-        return !!doc.inResponseTo.length;
-      },
-    };
-    const addCancel = (id, handler) => {
-      handler.on("complete", function(info) {
-        console.warn(
-          `Syncing canceled: [${cacheDbName}] <-> [${remoteDbName}]`,
-          info,
-        );
-        window.sync[`cancel${id}`] = null;
-      });
-      window.sync[`cancel${id}`] = handler.cancel.bind(handler);
-    };
-    await doReplicate(remote, cache, remoteDbName, cacheDbName);
-    {
-      //   const { handler } = await doSync(
-      //   cache,
-      //   cacheDbName,
-      //   remote,
-      //   remoteDbName,
-      //   replyOpts,
-      // );
-      // addCancel("Replies", handler);
-    }
-    {
-      const { handler } = await doSync(
-        cache,
-        cacheDbName,
-        remote,
-        remoteDbName,
-      );
-      addCancel("All", handler);
-    }
-    window.sync.syncAll = async () => {
-      if (window.sync.cancelAll) {
-        return;
-      }
-      const { handler } = await doSync(
-        cache,
-        cacheDbName,
-        remote,
-        remoteDbName,
-      );
-      addCancel("All", handler);
-    };
-    window.sync.syncReplies = async () => {
-      if (window.sync.cancelReplies) {
-        return;
-      }
-      const { handler } = await doSync(
-        cache,
-        cacheDbName,
-        remote,
-        remoteDbName,
-        replyOpts,
-      );
-      addCancel("Replies", handler);
-    };
+    await replicate(remote, cache, remoteDbName, cacheDbName);
   }
 
-  await doReplicate(cache, inMemory, cacheDbName, inMemoryDbName);
-  await doSync(inMemory, inMemoryDbName, cache, cacheDbName);
+  await replicate(cache, inMemory, cacheDbName, inMemoryDbName);
+  // await sync(
+  //   inMemory,
+  //   cache,
+  //   { live: true, retry: true },
+  //   inMemoryDbName,
+  //   cacheDbName,
+  // );
 
   return { remote, cache, inMemory };
 };
+
+export const pouchDbFactory = (pouchOptions = {}) => ensureDbSync(pouchOptions);

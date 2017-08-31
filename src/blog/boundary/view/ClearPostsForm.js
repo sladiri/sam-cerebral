@@ -10,39 +10,79 @@ import { actionFog } from ".";
 
 export default connect(
   {
-    clearDb: signal`blog.clearDb`,
     refresh: signal`blog.refresh`,
+    sync: signal`blog.blogDb.sync`,
+    removeAll: signal`blog.blogDb.removeAll`,
     markActionsDisabled: markActionsDisabled("blog"),
+    // Composition possible inside action (eg. db.clear + blog.refresh)
+    markActionsDisabledDb: markActionsDisabled("blog.blogDb"),
   },
   (
-    { clearDb, refresh, markActionsDisabled, ...connectedProps },
+    {
+      refresh,
+      sync,
+      removeAll,
+      markActionsDisabled,
+      markActionsDisabledDb,
+      ...connectedProps
+    },
     parentProps,
   ) => ({
     ...parentProps,
     ...connectedProps,
-    actions: { ...markActionsDisabled({ clearDb, refresh }) },
+    actions: {
+      ...markActionsDisabled({ refresh }),
+      ...markActionsDisabledDb({ sync, removeAll }),
+    },
   }),
   function ClearPostsForm({ actions, className }) {
     const formClass = classNames("flex", "justify-center", className);
     return (
       <div className={formClass}>
         <button
-          disabled={actions.clearDb.disabled()}
-          className={classNames(actionFog(actions.clearDb), "w-50")}
-          onClick={() => {
-            actions.clearDb({});
-          }}
-        >
-          clear posts DB
-        </button>
-        <button
           disabled={actions.refresh.disabled()}
-          className={classNames(actionFog(actions.refresh), "w-30")}
+          className={classNames(actionFog(actions.refresh), "w-25 f7")}
           onClick={() => {
             actions.refresh({});
           }}
         >
           refresh
+        </button>
+        <button
+          disabled={actions.removeAll.disabled()}
+          className={classNames(actionFog(actions.removeAll), "w-25 f7")}
+          onClick={() => {
+            actions.removeAll({});
+          }}
+        >
+          clear DB
+        </button>
+        <button
+          disabled={actions.sync.disabled()}
+          className={classNames(actionFog(actions.sync), "w-25 f7")}
+          onClick={() => {
+            actions.sync({});
+          }}
+        >
+          sync DB
+        </button>
+        <button
+          disabled={actions.sync.disabled()}
+          className={classNames(actionFog(actions.sync), "w-25 f7")}
+          onClick={() => {
+            actions.sync({ live: true });
+          }}
+        >
+          sync live
+        </button>
+        <button
+          disabled={actions.sync.disabled()}
+          className={classNames(actionFog(actions.sync), "w-25 f7")}
+          onClick={() => {
+            actions.sync({ stop: true });
+          }}
+        >
+          stop sync
         </button>
       </div>
     );

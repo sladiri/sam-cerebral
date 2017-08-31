@@ -5,15 +5,13 @@ export const model = compute(
   state`blog.userName`,
   state`blog.posts`,
   (userName, posts = []) => {
-    posts = posts.map(({ _id, message, deleted, parentMessage }) => {
-      const [created, creator] = _id.split("-");
+    posts = posts.map(post => {
       return {
-        id: _id,
-        creator,
-        created: new Date(Number.parseInt(created)).toLocaleString(),
-        message,
-        deleted,
-        parentMessage,
+        ...post,
+        created: new Date(Number.parseInt(post.created)).toLocaleString(),
+        parentMessage:
+          post.parentMessage && `${post.parentMessage.substr(0, 15)}...`,
+        vote: post.vote.value,
       };
     });
     return {

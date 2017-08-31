@@ -1,84 +1,55 @@
-import { uniqBy } from "ramda";
-
-// const get = async ({ props: { id } }) => {
-//   const defaultOptions = {
-//     revs: true,
-//     revs_info: true,
-//     conflicts: true,
-//   };
-//   const doc = await db.get(id, defaultOptions);
-//   return { doc };
-// };
-
-// const remove = async ({ props: { id, rev } }) => {
-//   const response = await db.remove(id, rev);
-//   console.log("remove response", response);
-//   return await _allDocs();
-// };
+import { sync as _sync } from "../../pouchdb/boundary";
 
 export default dbPromise => {
   let db;
+  let cacheDb;
+  let syncHandler;
 
   const init = async () => {
-    db = await dbPromise;
-    return await _allDocs();
+    const { cache, inMemory } = await dbPromise;
+    db = inMemory;
+    cacheDb = cache;
   };
 
-  const _allDocs = async ids => {
-    const options = {
-      include_docs: true,
-      conflicts: true,
-    };
-    if (ids) options.keys = ids;
-    const docs = await db.allDocs(options);
-    const withConflichts = docs.rows.filter(d => !!d.doc._conflicts);
-    if (withConflichts.length) {
-      console.warn("conflicts in documents", withConflichts);
-      debugger;
+  // Cerebral does not allow non-serializable props, so hold state here.
+  const sync = async ({ props: { live = false, stop = false } }) => {
+    if ((live && syncHandler) || (stop && !syncHandler)) {
+      return;
     }
-    return { docs };
+    if (stop && syncHandler) {
+      syncHandler.cancel();
+      syncHandler = false;
+    }
+    const { handler } = await _sync(db, cacheDb, { live, retry: live });
+    if (live && !stop) {
+      syncHandler = handler;
+    }
+    return { sync: true };
   };
 
-  const put = async ({ props: { data } }) => {
-    const { inResponseTo } = data;
-    let previous;
-    if (inResponseTo.length === 1) {
-      previous = inResponseTo[0];
-    }
-    if (previous) {
-      data.inResponseTo.push(previous);
-      data.inResponseTo = uniqBy(x => x, data.inResponseTo);
-    }
-    const payload = {
-      updated: Date.now(),
-      ...data,
-    };
-    const response = await db.put(payload);
-    if (!response.ok) {
-      console.warn("put response not ok", response);
-      debugger;
-    }
-    return await _allDocs();
-  };
+  const put = ({ props: { data } }) => ({ doc: data });
 
-  const getAll = async () => {
-    // Dummy payload, return current state to consumers.
-    // Real fetching should be internal according to Bolt-on protocol.
-    return { refresh: true };
-  };
+  // Dummy payload, return current state to consumers.
+  // Real fetching should be internal according to Bolt-on protocol.
+  const getAll = () => ({ refresh: true });
 
-  const removeAll = async () => {
-    const { docs } = await _allDocs();
-    const responses = await Promise.all(
-      docs.rows.map(row => db.remove(row.id, row.value.rev)),
-    );
-    const notOk = responses.filter(r => !r.ok);
-    if (notOk.length) {
-      console.warn("removeAll responses not ok", responses);
-      debugger;
-    }
-    return await _allDocs();
-  };
+  const removeAll = () => ({ clear: true });
 
-  return { init, put, getAll, removeAll };
+  // const get = async ({ props: { id } }) => {
+  //   const defaultOptions = {
+  //     revs: true,
+  //     revs_info: true,
+  //     conflicts: true,
+  //   };
+  //   const doc = await db.get(id, defaultOptions);
+  //   return { doc };
+  // };
+
+  // const remove = async ({ props: { id, rev } }) => {
+  //   const response = await db.remove(id, rev);
+  //   console.log("remove response", response);
+  //   return await _allDocs();
+  // };
+
+  return { init, sync, put, getAll, removeAll };
 };

@@ -6,7 +6,7 @@ export default prefix => {
       cachedProvider = {
         async put(options) {
           const { docs } = await samStep(prefix, ["put", options]);
-          return { rows: docs.rows.filter(r => r.id === options.data._id) };
+          return docs.rows.find(r => r.id === options.data._id);
         },
         async getAll(ids) {
           const { docs } = await samStep(prefix, ["getAll"]);

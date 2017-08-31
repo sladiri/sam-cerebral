@@ -3,7 +3,7 @@ import { state } from "cerebral/tags";
 
 import { getModulePath } from "../../util/control";
 
-const actionsDisabled = prefix =>
+const _actionsDisabled = prefix =>
   compute(
     get =>
       get(state`${getModulePath(prefix, "_sam.init")}`) ||
@@ -24,7 +24,7 @@ const addDisabledMethod = actionDisabled => (acc, [key, val]) => {
 
 export const markActionsDisabled = prefix =>
   compute(
-    actionsDisabled(prefix),
+    _actionsDisabled(prefix),
     state`${getModulePath(prefix, "_sam.controlState.allowedActions")}`,
     (actionsDisabled, allowedActions = []) => {
       const actionDisabled = actionName =>
