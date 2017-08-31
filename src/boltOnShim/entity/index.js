@@ -39,9 +39,9 @@ export default dbPromise => {
     }
 
     // For debugging, save hidden state to Cerebral's state.
-    if (!state.get("_")) {
-      state.set("_", {
-        shimId: `${Math.random()}`, // TODO: Should be globally unique.
+    if (!state.get("hidden")) {
+      state.set("hidden", {
+        shimId: `${new Date().valueOf() + Math.random()}`, // TODO: Should be globally unique.
         clock: 0, // TDOD: Handle wrap-around?
         available: [],
         missing: [],
@@ -49,7 +49,7 @@ export default dbPromise => {
       });
 
       const docs = await allDocs(db);
-      state.set("_.docs", docs);
+      state.set("hidden.docs", docs);
       tick = true;
     }
 
@@ -75,7 +75,7 @@ export default dbPromise => {
           debugger;
         }
         const docs = await allDocs(db);
-        state.set("_.docs", docs);
+        state.set("hidden.docs", docs);
         tick = true;
       }
     }
@@ -84,20 +84,21 @@ export default dbPromise => {
       const { clear } = props;
       if (clear) {
         const docs = await clearDocs(db);
-        state.set("_.docs", docs);
+        state.set("hidden.docs", docs);
         tick = true;
       }
     }
 
     if (tick) {
       const { messageClock = -Infinity } = props;
-      const currentlock = Math.max(state.get("_.clock"), messageClock);
-      state.set("_.clock", currentlock + 1);
+      const currentlock = Math.max(state.get("hidden.clock"), messageClock);
+      state.set("hidden.clock", currentlock + 1);
     }
   };
 
   const computeStateRepresentation = state => {
-    const { _: { docs = { rows: [] } } } = state.get();
+    const { hidden } = state.get();
+    const docs = (hidden && hidden.docs) || { rows: [] };
 
     const [available, missing] = partition(
       ({ doc }) =>
@@ -107,11 +108,11 @@ export default dbPromise => {
       docs.rows,
     );
 
-    state.set("_.available", available);
-    state.set("_.missing", missing);
+    state.set("hidden.available", available);
+    state.set("hidden.missing", missing);
 
     // const missingIds = flatten(missing.map(row => row.doc.inResponseTo));
-    // state.set("_.missingIds", missingIds);
+    // state.set("hidden.missingIds", missingIds);
 
     state.set("docs", { rows: available });
 
@@ -133,7 +134,7 @@ export default dbPromise => {
 
   const computeNextAction = (controlState, model) => {
     // if (controlState === "missing") {
-    //   const { _: { missingIds } } = model;
+    //   const { hidden: { missingIds } } = model;
     //   return [[["allDocs", { ids: missingIds }]]];
     // }
   };

@@ -61,7 +61,7 @@ const updatePost = async (db, state, props) => {
     async function votePost() {
       if (update.vote && canVote(userName, post)) {
         post.voteList.push(userName);
-        post.vote += update.vote;
+        post.vote.value += update.vote;
         const thread = [];
         post.inResponseTo = uniq([...post.inResponseTo, ...thread]);
         const { doc: updated } = await db.put({ data: post });
