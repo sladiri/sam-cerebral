@@ -12,14 +12,13 @@ const getPosts = async db => {
 
 const createPost = async (db, state, props) => {
   const { userName } = state.get();
-  const { creator = userName, created, message, parentId } = props;
-  if (creator && created && message && parentId !== undefined) {
-    let parentMessage;
+  const { creator = userName, message, parentId } = props;
+  if (creator && message && parentId !== undefined) {
+    const created = Date.now();
     let parent;
     if (parentId) {
       const { posts } = state.get();
       parent = posts.find(post => post._id === parentId);
-      parentMessage = parent && parent.message;
     }
     const newPost = {
       _id: `${created}-${creator}`,
@@ -27,7 +26,7 @@ const createPost = async (db, state, props) => {
       created,
       creator,
       message,
-      parentMessage,
+      parentMessage: parent && parent.message,
       happenedAfter:
         parentId !== null ? [...parent.happenedAfter, parentId] : [],
       vote: { value: 0, happenedAfter: [] },

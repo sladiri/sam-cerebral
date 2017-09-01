@@ -9,7 +9,9 @@ export function refresh() {
 }
 
 export async function login({ props: { userName } }) {
-  if (!userName && userName !== null) return;
+  if (!userName && userName !== null) {
+    return;
+  }
   return { userName };
 }
 
@@ -19,14 +21,14 @@ export async function logout() {
 }
 
 export async function post({ props: { message, creator, parentId = null } }) {
-  return (
-    message && {
-      creator,
-      parentId,
-      created: Date.now(),
-      message,
-    }
-  );
+  if (!message) {
+    return;
+  }
+  return {
+    message,
+    creator,
+    parentId,
+  };
 }
 
 export async function deletePost({ props: { id, deleted } }) {
