@@ -56,14 +56,14 @@ export default dbPromise => {
     {
       const { doc } = props;
       if (doc) {
-        const { inResponseTo } = doc;
+        const { happenedAfter } = doc;
         let previous;
-        if (inResponseTo.length === 1) {
-          previous = inResponseTo[0];
+        if (happenedAfter.length === 1) {
+          previous = happenedAfter[0];
         }
         if (previous) {
-          doc.inResponseTo.push(previous);
-          doc.inResponseTo = uniqBy(x => x, doc.inResponseTo);
+          doc.happenedAfter.push(previous);
+          doc.happenedAfter = uniqBy(x => x, doc.happenedAfter);
         }
         const payload = {
           updated: Date.now(),
@@ -102,16 +102,16 @@ export default dbPromise => {
 
     const [available, missing] = partition(
       ({ doc }) =>
-        !doc.inResponseTo.length ||
-        doc.inResponseTo.length ===
-          intersection(doc.inResponseTo, docs.rows.map(d => d.id)).length,
+        !doc.happenedAfter.length ||
+        doc.happenedAfter.length ===
+          intersection(doc.happenedAfter, docs.rows.map(d => d.id)).length,
       docs.rows,
     );
 
     state.set("hidden.available", available);
     state.set("hidden.missing", missing);
 
-    // const missingIds = flatten(missing.map(row => row.doc.inResponseTo));
+    // const missingIds = flatten(missing.map(row => row.doc.happenedAfter));
     // state.set("hidden.missingIds", missingIds);
 
     state.set("docs", { rows: available });

@@ -1,4 +1,4 @@
-import { uniq, intersection, flatten } from "ramda";
+import { uniq } from "ramda";
 
 import { wait } from "../util/control";
 import { canDelete, canVote } from "./control/validation";
@@ -28,8 +28,9 @@ const createPost = async (db, state, props) => {
       creator,
       message,
       parentMessage,
-      inResponseTo: parentId !== null ? [parentId, ...parent.inResponseTo] : [],
-      vote: { value: 0, inResponseTo: [] },
+      happenedAfter:
+        parentId !== null ? [...parent.happenedAfter, parentId] : [],
+      vote: { value: 0, happenedAfter: [] },
       voteList: [],
     };
     await db.put({ data: newPost });
@@ -63,7 +64,7 @@ const updatePost = async (db, state, props) => {
         post.voteList.push(userName);
         post.vote.value += update.vote;
         const thread = [];
-        post.inResponseTo = uniq([...post.inResponseTo, ...thread]);
+        post.happenedAfter = uniq([...post.happenedAfter, ...thread]);
         const { doc: updated } = await db.put({ data: post });
         state.set(`posts.${postIndex}`, updated);
       }
