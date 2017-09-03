@@ -18,17 +18,16 @@ const allDocsFactory = db => {
   return allDocs;
 };
 
-const getFactory = ({ state, db }) => {
+const getFactory = ({ db, state }) => {
   const allDocs = allDocsFactory(db);
   const get = async ids => {
     const docs = await allDocs(ids);
-    state.set("shim.docs", docs);
     return docs;
   };
   return get;
 };
 
-const putFactory = ({ state, db }) => {
+const putFactory = ({ db, state }) => {
   const allDocs = allDocsFactory(db);
   const put = async doc => {
     const { happenedAfter } = doc;
@@ -47,7 +46,6 @@ const putFactory = ({ state, db }) => {
     const response = await db.put(payload);
     console.log("Shim PUT", response);
     const docs = await allDocs();
-    state.set("shim.docs", docs);
     const updated = docs.rows.find(row => row.id === doc._id);
     return updated;
 
@@ -68,9 +66,6 @@ export default (db, state /* for debugging */) => {
     state.set("shim", {
       shimId: `${new Date().valueOf() + Math.random()}`, // TODO: Should be globally unique.
       clock: 0, // TDOD: Handle wrap-around?
-      available: [],
-      missing: [],
-      missingIds: [],
     });
   }
 
