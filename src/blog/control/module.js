@@ -6,15 +6,19 @@ import {
 } from "../entity";
 import * as actions from "./actions";
 
-import { moduleFactory as shimFactory } from "../../boltOnShim/control";
-import { shimProviderFactory } from "../../boltOnShim/control";
+import pouchDbFactory from "../../pouchdb/boundary";
 
-import { getModulePath } from "../../util/control";
+import shimProviderFactory from "./dbProvider";
 
-export default prefix => {
-  const shimPath = "blogDb";
-  const shimPrefix = getModulePath(prefix, shimPath);
-  const shimModule = shimFactory(shimPrefix);
+const dbPromise = pouchDbFactory({
+  remoteDbHost: "http://localhost:5984",
+  remoteDbName: "remote_blog",
+  cacheDbName: "cached_blog",
+  inMemoryDbName: "inMemory_blog",
+});
+
+export default async prefix => {
+  const db = await dbPromise;
 
   const module = {
     ...samFactory({
@@ -24,12 +28,8 @@ export default prefix => {
       computeNextAction,
       actions,
     }),
-    modules: {
-      [shimPath]: shimModule,
-    },
-    provider: shimProviderFactory(shimPrefix),
+    provider: shimProviderFactory(db),
   };
-  module.signals.init = [...shimModule.signals.init, ...module.signals.init];
 
   return module;
 };

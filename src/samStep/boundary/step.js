@@ -40,7 +40,7 @@ const parseAction = action => {
   }
 
   if (!action.name) {
-    console.log("action", action);
+    console.error("action missing name", action, action.name);
     throw new Error(
       "Action must have a name. Provide a named function or an array ([name, [functionTree]])",
     );

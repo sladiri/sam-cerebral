@@ -11,28 +11,18 @@ import { actionFog } from ".";
 export default connect(
   {
     refresh: signal`blog.refresh`,
-    sync: signal`blog.blogDb.sync`,
-    removeAll: signal`blog.blogDb.removeAll`,
+    sync: signal`blog.sync`,
+    removeAll: signal`blog.removeAll`,
     markActionsDisabled: markActionsDisabled("blog"),
-    // Composition possible inside action (eg. db.clear + blog.refresh)
-    markActionsDisabledDb: markActionsDisabled("blog.blogDb"),
   },
   (
-    {
-      refresh,
-      sync,
-      removeAll,
-      markActionsDisabled,
-      markActionsDisabledDb,
-      ...connectedProps
-    },
+    { refresh, sync, removeAll, markActionsDisabled, ...connectedProps },
     parentProps,
   ) => ({
     ...parentProps,
     ...connectedProps,
     actions: {
-      ...markActionsDisabled({ refresh }),
-      ...markActionsDisabledDb({ sync, removeAll }),
+      ...markActionsDisabled({ refresh, sync, removeAll }),
     },
   }),
   function ClearPostsForm({ actions, className }) {

@@ -4,7 +4,7 @@ import { wait } from "../util/control";
 import { canDelete, canVote } from "./control/validation";
 
 const getPosts = async db => {
-  const docs = await db.getAll();
+  const docs = await db.get();
   return docs.rows
     .filter(row => row.doc && row.doc.type === "post")
     .map(row => row.doc);
@@ -32,9 +32,16 @@ const createPost = async (db, state, props) => {
       vote: { value: 0, happenedAfter: [] },
       voteList: [],
     };
-    await db.put({ data: newPost });
+    await db.put(newPost);
     const updatedPosts = await getPosts(db);
     const index = updatedPosts.findIndex(post => post._id === newPost._id);
+    if (index === -1) {
+      throw new Error(
+        "Invalid blog-db state, new post not found.",
+        newPost,
+        updatedPosts,
+      );
+    }
     state.set(`posts.${index}`, updatedPosts[index]);
   }
 };
@@ -51,9 +58,7 @@ const updatePost = async (db, state, props) => {
 
     async function deletePost() {
       if (update.deleted !== undefined && canDelete(userName, post)) {
-        const { doc: updated } = await db.put({
-          data: { ...post, ...update },
-        });
+        const { doc: updated } = await db.put({ ...post, ...update });
         state.set(`posts.${postIndex}`, updated);
       }
     }
@@ -64,7 +69,7 @@ const updatePost = async (db, state, props) => {
         post.vote.value += update.vote;
         const thread = [];
         post.happenedAfter = uniq([...post.happenedAfter, ...thread]);
-        const { doc: updated } = await db.put({ data: post });
+        const { doc: updated } = await db.put(post);
         state.set(`posts.${postIndex}`, updated);
       }
     }
@@ -90,6 +95,21 @@ export const accept = async ({ db, state, props }) => {
   {
     const { refresh } = props;
     if (refresh) {
+      state.set("posts", await getPosts(db));
+    }
+  }
+
+  {
+    const { sync } = props;
+    if (sync) {
+      await db.sync();
+    }
+  }
+
+  {
+    const { removeAll } = props;
+    if (removeAll) {
+      await db.clear();
       state.set("posts", await getPosts(db));
     }
   }
@@ -124,6 +144,8 @@ export const computeStateRepresentation = state => {
       "normal",
       [
         blog.userName ? "logout" : "login",
+        "sync",
+        "removeAll",
         "refresh",
         "cancel",
         "post",

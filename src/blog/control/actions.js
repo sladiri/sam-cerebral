@@ -1,40 +1,41 @@
-export async function init() {}
+const init = () => {};
+export { init };
 
-export async function cancel() {
-  return { cancel: true };
-}
+const cancel = () => ({ cancel: true });
+export { cancel };
 
-export function refresh() {
-  return { refresh: true };
-}
+const refresh = () => ({ refresh: true });
+export { refresh };
 
-export async function login({ props: { userName } }) {
-  if (!userName && userName !== null) {
-    return;
-  }
-  return { userName };
-}
+const sync = () => ({ sync: true });
+export { sync };
 
-export async function logout() {
-  // example of calling other action.
-  return login({ props: { userName: null } });
-}
+const removeAll = () => ({ removeAll: true });
+export { removeAll };
 
-export async function post({ props: { message, creator, parentId = null } }) {
-  if (!message) {
-    return;
-  }
-  return {
+const login = ({ props: { userName } }) =>
+  (userName || userName === null) && { userName };
+export { login };
+
+const logout = () => login({ props: { userName: null } });
+export { logout };
+
+const post = ({ props: { message, creator, parentId = null } }) =>
+  message && {
     message,
     creator,
     parentId,
   };
-}
+export { post };
 
-export async function deletePost({ props: { id, deleted } }) {
-  return { id, update: { deleted } };
-}
+const deletePost = ({ props: { id, deleted } }) => ({
+  id,
+  update: { deleted },
+});
+export { deletePost };
 
-export async function vote({ props: { id, vote } }) {
-  return { id, update: { vote } };
-}
+const vote = ({ props: { id, vote } }) => ({
+  id,
+  update: { vote },
+});
+export { vote };

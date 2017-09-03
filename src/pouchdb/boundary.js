@@ -116,7 +116,7 @@ export const sync = async (
   return { handler }; // Prevent bug because handler has Promise-like API.
 };
 
-const ensureDbSync = async ({
+const pouchDbFactory = async ({
   remoteDbHost,
   remoteDbName,
   cacheDbName,
@@ -147,4 +147,4 @@ const ensureDbSync = async ({
   return { remote, cache, inMemory };
 };
 
-export const pouchDbFactory = (pouchOptions = {}) => ensureDbSync(pouchOptions);
+export default pouchDbFactory;

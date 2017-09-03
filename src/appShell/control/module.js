@@ -21,10 +21,10 @@ const routes = Object.entries(
   signal,
 }));
 
-export default (routerOptions = {}) => {
+export default async (routerOptions = {}) => {
   const getRoutedSignal = getRoutedSignalFactory(routerOptions);
 
-  const blogModule = blogFactory(routeMap["/"].prefix);
+  const blogModule = await blogFactory(routeMap["/"].prefix);
 
   return {
     modules: {
